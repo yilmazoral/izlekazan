@@ -1,5 +1,7 @@
 # İzleKazan
 
-Admin: admin@admin.com / 123456
+Render ayarları:
 
-Render: Build Command npm install, Start Command npm start
+Build Command: `npm install`
+
+Start Command: `npm start`
