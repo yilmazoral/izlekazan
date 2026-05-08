@@ -1,56 +1,10 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>İzleKazan</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <header class="hero">
-    <div class="logoBox">
-      <div class="icon">▶</div>
-      <h1>İzle ve Kazan!</h1>
-      <div class="line"></div>
-      <p>Film izle Ek Gelir Sağla</p>
-    </div>
-  </header>
-
-  <main class="container">
-    <section class="card">
-      <h2>İzleKazan Yayında ✅</h2>
-      <p>Site Render üzerinde başarıyla çalışıyor.</p>
-      <button onclick="testApi()">API Test Et</button>
-      <pre id="result"></pre>
-    </section>
-
-    <section class="grid">
-      <div class="card">
-        <h3>Kayıt / Giriş</h3>
-        <p>Ad, soyad, email, telefon ve şifre sistemi eklenecek.</p>
-      </div>
-      <div class="card">
-        <h3>5 Paket</h3>
-        <p>Üye, Kıdemli Üye, Ortak, Kıdemli Ortak, CEO.</p>
-      </div>
-      <div class="card">
-        <h3>IBAN Ödeme</h3>
-        <p>Alıcı: YILMAZ ORAL<br>IBAN: TR78 0015 7000 0000 0037 7980 62</p>
-      </div>
-      <div class="card">
-        <h3>Film Sistemi</h3>
-        <p>Üyeler film ekler, CEO onaylar, cüzdana kazanç yansır.</p>
-      </div>
-    </section>
-  </main>
-
-  <nav class="bottom">
-    <button>Ana</button>
-    <button>Filmler</button>
-    <button>Cüzdan</button>
-    <button>Profil</button>
-  </nav>
-
-  <script src="app.js"></script>
-</body>
-</html>
+<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>İzleKazan</title><link rel="stylesheet" href="style.css"></head><body>
+<header><div class="logo">▶</div><h1>İzle ve Kazan!</h1><div class="line"></div><p>Film izle Ek Gelir Sağla</p></header>
+<nav><button onclick="page('home')">Ana</button><button onclick="page('auth')">Giriş</button><button onclick="page('panel')">Panel</button><button onclick="page('movies')">Filmler</button><button onclick="page('admin')">Admin</button></nav>
+<main>
+<section id="home" class="show"><div class="card"><h2>İzleKazan Full MVP</h2><p>Premium olmadan filmler kilitlidir. Paket ödemesi admin onayından sonra açılır.</p><button onclick="page('auth')">Başla</button></div><div id="packs" class="grid"></div></section>
+<section id="auth"><div class="grid"><div class="card"><h2>Kayıt</h2><input id="rf" placeholder="Ad"><input id="rl" placeholder="Soyad"><input id="re" placeholder="Email"><input id="rp" placeholder="Telefon 05XXXXXXXXX"><input id="rs" type="password" placeholder="Şifre"><input id="rs2" type="password" placeholder="Şifre Tekrar"><input id="rr" placeholder="Referans Kodu"><button onclick="register()">Kayıt Ol</button></div><div class="card"><h2>Giriş</h2><input id="le" placeholder="Email" value="admin@admin.com"><input id="ls" type="password" placeholder="Şifre" value="123456"><button onclick="login()">Giriş</button></div></div></section>
+<section id="panel"><div id="dash" class="card">Giriş yapın.</div></section>
+<section id="movies"><div class="card"><h2>Film Ekle</h2><input id="mt" placeholder="Film adı"><input id="my" placeholder="Yıl"><input id="mc" placeholder="Kategori"><input id="mp" placeholder="Afiş linki"><input id="ml" placeholder="Film linki"><textarea id="md" placeholder="Açıklama"></textarea><button onclick="addMovie()">CEO Onayına Gönder</button></div><div id="movieList" class="grid"></div><div id="ceoBox" class="card"></div></section>
+<section id="admin"><div id="adminBox" class="card">Admin girişi gerekli.</div></section>
+</main><div id="toast"></div><script src="app.js"></script></body></html>

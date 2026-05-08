@@ -1,7 +1,11 @@
-# İzleKazan
+# İzleKazan Full MVP
 
 Render ayarları:
+- Build Command: npm install
+- Start Command: npm start
 
-Build Command: `npm install`
+Admin:
+- admin@admin.com
+- 123456
 
-Start Command: `npm start`
+Not: Film linkleri premium üyelik aktif olmadan gösterilmez.
