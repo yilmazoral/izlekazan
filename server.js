@@ -18,11 +18,11 @@ const ADMIN_EMAIL = "yilmazoral@hotmail.com";
 const ADMIN_PASS = "059221";
 
 const PACKAGES = [
-  {id:1,name:"Standart Üye",price:100,depth:1,rate:0.10,durationDays:365,badge:"Başlangıç",features:["1 yıl premium film erişimi","Reklamsız Film Platformu filmlerine erişim","1. seviye referanslardan %10 kazanç","Referans kodu paket aktif olunca görünür","Film ekleme hakkı ve onay sonrası kazanç","Cüzdan, destek ve çekim talebi"]},
-  {id:2,name:"Kıdemli Üye",price:200,depth:2,rate:0.10,durationDays:365,badge:"2 Seviye",features:["Standart Üye özelliklerinin tamamı","1. ve 2. seviye referanslardan %10 kazanç","Alt üye ağacını daha geniş takip","Referans kazanç geçmişi","1 yıl aktif premium üyelik"]},
-  {id:3,name:"Ortak",price:300,depth:3,rate:0.10,durationDays:365,badge:"3 Seviye",features:["Kıdemli Üye özelliklerinin tamamı","1, 2 ve 3. seviye referanslardan %10 kazanç","Platform gelir ortaklığına tam katılım","Geniş referans ağı takibi","1 yıl premium erişim"]},
-  {id:4,name:"Kıdemli Ortak",price:500,depth:3,rate:0.20,durationDays:365,badge:"Yüksek Prim",features:["Ortak paket özelliklerinin tamamı","İlk 3 referans seviyesinden %20 kazanç","Daha yüksek cüzdan kazanç potansiyeli","Gelişmiş kazanç takibi","1 yıl premium erişim"]},
-  {id:5,name:"CEO Üye",price:1000,depth:3,rate:0.30,durationDays:365,badge:"En Üst Seviye",features:["Tüm özelliklere tam erişim","İlk 3 referans seviyesinden %30 kazanç","CEO film ön onay paneli","Onayladığı film yayına alınırsa 1 TL bekleyen kazanç","1 yıl premium erişim"]}
+  {id:1,name:"Standart Üye",price:100,depth:1,rate:0.10,durationDays:365,badge:"Başlangıç",features:["1 yıl premium film erişimi","Reklamsız Film Platformu filmlerine erişim","1. seviye referanslardan %10 kazanç","Referans kodu paket aktif olunca görünür","Siteye Film Ekleme Kazancı","Cüzdan, destek ve çekim talebi"]},
+  {id:2,name:"Kıdemli Üye",price:200,depth:2,rate:0.10,durationDays:365,badge:"2 Seviye",features:["Standart Üye özelliklerinin tamamı","1. ve 2. seviye referanslardan %10 kazanç","Alt üye ağacını daha geniş takip","Referans kazanç geçmişi","1 yıl aktif premium üyelik","Siteye Film Ekleme Kazancı"]},
+  {id:3,name:"Ortak",price:300,depth:3,rate:0.10,durationDays:365,badge:"3 Seviye",features:["Kıdemli Üye özelliklerinin tamamı","1, 2 ve 3. seviye referanslardan %10 kazanç","Platform gelir ortaklığına tam katılım","Geniş referans ağı takibi","1 yıl premium erişim","Siteye Film Ekleme Kazancı"]},
+  {id:4,name:"Kıdemli Ortak",price:500,depth:3,rate:0.20,durationDays:365,badge:"Yüksek Prim",features:["Ortak paket özelliklerinin tamamı","İlk 3 referans seviyesinden %20 kazanç","Daha yüksek cüzdan kazanç potansiyeli","Gelişmiş kazanç takibi","1 yıl premium erişim","Siteye Film Ekleme Kazancı"]},
+  {id:5,name:"CEO Üye",price:1000,depth:3,rate:0.30,durationDays:365,badge:"En Üst Seviye",features:["Tüm özelliklere tam erişim","İlk 3 referans seviyesinden %30 kazanç","CEO film ön onay paneli","Onayladığı film başına extra kazanç","Siteye Film Ekleme Kazancı","1 yıl premium erişim"]}
 ];
 
 function now(){ return new Date().toISOString(); }
