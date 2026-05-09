@@ -19,3 +19,11 @@ Kalıcı çözüm:
 - Render Persistent Disk
 
 Bir sonraki sürümde veritabanı dış servise taşınmalıdır.
+
+
+## V3 Kazanç Takip Güncellemesi
+
+- Alt üyeler artık paket, premium başlangıç ve premium bitiş bilgisiyle görünür.
+- Tüm kazançlar önce bekleyen bakiyeye eklenir.
+- 15 gün sonra otomatik çekilebilir bakiyeye aktarılır.
+- Bekleyen bakiye ve çekilebilir bakiye kartları tıklanınca işlem detayları listelenir.

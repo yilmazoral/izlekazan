@@ -76,9 +76,8 @@ function distributeReferral(d,buyer,amount){
     const pack=PACKAGES.find(p=>p.id===sponsor.packageId);
     if(pack && isPremium(sponsor) && level<=pack.depth){
       const earn=Number((amount*pack.rate).toFixed(2));
-      sponsor.balance=Number((Number(sponsor.balance||0)+earn).toFixed(2));
-      tx(d,sponsor.id,earn,"referans",`${buyer.firstName} ${buyer.lastName} ödemesinden ${level}. seviye referans kazancı`);
-      notify(d,sponsor.id,"Referans Kazancı",`${earn} TL referans kazancı çekilebilir bakiyenize eklendi.`,"success");
+      pending(d, sponsor.id, earn, "referans", `${buyer.firstName} ${buyer.lastName} ödemesinden ${level}. seviye referans kazancı`, 15);
+      notify(d,sponsor.id,"Referans Kazancı Beklemede",`${earn} TL referans kazancı bekleyen bakiyenize eklendi. 15 gün sonra çekilebilir bakiyeye aktarılır.`,"success");
     }
     sid=sponsor.sponsorId;
   }
@@ -96,7 +95,7 @@ app.post("/api/register",(req,res)=>{
   if(d.users.find(u=>u.email.toLowerCase()===email.toLowerCase())) return res.status(400).json({error:"Bu email zaten kayıtlı"});
   if(d.users.find(u=>u.phone===phone)) return res.status(400).json({error:"Bu telefon zaten kayıtlı"});
   const sponsor=d.users.find(u=>u.referralCode.toUpperCase()===String(referralCode||"").toUpperCase());
-  const u={id:uuidv4(),firstName,lastName,email:email.toLowerCase(),phone,passwordHash:bcrypt.hashSync(password,10),referralCode:makeRef(),sponsorId:sponsor?sponsor.id:null,packageId:0,premiumUntil:null,balance:0,role:"user",banned:false,createdAt:now()};
+  const u={id:uuidv4(),firstName,lastName,email:email.toLowerCase(),phone,passwordHash:bcrypt.hashSync(password,10),referralCode:makeRef(),sponsorId:sponsor?sponsor.id:null,packageId:0,premiumStartedAt:null,premiumUntil:null,balance:0,role:"user",banned:false,createdAt:now()};
   d.users.push(u); notify(d,u.id,"Hoş Geldiniz","Paket satın aldığınızda referans kodunuz aktif olacak.","info"); saveDb(d); res.json({success:true,user:pub(u)});
 });
 app.post("/api/login",(req,res)=>{
@@ -118,7 +117,7 @@ app.post("/api/profile",auth,(req,res)=>{
 });
 app.get("/api/dashboard",auth,(req,res)=>{
   const d=readDb(); releasePending(d); const u=user(req,d); saveDb(d);
-  res.json({user:pub(u),package:PACKAGES.find(p=>p.id===u.packageId)||null,children:d.users.filter(x=>x.sponsorId===u.id).map(pub),payments:d.payments.filter(x=>x.userId===u.id),withdrawals:d.withdrawals.filter(x=>x.userId===u.id),movies:d.movies.filter(x=>x.addedBy===u.id),tx:d.transactions.filter(x=>x.userId===u.id).slice().reverse(),pendingEarnings:d.pendingEarnings.filter(x=>x.userId===u.id).slice().reverse(),notifications:d.notifications.filter(x=>x.userId===u.id).slice().reverse(),tickets:d.supportTickets.filter(x=>x.userId===u.id).slice().reverse()});
+  res.json({user:pub(u),package:PACKAGES.find(p=>p.id===u.packageId)||null,children:d.users.filter(x=>x.sponsorId===u.id).map(c=>({...pub(c), packageName:(PACKAGES.find(p=>p.id===c.packageId)||{}).name||"Paket Yok"})),payments:d.payments.filter(x=>x.userId===u.id),withdrawals:d.withdrawals.filter(x=>x.userId===u.id),movies:d.movies.filter(x=>x.addedBy===u.id),tx:d.transactions.filter(x=>x.userId===u.id).slice().reverse(),pendingEarnings:d.pendingEarnings.filter(x=>x.userId===u.id).slice().reverse(),notifications:d.notifications.filter(x=>x.userId===u.id).slice().reverse(),tickets:d.supportTickets.filter(x=>x.userId===u.id).slice().reverse()});
 });
 app.post("/api/payment",auth,(req,res)=>{
   const d=readDb(); const u=user(req,d); const pack=PACKAGES.find(p=>p.id===Number(req.body.packageId));
@@ -162,7 +161,7 @@ app.get("/api/admin/all",auth,adminOnly,(req,res)=>{ const d=req.db; res.json({u
 app.post("/api/admin/payments/:id/approve",auth,adminOnly,(req,res)=>{
   const d=req.db; const p=d.payments.find(x=>x.id===req.params.id); if(!p)return res.status(404).json({error:"Ödeme yok"});
   const u=d.users.find(x=>x.id===p.userId); if(!u)return res.status(404).json({error:"Kullanıcı yok"}); const pack=PACKAGES.find(x=>x.id===p.packageId);
-  p.status="approved"; p.approvedAt=now(); p.archive=true; u.packageId=p.packageId; u.premiumUntil=addDays(pack.durationDays); if(u.packageId===5)u.role="ceo";
+  p.status="approved"; p.approvedAt=now(); p.archive=true; u.packageId=p.packageId; u.premiumStartedAt=now(); u.premiumUntil=addDays(pack.durationDays); if(u.packageId===5)u.role="ceo";
   distributeReferral(d,u,Number(p.amount)); notify(d,u.id,"Ödeme Onaylandı",`${pack.name} paketiniz 1 yıl süreyle aktif edildi. Premium bitiş tarihi: ${new Date(u.premiumUntil).toLocaleDateString("tr-TR")}`,"success"); saveDb(d); res.json({success:true});
 });
 app.post("/api/admin/payments/:id/reject",auth,adminOnly,(req,res)=>{ const d=req.db; const p=d.payments.find(x=>x.id===req.params.id); if(!p)return res.status(404).json({error:"Ödeme yok"}); p.status="rejected"; p.rejectReason=req.body.reason||"Admin tarafından reddedildi"; p.archive=true; notify(d,p.userId,"Ödeme Reddedildi",p.rejectReason,"error"); ticket(d,p.userId,"Ödeme Reddedildi",`Ödeme bildiriminiz reddedildi. Neden: ${p.rejectReason}`,"answered"); saveDb(d); res.json({success:true}); });

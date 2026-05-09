@@ -11,7 +11,122 @@ async function loadPackages(){let p=await api("/api/packages");$("packageList").
 function choosePack(id,price){page("panel");setTimeout(()=>{let s=$("packSel");if(s){s.value=id;$("payAmount").value=price}},300)}
 async function register(){try{await api("/api/register",{method:"POST",body:JSON.stringify({firstName:rf.value,lastName:rl.value,email:re.value,phone:rp.value,password:rs.value,password2:rs2.value,referralCode:rr.value})});toast("Kayıt başarılı, giriş yapın")}catch(e){toast(e.message)}}
 async function login(){try{let d=await api("/api/login",{method:"POST",body:JSON.stringify({email:le.value,password:ls.value})});token=d.token;me=d.user;localStorage.setItem("token",token);refreshMenu();toast("Giriş başarılı");page("panel")}catch(e){toast(e.message)}}
-async function dash(){try{let d=await api("/api/dashboard");me=d.user;refreshMenu();let packs=await api("/api/packages");let pEnd=d.user.premiumUntil?new Date(d.user.premiumUntil).toLocaleDateString("tr-TR"):"Aktif değil";let pendingSum=d.pendingEarnings.filter(x=>x.status==="pending").reduce((a,b)=>a+Number(b.amount),0).toFixed(2);$("dash").innerHTML=`<div class="panelGrid"><div class="box">Premium Bitiş<br><b>${pEnd}</b><br><small>${d.user.premiumDaysLeft||0} gün kaldı</small></div><div class="box">Bekleyen Bakiye<br><b>${pendingSum} TL</b><br><small>15 gün sonra aktarılır</small></div><div class="box">Çekilebilir Bakiye<br><b>${d.user.balance} TL</b></div><div class="box">Paket<br><b>${d.package?d.package.name:"Aktif Değil"}</b></div></div><div class="card"><h3>Bildirimlerim</h3>${d.notifications.map(n=>`<p>${n.type==="error"?"❌":"✅"} <b>${n.title}</b><br>${n.message}</p>`).join("")||"Bildirim yok"}</div><div class="card"><h3>Üyelik Bilgilerim / Şifre Değiştir</h3><input id="pf" value="${d.user.firstName}" placeholder="Ad"><input id="pl" value="${d.user.lastName}" placeholder="Soyad"><input id="pe" value="${d.user.email}" placeholder="Email"><input id="pp" value="${d.user.phone}" placeholder="Telefon"><input id="pcp" type="password" placeholder="Mevcut şifre"><input id="pnp" type="password" placeholder="Yeni şifre"><button onclick="saveProfile()">Bilgileri Güncelle</button></div><div class="card"><h3>Referans Sistemi</h3>${d.user.premiumActive?`<div class="refBox"><span class="refCode" id="refCode">${d.user.referralCode}</span><button onclick="copyRef()">Kopyala</button><button onclick="shareRef()">Paylaş</button></div>`:"Referans kodunuz paket satın alındıktan sonra görünür."}</div><div class="card"><h3>IBAN Ödeme Bildir</h3><p><b>IBAN:</b> TR78 0015 7000 0000 0037 7980 62<br><b>Alıcı:</b> YILMAZ ORAL<br><b>Açıklama:</b> Telefon numaranızı yazınız</p><select id="packSel">${packs.map(p=>`<option value="${p.id}" data-price="${p.price}">${p.name} - ${p.price} TL / Yıl</option>`).join("")}</select><input id="payAmount" placeholder="Tutar"><input id="payPhone" value="${d.user.phone}" placeholder="Telefon"><button onclick="payment()">Ödeme Bildir</button></div><div class="card"><h3>Çekim Talebi</h3><input id="wName" value="${d.user.firstName} ${d.user.lastName}" placeholder="Ad Soyad"><input id="wIban" placeholder="IBAN"><input id="wAmount" placeholder="50 TL ve katları"><button onclick="withdraw()">Çekim Talebi Gönder</button></div><div class="card"><h3>Destek Merkezi</h3><input id="supSub" placeholder="Konu"><textarea id="supMsg" placeholder="Mesajınız"></textarea><button onclick="support()">Destek Kaydı Gönder</button><h4>Destek Kayıtlarım</h4>${d.tickets.map(t=>`<p><b>${t.subject}</b> - ${t.status}<br>${t.message}<br>${t.replies.map(r=>`↳ Admin: ${r.message}`).join("<br>")}</p>`).join("")||"Kayıt yok"}</div>`;packSel.onchange=()=>payAmount.value=packSel.options[packSel.selectedIndex].dataset.price;payAmount.value=packSel.options[0].dataset.price}catch(e){$("dash").innerHTML='<div class="card">Devam etmek için giriş yapmalısınız.</div>'}}
+async function dash(){
+try{
+let d=await api("/api/dashboard");
+me=d.user; refreshMenu();
+let packs=await api("/api/packages");
+let pEnd=d.user.premiumUntil?new Date(d.user.premiumUntil).toLocaleDateString("tr-TR"):"Aktif değil";
+let pStart=d.user.premiumStartedAt?new Date(d.user.premiumStartedAt).toLocaleDateString("tr-TR"):"Aktif değil";
+let pendingList=d.pendingEarnings.filter(x=>x.status==="pending").sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+let releasedList=d.tx.slice().sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+let pendingSum=pendingList.reduce((a,b)=>a+Number(b.amount),0).toFixed(2);
+
+$("dash").innerHTML=`
+<div class="panelHero">
+  <div>
+    <h3>Hoş geldin, ${d.user.firstName} ${d.user.lastName}</h3>
+    <p>${d.package?d.package.name:"Paket aktif değil"} • Premium başlangıç: ${pStart} • Premium bitiş: ${pEnd}</p>
+  </div>
+  <button onclick="page('packages')">Paketi Yükselt / Yenile</button>
+</div>
+
+<div class="panelGrid">
+  <div class="box clickable" onclick="toggleList('pendingList')">
+    <span>Bekleyen Bakiye</span>
+    <b>${pendingSum} TL</b>
+    <small>15 gün sonra çekilebilir bakiyeye aktarılır. Detay için tıkla.</small>
+  </div>
+  <div class="box clickable" onclick="toggleList('releasedList')">
+    <span>Çekilebilir Bakiye</span>
+    <b>${d.user.balance} TL</b>
+    <small>Detaylı işlem geçmişi için tıkla.</small>
+  </div>
+  <div class="box">
+    <span>Premium Bitiş</span>
+    <b>${pEnd}</b>
+    <small>${d.user.premiumDaysLeft||0} gün kaldı</small>
+  </div>
+  <div class="box">
+    <span>Alt Üye</span>
+    <b>${d.children.length}</b>
+    <small>Referans ağındaki doğrudan üyeler</small>
+  </div>
+</div>
+
+<div id="pendingList" class="card detailList hidden">
+  <h3>Bekleyen Bakiye Detayı</h3>
+  ${pendingList.map(e=>`<div class="listItem"><b>+${e.amount} TL</b><span>${e.desc}</span><small>${new Date(e.createdAt).toLocaleString("tr-TR")} • Çekilebilir tarih: ${new Date(e.availableAt).toLocaleDateString("tr-TR")}</small></div>`).join("")||"Bekleyen kazanç yok"}
+</div>
+
+<div id="releasedList" class="card detailList hidden">
+  <h3>Çekilebilir Bakiye / İşlem Geçmişi</h3>
+  ${releasedList.map(t=>`<div class="listItem"><b>${Number(t.amount)>0?"+":""}${t.amount} TL</b><span>${t.desc}</span><small>${new Date(t.createdAt).toLocaleString("tr-TR")} • ${t.type}</small></div>`).join("")||"İşlem yok"}
+</div>
+
+<div class="card">
+  <h3>Bildirimlerim</h3>
+  ${d.notifications.map(n=>`<p class="notification ${n.type}">${n.type==="error"?"❌":"✅"} <b>${n.title}</b><br>${n.message}<br><small>${new Date(n.createdAt).toLocaleString("tr-TR")}</small></p>`).join("")||"Bildirim yok"}
+</div>
+
+<div class="card">
+  <h3>Alt Üyelerim</h3>
+  <div class="tableWrap">
+    <table>
+      <thead><tr><th>Ad Soyad</th><th>Telefon</th><th>Paket</th><th>Premium Başlangıç</th><th>Premium Bitiş</th><th>Durum</th></tr></thead>
+      <tbody>
+        ${d.children.map(c=>`<tr><td>${c.firstName} ${c.lastName}</td><td>${c.phone}</td><td>${c.packageName}</td><td>${c.premiumStartedAt?new Date(c.premiumStartedAt).toLocaleDateString("tr-TR"):"-"}</td><td>${c.premiumUntil?new Date(c.premiumUntil).toLocaleDateString("tr-TR"):"-"}</td><td>${c.premiumActive?"Premium":"Pasif"}</td></tr>`).join("")||`<tr><td colspan="6">Alt üye yok</td></tr>`}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Üyelik Bilgilerim / Şifre Değiştir</h3>
+  <input id="pf" value="${d.user.firstName}" placeholder="Ad">
+  <input id="pl" value="${d.user.lastName}" placeholder="Soyad">
+  <input id="pe" value="${d.user.email}" placeholder="Email">
+  <input id="pp" value="${d.user.phone}" placeholder="Telefon">
+  <input id="pcp" type="password" placeholder="Mevcut şifre">
+  <input id="pnp" type="password" placeholder="Yeni şifre">
+  <button onclick="saveProfile()">Bilgileri Güncelle</button>
+</div>
+
+<div class="card">
+  <h3>Referans Sistemi</h3>
+  ${d.user.premiumActive?`<div class="refBox"><span class="refCode" id="refCode">${d.user.referralCode}</span><button onclick="copyRef()">Kopyala</button><button onclick="shareRef()">Paylaş</button></div>`:"Referans kodunuz paket satın alındıktan sonra görünür."}
+</div>
+
+<div class="card">
+  <h3>IBAN Ödeme Bildir</h3>
+  <p><b>IBAN:</b> TR78 0015 7000 0000 0037 7980 62<br><b>Alıcı:</b> YILMAZ ORAL<br><b>Açıklama:</b> Telefon numaranızı yazınız</p>
+  <select id="packSel">${packs.map(p=>`<option value="${p.id}" data-price="${p.price}">${p.name} - ${p.price} TL / Yıl</option>`).join("")}</select>
+  <input id="payAmount" placeholder="Tutar">
+  <input id="payPhone" value="${d.user.phone}" placeholder="Telefon">
+  <button onclick="payment()">Ödeme Bildir</button>
+</div>
+
+<div class="card">
+  <h3>Çekim Talebi</h3>
+  <input id="wName" value="${d.user.firstName} ${d.user.lastName}" placeholder="Ad Soyad">
+  <input id="wIban" placeholder="IBAN">
+  <input id="wAmount" placeholder="50 TL ve katları">
+  <button onclick="withdraw()">Çekim Talebi Gönder</button>
+</div>
+
+<div class="card">
+  <h3>Destek Merkezi</h3>
+  <input id="supSub" placeholder="Konu">
+  <textarea id="supMsg" placeholder="Mesajınız"></textarea>
+  <button onclick="support()">Destek Kaydı Gönder</button>
+  <h4>Destek Kayıtlarım</h4>
+  ${d.tickets.map(t=>`<p><b>${t.subject}</b> - ${t.status}<br>${t.message}<br>${t.replies.map(r=>`↳ Admin: ${r.message}`).join("<br>")}</p>`).join("")||"Kayıt yok"}
+</div>`;
+packSel.onchange=()=>payAmount.value=packSel.options[packSel.selectedIndex].dataset.price;
+payAmount.value=packSel.options[0].dataset.price;
+}catch(e){$("dash").innerHTML='<div class="card">Devam etmek için giriş yapmalısınız.</div>'}
+}
+function toggleList(id){$(id).classList.toggle("hidden")}
 async function saveProfile(){try{await api("/api/profile",{method:"POST",body:JSON.stringify({firstName:pf.value,lastName:pl.value,email:pe.value,phone:pp.value,currentPassword:pcp.value,newPassword:pnp.value})});toast("Bilgiler güncellendi");dash()}catch(e){toast(e.message)}}
 function copyRef(){navigator.clipboard.writeText($("refCode").innerText);toast("Referans kodu kopyalandı")}
 function shareRef(){let text=`İzleKazan referans kodum: ${$("refCode").innerText}`; if(navigator.share)navigator.share({text}); else{navigator.clipboard.writeText(text);toast("Paylaşım metni kopyalandı")}}
