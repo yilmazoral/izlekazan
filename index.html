@@ -14,7 +14,38 @@
 <section id="packages" class="page"><h2>Üyelik Paketleri</h2><p class="muted center">Tüm paketler yıllıktır. Paket süresi 1 yıl / 365 gündür.</p><div id="packageList" class="packageGrid"></div></section>
 <section id="how" class="page"><h2>İzle ve Kazan Nasıl Çalışır?</h2><div class="steps"><div><b>01</b><h3>Üye Ol</h3><p>Hızlıca hesap oluştur.</p></div><div><b>02</b><h3>Paketi Seç</h3><p>Yıllık paketini seç ve ödeme bildir.</p></div><div><b>03</b><h3>Film İzle / Yükle</h3><p>Filmleri izle, film ekleyerek kazanç sağla.</p></div><div><b>04</b><h3>Kazan</h3><p>Gelir ortaklığı ve emek bazlı kazançtan faydalan.</p></div></div><div class="card"><h3>Gelir Dağılımı</h3><div class="donut">%95</div><p>Gelirlerin %95’i üyelere kazanç ve ödül sistemi olarak aktarılır. Platformda hiç reklam yoktur.</p></div></section>
 <section id="faq" class="page"><h2>Sıkça Sorulan Sorular</h2><div class="faq"><details><summary>İzleKazan nedir?</summary><p>Reklamsız film izleme ve üyelerin emekleriyle kazanç sağlayabildiği bir platformdur.</p></details><details><summary>Platformda reklam var mı?</summary><p>Hayır. Platformda hiçbir reklam bulunmaz.</p></details><details><summary>Paketler ne kadar süre geçerli?</summary><p>Tüm üyelik paketleri 1 yıl / 365 gün geçerlidir.</p></details><details><summary>Premium bitince ne olur?</summary><p>Premium süreniz bitince filmlere erişim kısıtlanır ve yeniden paket almanız gerekir.</p></details><details><summary>Referans kodumu ne zaman görürüm?</summary><p>Referans kodu sadece paket satın alıp admin onayı aldıktan sonra görünür.</p></details><details><summary>Film ekleyerek nasıl kazanırım?</summary><p>Film eklenir, CEO ön onayı ve admin yayın onayından geçerse bekleyen bakiyeye 1 TL eklenir. 15 gün sonra çekilebilir bakiyeye devredilir.</p></details><details><summary>Çekim nasıl yapılır?</summary><p>Minimum 50 TL ve 50 TL katları şeklinde çekim talebi oluşturabilirsiniz.</p></details></div></section>
-<section id="auth" class="page authPage"><div class="authGrid"><div class="card"><h2>Üye Girişi</h2><input id="le" placeholder="E-posta" value="yilmazoral@hotmail.com"><input id="ls" type="password" placeholder="Şifre" value="059221"><button onclick="login()">Giriş Yap</button></div><div class="card"><h2>Üye Ol</h2><input id="rf" placeholder="Ad"><input id="rl" placeholder="Soyad"><input id="re" placeholder="E-posta"><input id="rp" placeholder="Telefon 05XXXXXXXXX"><input id="rs" type="password" placeholder="Şifre"><input id="rs2" type="password" placeholder="Şifre Tekrar"><input id="rr" placeholder="Referans Kodu (Varsa)"><button onclick="register()">Üye Ol</button></div></div></section>
+<section id="auth" class="page authPage"><div class="authGrid"><div class="card"><h2>Üye Girişi</h2><input id="le" placeholder="E-posta"><input id="ls" type="password" placeholder="Şifre"><button onclick="login()">Giriş Yap</button><button class="linkBtn" onclick="page(\'forgot\')">Şifremi Unuttum</button></div><div class="card"><h2>Üye Ol</h2><input id="rf" placeholder="Ad"><input id="rl" placeholder="Soyad"><input id="re" placeholder="E-posta"><input id="rp" placeholder="Telefon 05XXXXXXXXX"><input id="rs" type="password" placeholder="Şifre"><input id="rs2" type="password" placeholder="Şifre Tekrar"><input id="rr" placeholder="Referans Kodu (Varsa)"><button onclick="register()">Üye Ol</button></div></div></section>
+
+<section id="forgot" class="page authPage">
+  <div class="card narrow">
+    <h2>Şifremi Unuttum</h2>
+    <p class="muted">E-posta adresinizi yazın. Şifre yenileme bağlantısı e-posta adresinize gönderilir.</p>
+    <input id="forgotEmail" placeholder="E-posta adresiniz">
+    <button onclick="forgotPassword()">Şifre Sıfırlama Bağlantısı Gönder</button>
+    <div id="forgotResult"></div>
+  </div>
+</section>
+<section id="reset" class="page authPage">
+  <div class="card narrow">
+    <h2>Yeni Şifre Belirle</h2>
+    <input id="resetPass" type="password" placeholder="Yeni şifre">
+    <button onclick="resetPassword()">Şifreyi Yenile</button>
+  </div>
+</section>
+<section id="packageInfo" class="page">
+  <div id="packageInfoBox" class="card"></div>
+</section>
+<section id="paymentGuide" class="page">
+  <div id="paymentGuideBox" class="card"></div>
+</section>
+<div id="filmModal" class="filmModal hidden">
+  <div class="filmModalTop">
+    <b>Reklamsız Film Platformu</b>
+    <button onclick="closeFilmModal()">Kapat</button>
+  </div>
+  <iframe id="filmFrame" src=""></iframe>
+</div>
+
 <section id="panel" class="page"><h2>Üye Paneli</h2><div id="dash"></div></section>
 <section id="movies" class="page"><h2>Reklamsız Film Platformu</h2><div class="movieActions"><button onclick="movies()">Filmleri Göster</button><button onclick="showAddMovie()">☁ Film Ekle Para Kazan</button></div><div id="movieList" class="movieGrid"></div><div id="addMovieBox" class="card hidden"><h2>Film Ekle Para Kazan</h2><input id="mt" placeholder="Film adı"><input id="my" placeholder="Yıl"><input id="mc" placeholder="Kategori"><input id="mp" placeholder="Afiş linki"><input id="ml" placeholder="Film linki"><textarea id="md" placeholder="Açıklama"></textarea><button onclick="addMovie()">CEO Onayına Gönder</button></div><div id="ceoBox"></div></section>
 <section id="admin" class="page"><h2>Admin Paneli</h2><div id="adminBox" class="card">Admin girişi gerekli.</div></section>

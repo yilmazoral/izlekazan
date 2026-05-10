@@ -5,6 +5,8 @@ const fs = require("fs");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require("uuid");
+let nodemailer = null;
+try { nodemailer = require("nodemailer"); } catch(e) { nodemailer = null; }
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -31,12 +33,12 @@ function daysLeft(dateStr){ if(!dateStr) return 0; return Math.max(0, Math.ceil(
 function isPremium(u){ return !!(u && u.packageId > 0 && u.premiumUntil && new Date(u.premiumUntil) > new Date()); }
 
 function freshDb(){
-  return {users:[],payments:[],withdrawals:[],transactions:[],pendingEarnings:[],movies:[{id:uuidv4(),title:"Reklamsız Film Platformu",year:"2026",category:"Film Arşivi",poster:"https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=700&q=80",description:"Premium üyeler için reklamsız film platformu.",link:"https://sine5.news/",status:"published",addedBy:"system",ceoApprovedBy:"system",adminApprovedBy:"system",createdAt:now()}],supportTickets:[],notifications:[],logs:[]};
+  return {users:[],payments:[],withdrawals:[],transactions:[],pendingEarnings:[],movies:[{id:uuidv4(),title:"Reklamsız Film Platformu",year:"2026",category:"Film Arşivi",poster:"https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=700&q=80",description:"Premium üyeler için reklamsız film platformu.",link:"https://sine5.news/",status:"published",addedBy:"system",ceoApprovedBy:"system",adminApprovedBy:"system",createdAt:now()}],supportTickets:[],notifications:[],passwordResets:[],logs:[]};
 }
 function readDb(){
   if(!fs.existsSync(DB_FILE)) fs.writeFileSync(DB_FILE, JSON.stringify(freshDb(), null, 2));
   const d = JSON.parse(fs.readFileSync(DB_FILE, "utf8"));
-  d.users ||= []; d.payments ||= []; d.withdrawals ||= []; d.transactions ||= []; d.pendingEarnings ||= []; d.movies ||= []; d.supportTickets ||= []; d.notifications ||= []; d.logs ||= [];
+  d.users ||= []; d.payments ||= []; d.withdrawals ||= []; d.transactions ||= []; d.pendingEarnings ||= []; d.movies ||= []; d.supportTickets ||= []; d.notifications ||= []; d.passwordResets ||= []; d.logs ||= [];
   return d;
 }
 function saveDb(d){ fs.writeFileSync(DB_FILE, JSON.stringify(d, null, 2)); }
@@ -94,8 +96,11 @@ app.post("/api/register",(req,res)=>{
   const d=readDb();
   if(d.users.find(u=>u.email.toLowerCase()===email.toLowerCase())) return res.status(400).json({error:"Bu email zaten kayıtlı"});
   if(d.users.find(u=>u.phone===phone)) return res.status(400).json({error:"Bu telefon zaten kayıtlı"});
-  const sponsor=d.users.find(u=>u.referralCode.toUpperCase()===String(referralCode||"").toUpperCase());
-  const u={id:uuidv4(),firstName,lastName,email:email.toLowerCase(),phone,passwordHash:bcrypt.hashSync(password,10),referralCode:makeRef(),sponsorId:sponsor?sponsor.id:null,packageId:0,premiumStartedAt:null,premiumUntil:null,balance:0,role:"user",banned:false,createdAt:now()};
+  const refText = String(referralCode||"").trim().toUpperCase();
+  if(!refText) return res.status(400).json({error:"Geçerli bir referans kodu girilmeden üye olunamaz"});
+  const sponsor=d.users.find(u=>u.referralCode.toUpperCase()===refText);
+  if(!sponsor) return res.status(400).json({error:"Referans kodu geçersiz"});
+  const u={id:uuidv4(),firstName,lastName,email:email.toLowerCase(),phone,passwordHash:bcrypt.hashSync(password,10),referralCode:makeRef(),sponsorId:sponsor.id,packageId:0,premiumStartedAt:null,premiumUntil:null,balance:0,role:"user",banned:false,createdAt:now()};
   d.users.push(u); notify(d,u.id,"Hoş Geldiniz","Paket satın aldığınızda referans kodunuz aktif olacak.","info"); saveDb(d); res.json({success:true,user:pub(u)});
 });
 app.post("/api/login",(req,res)=>{
@@ -178,5 +183,61 @@ app.post("/api/admin/movies/:id/publish",auth,adminOnly,(req,res)=>{
 app.post("/api/admin/movies/:id/reject",auth,adminOnly,(req,res)=>{ const d=req.db; const m=d.movies.find(x=>x.id===req.params.id); if(!m)return res.status(404).json({error:"Film yok"}); m.status="rejected"; m.rejectionReason=req.body.reason||"Admin tarafından reddedildi"; notify(d,m.addedBy,"Film Reddedildi",`${m.title}: ${m.rejectionReason}`,"error"); ticket(d,m.addedBy,"Reddedilen Film",`${m.title} admin tarafından reddedildi. Neden: ${m.rejectionReason}`,"answered"); saveDb(d); res.json({success:true}); });
 app.post("/api/support",auth,(req,res)=>{ const d=readDb(); const u=user(req,d); ticket(d,u.id,req.body.subject||"Destek Talebi",req.body.message||"", "open"); d.users.filter(x=>x.role==="admin").forEach(a=>notify(d,a.id,"Yeni Destek Mesajı",`${u.firstName} ${u.lastName} destek mesajı gönderdi.`,"info")); saveDb(d); res.json({success:true}); });
 app.post("/api/admin/support/:id/reply",auth,adminOnly,(req,res)=>{ const d=req.db; const t=d.supportTickets.find(x=>x.id===req.params.id); if(!t)return res.status(404).json({error:"Destek kaydı yok"}); t.replies.push({from:req.user.id,message:req.body.message||"",createdAt:now()}); t.status="answered"; t.updatedAt=now(); notify(d,t.userId,"Destek Cevaplandı",req.body.message||"Destek kaydınıza cevap verildi.","success"); saveDb(d); res.json({success:true}); });
+
+async function sendResetEmail(to, link){
+  if(!nodemailer || !process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS){
+    return {sent:false, reason:"SMTP ayarı yok"};
+  }
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT || 587),
+    secure: String(process.env.SMTP_SECURE || "false") === "true",
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+  });
+  await transporter.sendMail({
+    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    to,
+    subject: "İzleKazan Şifre Sıfırlama",
+    html: `<p>Şifrenizi yenilemek için bağlantıya tıklayın:</p><p><a href="${link}">${link}</a></p><p>Bu bağlantı 1 saat geçerlidir.</p>`
+  });
+  return {sent:true};
+}
+
+app.post("/api/forgot-password",(req,res)=>{
+  const d=readDb();
+  const email=String(req.body.email||"").toLowerCase();
+  const u=d.users.find(x=>x.email===email);
+  if(!u) return res.json({success:true,message:"Bu e-posta kayıtlıysa şifre sıfırlama bağlantısı gönderilecek."});
+  const token=uuidv4()+uuidv4();
+  const expiresAt=new Date(Date.now()+60*60*1000).toISOString();
+  d.passwordResets.push({id:uuidv4(),userId:u.id,token,used:false,expiresAt,createdAt:now()});
+  const baseUrl=process.env.PUBLIC_URL || `${req.protocol}://${req.get("host")}`;
+  const link=`${baseUrl}/?reset=${token}`;
+  saveDb(d);
+  sendResetEmail(u.email, link).then(r=>{
+    if(r.sent) console.log("Şifre sıfırlama maili gönderildi:", u.email);
+    else console.log("SMTP ayarı yok, test linki:", link);
+  }).catch(err=>console.log("Mail gönderim hatası:", err.message));
+  res.json({success:true,message:"Şifre sıfırlama bağlantısı hazırlandı.", demoLink:(!process.env.SMTP_HOST?link:undefined)});
+});
+
+app.post("/api/reset-password",(req,res)=>{
+  const d=readDb();
+  const token=String(req.body.token||"");
+  const newPassword=String(req.body.newPassword||"");
+  if(newPassword.length<6) return res.status(400).json({error:"Yeni şifre en az 6 karakter olmalı"});
+  const r=d.passwordResets.find(x=>x.token===token && !x.used);
+  if(!r) return res.status(400).json({error:"Geçersiz bağlantı"});
+  if(new Date(r.expiresAt)<new Date()) return res.status(400).json({error:"Bağlantının süresi dolmuş"});
+  const u=d.users.find(x=>x.id===r.userId);
+  if(!u) return res.status(404).json({error:"Kullanıcı bulunamadı"});
+  u.passwordHash=bcrypt.hashSync(newPassword,10);
+  r.used=true;
+  notify(d,u.id,"Şifre Yenilendi","Şifreniz başarıyla yenilendi.","success");
+  saveDb(d);
+  res.json({success:true});
+});
+
+
 app.get("*",(req,res)=>res.sendFile(path.join(__dirname,"index.html")));
 app.listen(PORT,()=>console.log("İzleKazan V2 çalışıyor:",PORT));

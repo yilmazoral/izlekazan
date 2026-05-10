@@ -8,7 +8,43 @@ function refreshMenu(){ $("loginTop").classList.toggle("hidden",isLoggedIn()); $
 function logout(){localStorage.removeItem("token");token="";me=null;refreshMenu();page("home");toast("Çıkış yapıldı")}
 async function init(){try{if(token){let d=await api("/api/me");me=d.user;refreshMenu();}}catch(e){localStorage.removeItem("token");token=""}loadPackages();refreshMenu();}
 async function loadPackages(){let p=await api("/api/packages");$("packageList").innerHTML=p.map(x=>`<div class="package"><span class="badge">${x.badge}</span><h3>${x.name}</h3><div class="price">${x.price} TL / Yıl</div><p>1 yıl geçerli | ${x.depth} seviye | %${x.rate*100} prim</p><ul>${x.features.map(f=>`<li>${f}</li>`).join("")}</ul><button onclick="choosePack(${x.id},${x.price})">Paketi Seç</button></div>`).join("");}
-function choosePack(id,price){page("panel");setTimeout(()=>{let s=$("packSel");if(s){s.value=id;$("payAmount").value=price}},300)}
+let selectedPackageId=null; let selectedPackagePrice=0;
+function choosePack(id,price){
+  selectedPackageId=id; selectedPackagePrice=price;
+  showPackageInfo(id, price);
+}
+async function showPackageInfo(id, price){
+  let packs=await api("/api/packages");
+  let p=packs.find(x=>x.id===id);
+  $("packageInfoBox").innerHTML=`
+    <h2>${p.name}</h2>
+    <div class="price">${p.price} TL / Yıl</div>
+    <p>Bu paket 1 yıl / 365 gün geçerlidir. Paket aktif olunca premium film erişimi açılır.</p>
+    <ul>${p.features.map(f=>`<li>${f}</li>`).join("")}</ul>
+    <div class="actionRow">
+      <button onclick="showPaymentGuide(${p.id},${p.price})">Paketi Satın Al</button>
+      <button class="ghost" onclick="page('packages')">Diğer Paketleri İncele</button>
+    </div>`;
+  page("packageInfo");
+}
+function showPaymentGuide(id, price){
+  selectedPackageId=id; selectedPackagePrice=price;
+  $("paymentGuideBox").innerHTML=`
+    <h2>Paketi Satın Al</h2>
+    <p class="muted">Aşağıdaki IBAN'a ödeme yapın. Açıklama bölümüne kayıtlı telefon numaranızı yazın.</p>
+    <div class="ibanBox">
+      <b>IBAN:</b> TR78 0015 7000 0000 0037 7980 62<br>
+      <b>Alıcı:</b> YILMAZ ORAL<br>
+      <b>Tutar:</b> ${price} TL<br>
+      <b>Açıklama:</b> Kayıtlı telefon numaranız
+    </div>
+    <input id="payGuidePhone" placeholder="Kayıtlı telefon numaranız">
+    <div class="actionRow">
+      <button onclick="paymentFromGuide()">Ödeme Yaptım</button>
+      <button class="ghost" onclick="page('packages')">Paket Değiştir</button>
+    </div>`;
+  page("paymentGuide");
+}},300)}
 async function register(){try{await api("/api/register",{method:"POST",body:JSON.stringify({firstName:rf.value,lastName:rl.value,email:re.value,phone:rp.value,password:rs.value,password2:rs2.value,referralCode:rr.value})});toast("Kayıt başarılı, giriş yapın")}catch(e){toast(e.message)}}
 async function login(){try{let d=await api("/api/login",{method:"POST",body:JSON.stringify({email:le.value,password:ls.value})});token=d.token;me=d.user;localStorage.setItem("token",token);refreshMenu();toast("Giriş başarılı");page("panel")}catch(e){toast(e.message)}}
 async function dash(){
@@ -131,10 +167,18 @@ async function saveProfile(){try{await api("/api/profile",{method:"POST",body:JS
 function copyRef(){navigator.clipboard.writeText($("refCode").innerText);toast("Referans kodu kopyalandı")}
 function shareRef(){let text=`İzleKazan referans kodum: ${$("refCode").innerText}`; if(navigator.share)navigator.share({text}); else{navigator.clipboard.writeText(text);toast("Paylaşım metni kopyalandı")}}
 async function payment(){try{await api("/api/payment",{method:"POST",body:JSON.stringify({packageId:packSel.value,amount:payAmount.value,phone:payPhone.value,note:payPhone.value})});toast("Ödeme bildirimi gönderildi")}catch(e){toast(e.message)}}
+async function paymentFromGuide(){
+try{
+  if(!isLoggedIn()){toast("Ödeme bildirimi için önce giriş yapmalısınız");page("auth");return;}
+  await api("/api/payment",{method:"POST",body:JSON.stringify({packageId:selectedPackageId,amount:selectedPackagePrice,phone:payGuidePhone.value,note:payGuidePhone.value})});
+  toast("Ödeme bildirimi admine gönderildi");
+  page("panel");
+}catch(e){toast(e.message)}
+}
 async function withdraw(){try{await api("/api/withdraw",{method:"POST",body:JSON.stringify({fullName:wName.value,iban:wIban.value,amount:wAmount.value})});toast("Çekim talebi gönderildi")}catch(e){toast(e.message)}}
 async function support(){try{await api("/api/support",{method:"POST",body:JSON.stringify({subject:supSub.value,message:supMsg.value})});toast("Destek kaydı gönderildi");dash()}catch(e){toast(e.message)}}
 function showAddMovie(){$("addMovieBox").classList.remove("hidden");window.scrollTo(0,$("addMovieBox").offsetTop-10)}
-async function movies(){try{let m=await api("/api/movies");$("movieList").innerHTML=m.map(x=>`<div class="card movie ${x.locked?'locked':''}"><img src="${x.poster||'https://via.placeholder.com/300x450?text=Film'}"><h3>${x.title}</h3><p>${x.description||""}</p>${x.locked?'<span class="lock">Premium üyelik gerekli</span>':`<a href="${x.link}" target="_blank"><button>Filmleri Göster</button></a>`}</div>`).join("")}catch(e){$("movieList").innerHTML='<div class="card">Filmleri görmek için giriş yapmalısınız.</div>'}}
+async function movies(){try{let m=await api("/api/movies");$("movieList").innerHTML=m.map(x=>`<div class="card movie ${x.locked?'locked':''}"><img src="${x.poster||'https://via.placeholder.com/300x450?text=Film'}"><h3>${x.title}</h3><p>${x.description||""}</p>${x.locked?'<span class="lock">Premium üyelik gerekli</span>':`<button onclick="openFilmModal(\'${x.link}\')">Filmleri Göster</button>`}</div>`).join("")}catch(e){$("movieList").innerHTML='<div class="card">Filmleri görmek için giriş yapmalısınız.</div>'}}
 async function addMovie(){try{await api("/api/movies",{method:"POST",body:JSON.stringify({title:mt.value,year:my.value,category:mc.value,poster:mp.value,link:ml.value,description:md.value})});toast("Film CEO onayına gönderildi")}catch(e){toast(e.message)}}
 async function ceo(){try{let m=await api("/api/ceo/pending");$("ceoBox").innerHTML=`<div class="card"><h3>CEO Film Ön Onay</h3>${m.map(x=>`<p>${x.title} <button onclick="okMovie('${x.id}')">CEO Onayla</button><button onclick="noMovie('${x.id}')">Reddet</button></p>`).join("")||"Bekleyen film yok"}</div>`}catch(e){$("ceoBox").innerHTML=""}}
 async function okMovie(id){await api("/api/ceo/approve/"+id,{method:"POST"});toast("Admin yayın onayına gönderildi");ceo()}
@@ -147,4 +191,35 @@ async function adminRejectMovie(id){let reason=prompt("Reddetme nedeni:")||"Film
 async function replyTicket(id){await api("/api/admin/support/"+id+"/reply",{method:"POST",body:JSON.stringify({message:$("rep_"+id).value})});toast("Destek cevabı gönderildi");admin()}
 async function wdOk(id){await api("/api/admin/withdrawals/"+id+"/approve",{method:"POST"});toast("Çekim onaylandı");admin()}
 async function wdNo(id){let reason=prompt("Reddetme nedeni:")||"Çekim reddedildi";await api("/api/admin/withdrawals/"+id+"/reject",{method:"POST",body:JSON.stringify({reason})});toast("Çekim reddedildi");admin()}
-init();
+
+function openFilmModal(url){
+  $("filmFrame").src=url;
+  $("filmModal").classList.remove("hidden");
+}
+function closeFilmModal(){
+  $("filmFrame").src="";
+  $("filmModal").classList.add("hidden");
+}
+async function forgotPassword(){
+  try{
+    let d=await api("/api/forgot-password",{method:"POST",body:JSON.stringify({email:forgotEmail.value})});
+    $("forgotResult").innerHTML=`<p>${d.message}</p>`+(d.demoLink?`<p class="muted">SMTP ayarı olmadığı için test bağlantısı: <a href="${d.demoLink}">${d.demoLink}</a></p>`:"");
+    toast("Şifre sıfırlama işlemi başlatıldı");
+  }catch(e){toast(e.message)}
+}
+async function resetPassword(){
+  try{
+    const params=new URLSearchParams(location.search);
+    const resetToken=params.get("reset");
+    await api("/api/reset-password",{method:"POST",body:JSON.stringify({token:resetToken,newPassword:resetPass.value})});
+    toast("Şifre yenilendi. Giriş yapabilirsiniz.");
+    history.replaceState({}, "", "/");
+    page("auth");
+  }catch(e){toast(e.message)}
+}
+function checkResetLink(){
+  const params=new URLSearchParams(location.search);
+  if(params.get("reset")) page("reset");
+}
+init(); setTimeout(checkResetLink,300);
+
