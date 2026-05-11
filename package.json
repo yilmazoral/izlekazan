@@ -1,6 +1,6 @@
 {
-  "name": "izlekazan-v2-full",
-  "version": "2.0.0",
+  "name": "izlekazan-supabase",
+  "version": "6.0.0",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -10,6 +10,8 @@
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
     "uuid": "^9.0.1",
-    "nodemailer": "^6.9.13"
+    "nodemailer": "^6.9.13",
+    "@supabase/supabase-js": "^2.45.4",
+    "dotenv": "^16.4.5"
   }
 }

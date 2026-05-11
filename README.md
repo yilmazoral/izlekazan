@@ -1,41 +1,59 @@
-# İzleKazan V2 Full
+# İzleKazan - Supabase Kalıcı Veritabanı Sürümü
 
-Render:
-- Build Command: npm install
-- Start Command: npm start
+Bu sürümde üyeler, ödemeler, çekim talepleri, bildirimler, filmler, destek kayıtları ve şifre sıfırlama verileri Supabase üzerinde kalıcı şekilde saklanır. Render yeniden başlasa veya yeniden deploy yapılsa bile üyeler silinmez.
 
-Admin:
-- yilmazoral@hotmail.com
-- 059221
+## 1. Supabase kurulumu
 
+1. Supabase hesabınızda yeni proje oluşturun.
+2. `supabase-setup.sql` dosyasındaki kodu Supabase > SQL Editor bölümünde çalıştırın.
+3. Project Settings > API bölümünden `Project URL` ve backend için `service_role` / secret key değerini alın.
 
-## Önemli Veri Notu
+## 2. Render Environment ayarları
 
-Render ücretsiz planda uygulama içindeki `db.json` kalıcı değildir. Yeni deploy veya servis yeniden başlatma sonrasında üyeler/ödemeler sıfırlanabilir.
+Render panelinde İzleKazan servisiniz için şu değişkenleri ekleyin:
 
-Kalıcı çözüm:
-- Supabase PostgreSQL
-- Neon PostgreSQL
-- Render Persistent Disk
+```env
+SUPABASE_URL=https://PROJE_ID.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_ROLE_KEY_BURAYA
+JWT_SECRET=çok_uzun_gizli_bir_yazi
+ADMIN_EMAIL=yilmazoral@hotmail.com
+ADMIN_PASS=059221
+PUBLIC_URL=https://izlekazan.onrender.com
+```
 
-Bir sonraki sürümde veritabanı dış servise taşınmalıdır.
+Önemli: `SUPABASE_SERVICE_ROLE_KEY` kesinlikle frontend dosyalarına yazılmamalıdır. Sadece Render Environment bölümünde kalmalıdır.
 
+## 3. Çalıştırma
 
-## V3 Kazanç Takip Güncellemesi
+```bash
+npm install
+npm start
+```
 
-- Alt üyeler artık paket, premium başlangıç ve premium bitiş bilgisiyle görünür.
-- Tüm kazançlar önce bekleyen bakiyeye eklenir.
-- 15 gün sonra otomatik çekilebilir bakiyeye aktarılır.
-- Bekleyen bakiye ve çekilebilir bakiye kartları tıklanınca işlem detayları listelenir.
+## 4. İlk giriş bilgileri
 
+Varsayılan admin bilgisi:
 
-## V4 Güncellemesi
+- E-posta: `yilmazoral@hotmail.com`
+- Şifre: `059221`
+- İlk referans kodu: `ADMIN`
 
-- Referans kodu zorunlu hale getirildi.
-- İlk kayıtlar için geçerli referans kodu: ADMIN
-- Paket satın alma bilgilendirme akışı eklendi.
-- Şifremi unuttum / şifre sıfırlama endpointleri eklendi.
-- Gerçek e-posta gönderimi için Render Environment Variables:
-  SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM, PUBLIC_URL
-- SMTP ayarı yoksa sistem test bağlantısını ekranda gösterir.
-- Film platformu iframe modal içinde açılır. Kaynak site iframe engellerse tarayıcı güvenliği nedeniyle dış sekme gerekebilir.
+Admin şifresini sonradan panelden değiştirmeniz önerilir.
+
+## 5. Sağlık kontrolü
+
+Kurulumdan sonra şu adrese girerek veri kaynağını kontrol edebilirsiniz:
+
+```text
+/api/health
+```
+
+`storage: "supabase"` görünüyorsa kalıcı veritabanı bağlantısı aktif demektir.
+
+## 6. Yapılan ana değişiklikler
+
+- Render'da silinen `db.json` bağımlılığı yerine Supabase destekli kalıcı veri katmanı eklendi.
+- Supabase bağlantısı yoksa sistem geçici olarak `db.json` ile çalışmaya devam eder.
+- Admin bilgileri ve JWT anahtarı Environment Variable üzerinden yönetilebilir hale getirildi.
+- Site görünümü modern kartlar, daha güçlü kontrast, mobil uyumlu düzen ve profesyonel panel tasarımıyla yenilendi.
+- Üye olurken referans kodu alanı zorunlu olacak şekilde netleştirildi.

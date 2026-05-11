@@ -77,6 +77,33 @@ function logout() {
   toast("Çıkış yapıldı");
 }
 
+
+const rotatingSlogans = [
+  "İzle, Paylaş, Kazanç Fırsatını Büyüt.",
+  "Hem Film İzle Hem de Platformun Kazanç Modeline Dahil Ol.",
+  "Premium Üyelik Sadece İzlemek İçin Değil, Ek Gelir Fırsatı İçin.",
+  "Film Keyfini Ek Gelir Modeliyle Birleştiren Yeni Platform."
+];
+let rotatingSloganIndex = 0;
+
+function startRotatingSlogans() {
+  const el = $("rotatingSlogan");
+  if (!el || el.dataset.started === "1") return;
+  el.dataset.started = "1";
+  el.innerText = rotatingSlogans[0];
+
+  setInterval(() => {
+    el.classList.add("sloganOut");
+    setTimeout(() => {
+      rotatingSloganIndex = (rotatingSloganIndex + 1) % rotatingSlogans.length;
+      el.innerText = rotatingSlogans[rotatingSloganIndex];
+      el.classList.remove("sloganOut");
+      el.classList.add("sloganIn");
+      setTimeout(() => el.classList.remove("sloganIn"), 520);
+    }, 420);
+  }, 3200);
+}
+
 async function init() {
   try {
     if (token) {
@@ -90,6 +117,7 @@ async function init() {
   }
 
   refreshMenu();
+  startRotatingSlogans();
   await loadPackages().catch(() => {});
   checkResetLink();
 }
@@ -115,6 +143,11 @@ async function loadPackages() {
 }
 
 async function choosePack(id, price) {
+  if(!isLoggedIn()){
+    const go = confirm("Paket satın almak için önce üye olmanız gerekmektedir.");
+    if(go) page("auth");
+    return;
+  }
   selectedPackageId = id;
   selectedPackagePrice = price;
   const packs = await api("/api/packages");
@@ -435,10 +468,10 @@ async function movies() {
     $("movieList").innerHTML = m
       .map(
         (x) => `<div class="card movie ${x.locked ? "locked" : ""}">
-          <img src="${x.poster || "https://via.placeholder.com/300x450?text=Film"}">
+          <img src="${x.poster || "/assets/movie-poster.svg"}">
           <h3>${x.title}</h3>
           <p>${x.description || ""}</p>
-          ${x.locked ? '<span class="lock">Premium üyelik gerekli</span>' : `<button onclick="openFilmModal('${x.link}')">Filmleri Göster</button>`}
+          ${x.locked ? '<span class="lock">Premium üyelik gerekli</span>' : `<button onclick='openFilmModal(${JSON.stringify(x.link || "")})'>Filmleri Göster</button>`}
         </div>`
       )
       .join("");
@@ -491,26 +524,102 @@ async function noMovie(id) {
 async function admin() {
   try {
     const d = await api("/api/admin/all");
+    const pendingPayments = d.payments.filter((p) => p.status === "pending");
+    const archivedPayments = d.payments.filter((p) => p.status !== "pending").slice().reverse();
     const adminPending = d.movies.filter((m) => m.status === "admin_pending");
+    const supportTickets = d.supportTickets.slice().reverse();
+    const withdrawals = d.withdrawals.slice().reverse();
+    const users = d.users.slice().reverse();
+
+    const statusText = (s) => s === "approved" ? "Onaylandı" : s === "rejected" ? "Reddedildi" : s === "pending" ? "Bekliyor" : s;
+    const statusClass = (s) => s === "approved" ? "success" : s === "rejected" ? "danger" : "warning";
+    const empty = (text) => `<div class="emptyState">${text}</div>`;
 
     $("adminBox").innerHTML = `
-      <h3>Ödeme Bildirimleri</h3>
-      ${d.payments.filter((p) => p.status === "pending").map((p) => `<p>${p.phone} | ${p.amount} TL | ${p.status} <button onclick="payOk('${p.id}')">Onayla</button><button onclick="payNo('${p.id}')">Reddet</button></p>`).join("") || "Bekleyen ödeme yok"}
+      <div class="adminHeader">
+        <div>
+          <span class="badge">Yönetim Paneli</span>
+          <h3>İzleKazan Operasyon Merkezi</h3>
+          <p class="muted">Ödeme onayı, çekim talebi, destek mesajları, film yayın akışı ve kullanıcı kontrolü tek ekranda.</p>
+        </div>
+        <div class="adminKpis">
+          <div><b>${d.users.length}</b><span>Üye</span></div>
+          <div><b>${pendingPayments.length}</b><span>Bekleyen Ödeme</span></div>
+          <div><b>${withdrawals.filter((w) => w.status === "pending").length}</b><span>Bekleyen Çekim</span></div>
+          <div><b>${adminPending.length}</b><span>Film Onayı</span></div>
+        </div>
+      </div>
 
-      <h3>Ödeme Bildirimleri Arşivi</h3>
-      ${d.payments.filter((p) => p.status !== "pending").map((p) => `<p>${p.phone} | ${p.amount} TL | ${p.status} ${p.rejectReason || ""}</p>`).join("") || "Arşiv boş"}
+      <div class="adminGrid">
+        <section class="adminSection wide">
+          <h3>Ödeme Bildirimleri</h3>
+          ${pendingPayments.map((p) => `
+            <div class="adminItem">
+              <div><b>${p.phone}</b><span>${p.amount} TL • Paket #${p.packageId}</span></div>
+              <span class="statusPill warning">Bekliyor</span>
+              <div class="adminActions">
+                <button onclick="payOk('${p.id}')">Onayla</button>
+                <button class="dangerBtn" onclick="payNo('${p.id}')">Reddet</button>
+              </div>
+            </div>`).join("") || empty("Bekleyen ödeme bildirimi yok")}
+        </section>
 
-      <h3>Admin Film Yayın Onayı</h3>
-      ${adminPending.map((m) => `<div class="box"><b>${m.title}</b><p>${m.description || ""}</p><button onclick="openFilmModal('${m.link}')">Sayfada Nasıl Görünüyor?</button><button onclick="publishMovie('${m.id}')">Yayınla</button><button onclick="adminRejectMovie('${m.id}')">Filmi Reddet</button></div>`).join("") || "Yayın onayı bekleyen film yok"}
+        <section class="adminSection">
+          <h3>Admin Film Yayın Onayı</h3>
+          ${adminPending.map((m) => `
+            <div class="adminItem vertical">
+              <div><b>${m.title}</b><span>${m.category || "Kategori yok"} • ${m.year || "Yıl yok"}</span></div>
+              <p>${m.description || "Açıklama girilmemiş"}</p>
+              <div class="adminActions">
+                <button onclick='openFilmModal(${JSON.stringify(m.link || "")})'>Ön İzle</button>
+                <button onclick="publishMovie('${m.id}')">Yayınla</button>
+                <button class="dangerBtn" onclick="adminRejectMovie('${m.id}')">Reddet</button>
+              </div>
+            </div>`).join("") || empty("Yayın onayı bekleyen film yok")}
+        </section>
 
-      <h3>Destek Mesajları</h3>
-      ${d.supportTickets.map((t) => `<div class="box"><b>${t.subject}</b> - ${t.status}<p>${t.message}</p><input id="rep_${t.id}" placeholder="Cevap yaz"><button onclick="replyTicket('${t.id}')">Cevapla</button></div>`).join("") || "Destek mesajı yok"}
+        <section class="adminSection">
+          <h3>Çekim Talepleri</h3>
+          ${withdrawals.map((w) => `
+            <div class="adminItem vertical">
+              <div><b>${w.amount} TL</b><span>${w.fullName || "İsim yok"}</span></div>
+              <span class="statusPill ${statusClass(w.status)}">${statusText(w.status)}</span>
+              <small>${w.iban || "IBAN yok"}</small>
+              ${w.status === "pending" ? `<div class="adminActions"><button onclick="wdOk('${w.id}')">Onayla</button><button class="dangerBtn" onclick="wdNo('${w.id}')">Reddet</button></div>` : ""}
+            </div>`).join("") || empty("Çekim talebi yok")}
+        </section>
 
-      <h3>Çekimler</h3>
-      ${d.withdrawals.map((w) => `<p>${w.amount} TL | ${w.status} <button onclick="wdOk('${w.id}')">Onayla</button><button onclick="wdNo('${w.id}')">Reddet</button></p>`).join("") || "Çekim yok"}
+        <section class="adminSection wide">
+          <h3>Destek Mesajları</h3>
+          ${supportTickets.map((t) => `
+            <div class="adminItem vertical">
+              <div><b>${t.subject}</b><span>${statusText(t.status)} • ${new Date(t.createdAt).toLocaleString("tr-TR")}</span></div>
+              <p>${t.message}</p>
+              <input id="rep_${t.id}" placeholder="Kullanıcıya cevap yaz">
+              <button onclick="replyTicket('${t.id}')">Cevapla</button>
+            </div>`).join("") || empty("Destek mesajı yok")}
+        </section>
 
-      <h3>Kullanıcılar</h3>
-      ${d.users.map((u) => `<p>${u.firstName} ${u.lastName} | ${u.email} | ${u.balance} TL | Paket:${u.packageId}</p>`).join("")}`;
+        <section class="adminSection wide">
+          <h3>Ödeme Arşivi</h3>
+          <div class="tableWrap">
+            <table>
+              <thead><tr><th>Telefon</th><th>Tutar</th><th>Paket</th><th>Durum</th><th>Not</th></tr></thead>
+              <tbody>${archivedPayments.map((p) => `<tr><td>${p.phone}</td><td>${p.amount} TL</td><td>#${p.packageId}</td><td><span class="statusPill ${statusClass(p.status)}">${statusText(p.status)}</span></td><td>${p.rejectReason || "-"}</td></tr>`).join("") || `<tr><td colspan="5">Arşiv boş</td></tr>`}</tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="adminSection wide">
+          <h3>Kullanıcılar</h3>
+          <div class="tableWrap">
+            <table>
+              <thead><tr><th>Ad Soyad</th><th>E-posta</th><th>Telefon</th><th>Paket</th><th>Bakiye</th><th>Rol</th></tr></thead>
+              <tbody>${users.map((u) => `<tr><td>${u.firstName} ${u.lastName}</td><td>${u.email}</td><td>${u.phone}</td><td>#${u.packageId || 0}</td><td>${u.balance || 0} TL</td><td>${u.role}</td></tr>`).join("")}</tbody>
+            </table>
+          </div>
+        </section>
+      </div>`;
   } catch (e) {
     $("adminBox").innerHTML = "Admin girişi gerekli";
   }

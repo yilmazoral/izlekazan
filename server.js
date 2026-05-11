@@ -1,3 +1,4 @@
+try { require("dotenv").config(); } catch (e) {}
 
 const express = require("express");
 const path = require("path");
@@ -7,17 +8,30 @@ const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require("uuid");
 let nodemailer = null;
 try { nodemailer = require("nodemailer"); } catch(e) { nodemailer = null; }
+let createClient = null;
+try { ({ createClient } = require("@supabase/supabase-js")); } catch(e) { createClient = null; }
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || "izlekazan_v2_secret";
+const JWT_SECRET = process.env.JWT_SECRET || "izlekazan_development_secret_change_me";
 const DB_FILE = path.join(__dirname, "db.json");
+
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "yilmazoral@hotmail.com";
+const ADMIN_PASS = process.env.ADMIN_PASS || "059221";
+
+const SUPABASE_URL = process.env.SUPABASE_URL || "";
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_KEY || "";
+const SUPABASE_STATE_TABLE = process.env.SUPABASE_STATE_TABLE || "izlekazan_state";
+const SUPABASE_STATE_ID = process.env.SUPABASE_STATE_ID || "main";
+const supabase = createClient && SUPABASE_URL && SUPABASE_KEY
+  ? createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } })
+  : null;
+
+let dbCache = null;
+let dbSaveQueue = Promise.resolve();
 
 app.use(express.json({ limit: "3mb" }));
 app.use(express.static(__dirname));
-
-const ADMIN_EMAIL = "yilmazoral@hotmail.com";
-const ADMIN_PASS = "059221";
 
 const PACKAGES = [
   {id:1,name:"Standart Üye",price:100,depth:1,rate:0.10,durationDays:365,badge:"Başlangıç",features:["1 yıl premium film erişimi","Reklamsız Film Platformu filmlerine erişim","1. seviye referanslardan %10 kazanç","Referans kodu paket aktif olunca görünür","Siteye Film Ekleme Kazancı","Cüzdan, destek ve çekim talebi"]},
@@ -32,16 +46,122 @@ function addDays(days){ const d = new Date(); d.setDate(d.getDate()+days); retur
 function daysLeft(dateStr){ if(!dateStr) return 0; return Math.max(0, Math.ceil((new Date(dateStr)-new Date())/(1000*60*60*24))); }
 function isPremium(u){ return !!(u && u.packageId > 0 && u.premiumUntil && new Date(u.premiumUntil) > new Date()); }
 
+function defaultMovie(){
+  return {
+    id: uuidv4(),
+    title: "Reklamsız Film Platformu",
+    year: "2026",
+    category: "Film Arşivi",
+    poster: "/assets/movie-poster.svg",
+    description: "Premium üyeler için reklamsız film platformu.",
+    link: "https://sine5.news/",
+    status: "published",
+    addedBy: "system",
+    ceoApprovedBy: "system",
+    adminApprovedBy: "system",
+    createdAt: now()
+  };
+}
+
 function freshDb(){
-  return {users:[],payments:[],withdrawals:[],transactions:[],pendingEarnings:[],movies:[{id:uuidv4(),title:"Reklamsız Film Platformu",year:"2026",category:"Film Arşivi",poster:"https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=700&q=80",description:"Premium üyeler için reklamsız film platformu.",link:"https://sine5.news/",status:"published",addedBy:"system",ceoApprovedBy:"system",adminApprovedBy:"system",createdAt:now()}],supportTickets:[],notifications:[],passwordResets:[],logs:[]};
+  return {
+    users: [],
+    payments: [],
+    withdrawals: [],
+    transactions: [],
+    pendingEarnings: [],
+    movies: [defaultMovie()],
+    supportTickets: [],
+    notifications: [],
+    passwordResets: [],
+    logs: []
+  };
 }
+
+function normalizeDb(data){
+  const base = freshDb();
+  const d = data && typeof data === "object" ? data : {};
+  const out = { ...base, ...d };
+  out.users = Array.isArray(out.users) ? out.users : [];
+  out.payments = Array.isArray(out.payments) ? out.payments : [];
+  out.withdrawals = Array.isArray(out.withdrawals) ? out.withdrawals : [];
+  out.transactions = Array.isArray(out.transactions) ? out.transactions : [];
+  out.pendingEarnings = Array.isArray(out.pendingEarnings) ? out.pendingEarnings : [];
+  out.movies = Array.isArray(out.movies) && out.movies.length ? out.movies : [defaultMovie()];
+  out.supportTickets = Array.isArray(out.supportTickets) ? out.supportTickets : [];
+  out.notifications = Array.isArray(out.notifications) ? out.notifications : [];
+  out.passwordResets = Array.isArray(out.passwordResets) ? out.passwordResets : [];
+  out.logs = Array.isArray(out.logs) ? out.logs : [];
+  return out;
+}
+
+function readLocalDb(){
+  try {
+    if(!fs.existsSync(DB_FILE)) fs.writeFileSync(DB_FILE, JSON.stringify(freshDb(), null, 2));
+    return normalizeDb(JSON.parse(fs.readFileSync(DB_FILE, "utf8")));
+  } catch (error) {
+    console.error("Yerel db.json okunamadı, yeni veritabanı başlatılıyor:", error.message);
+    return freshDb();
+  }
+}
+
+async function loadDb(){
+  if(!supabase){
+    console.warn("Supabase ayarı bulunamadı. Geçici olarak db.json kullanılacak. Kalıcı kayıt için SUPABASE_URL ve SUPABASE_SERVICE_ROLE_KEY ekleyin.");
+    return readLocalDb();
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from(SUPABASE_STATE_TABLE)
+      .select("data")
+      .eq("id", SUPABASE_STATE_ID)
+      .maybeSingle();
+
+    if(error) throw error;
+    if(data && data.data){
+      console.log("Supabase veritabanı yüklendi:", SUPABASE_STATE_TABLE);
+      return normalizeDb(data.data);
+    }
+
+    const firstDb = readLocalDb();
+    await persistDb(firstDb);
+    console.log("Supabase veritabanı ilk kez oluşturuldu:", SUPABASE_STATE_TABLE);
+    return firstDb;
+  } catch (error) {
+    console.error("Supabase bağlantı/kayıt hatası:", error.message);
+    console.error("Tablonun oluşturulduğundan ve Environment Variable değerlerinin doğru olduğundan emin olun.");
+    return readLocalDb();
+  }
+}
+
+async function persistDb(snapshot){
+  if(!supabase) return;
+  const { error } = await supabase
+    .from(SUPABASE_STATE_TABLE)
+    .upsert({ id: SUPABASE_STATE_ID, data: snapshot, updated_at: now() }, { onConflict: "id" });
+  if(error) throw error;
+}
+
 function readDb(){
-  if(!fs.existsSync(DB_FILE)) fs.writeFileSync(DB_FILE, JSON.stringify(freshDb(), null, 2));
-  const d = JSON.parse(fs.readFileSync(DB_FILE, "utf8"));
-  d.users ||= []; d.payments ||= []; d.withdrawals ||= []; d.transactions ||= []; d.pendingEarnings ||= []; d.movies ||= []; d.supportTickets ||= []; d.notifications ||= []; d.passwordResets ||= []; d.logs ||= [];
-  return d;
+  if(!dbCache) dbCache = readLocalDb();
+  return dbCache;
 }
-function saveDb(d){ fs.writeFileSync(DB_FILE, JSON.stringify(d, null, 2)); }
+
+function saveDb(d){
+  dbCache = normalizeDb(d);
+  try { fs.writeFileSync(DB_FILE, JSON.stringify(dbCache, null, 2)); } catch(e) { console.error("Yerel yedek kaydedilemedi:", e.message); }
+  if(supabase){
+    const snapshot = JSON.parse(JSON.stringify(dbCache));
+    dbSaveQueue = dbSaveQueue
+      .catch(() => {})
+      .then(() => persistDb(snapshot))
+      .catch((error) => console.error("Supabase kaydetme hatası:", error.message));
+    return dbSaveQueue;
+  }
+  return Promise.resolve();
+}
+
 function pub(u){ if(!u) return null; const {passwordHash, ...r}=u; return {...r, premiumActive:isPremium(u), premiumDaysLeft:daysLeft(u.premiumUntil)}; }
 function makeRef(){ return "IK" + Math.random().toString(36).slice(2,8).toUpperCase() + Math.floor(10+Math.random()*89); }
 function notify(d,userId,title,message,type="info"){ d.notifications.push({id:uuidv4(),userId,title,message,type,read:false,createdAt:now()}); }
@@ -55,15 +175,39 @@ function releasePending(d){
     if(u){ u.balance = Number((Number(u.balance||0)+Number(e.amount)).toFixed(2)); e.status="released"; tx(d,u.id,Number(e.amount),"bekleyen_devri",e.desc+" çekilebilir bakiyeye devredildi"); notify(d,u.id,"Bekleyen Kazanç Aktarıldı",`${e.amount} TL çekilebilir bakiyenize aktarıldı.`,"success"); }
   });
 }
-function seedAdmin(){
-  const d=readDb();
-  let admin=d.users.find(u=>u.email===ADMIN_EMAIL);
+async function seedAdmin(){
+  const d = readDb();
+  let admin = d.users.find(u => String(u.email || "").toLowerCase() === ADMIN_EMAIL.toLowerCase());
   if(!admin){
-    d.users.push({id:uuidv4(),firstName:"Yılmaz",lastName:"Oral",email:ADMIN_EMAIL,phone:"05000000000",passwordHash:bcrypt.hashSync(ADMIN_PASS,10),referralCode:"ADMIN",sponsorId:null,packageId:5,premiumUntil:addDays(3650),balance:0,role:"admin",banned:false,createdAt:now()});
-  } else { admin.passwordHash=bcrypt.hashSync(ADMIN_PASS,10); admin.role="admin"; admin.packageId=5; admin.premiumUntil=admin.premiumUntil||addDays(3650); }
-  saveDb(d);
+    d.users.push({
+      id: uuidv4(),
+      firstName: "Yılmaz",
+      lastName: "Oral",
+      email: ADMIN_EMAIL.toLowerCase(),
+      phone: "05000000000",
+      passwordHash: bcrypt.hashSync(ADMIN_PASS, 10),
+      referralCode: "ADMIN",
+      sponsorId: null,
+      packageId: 5,
+      premiumStartedAt: now(),
+      premiumUntil: addDays(3650),
+      balance: 0,
+      role: "admin",
+      banned: false,
+      createdAt: now()
+    });
+  } else {
+    admin.role = "admin";
+    admin.packageId = 5;
+    admin.referralCode = admin.referralCode || "ADMIN";
+    admin.premiumStartedAt = admin.premiumStartedAt || now();
+    admin.premiumUntil = admin.premiumUntil || addDays(3650);
+    if(process.env.RESET_ADMIN_PASSWORD_ON_START === "true"){
+      admin.passwordHash = bcrypt.hashSync(ADMIN_PASS, 10);
+    }
+  }
+  await saveDb(d);
 }
-seedAdmin();
 
 function auth(req,res,next){ const h=req.headers.authorization||""; const token=h.startsWith("Bearer ")?h.slice(7):null; if(!token) return res.status(401).json({error:"Giriş gerekli"}); try{req.auth=jwt.verify(token,JWT_SECRET);next()}catch(e){res.status(401).json({error:"Oturum geçersiz"});} }
 function user(req,d){return d.users.find(u=>u.id===req.auth.id);}
@@ -86,6 +230,7 @@ function distributeReferral(d,buyer,amount){
 }
 
 app.get("/",(req,res)=>res.sendFile(path.join(__dirname,"index.html")));
+app.get("/api/health", (req, res) => res.json({ ok: true, storage: supabase ? "supabase" : "db.json", table: supabase ? SUPABASE_STATE_TABLE : null }));
 app.get("/api/packages",(req,res)=>res.json(PACKAGES));
 
 app.post("/api/register",(req,res)=>{
@@ -240,4 +385,16 @@ app.post("/api/reset-password",(req,res)=>{
 
 
 app.get("*",(req,res)=>res.sendFile(path.join(__dirname,"index.html")));
-app.listen(PORT,()=>console.log("İzleKazan V2 çalışıyor:",PORT));
+async function startServer(){
+  dbCache = await loadDb();
+  await seedAdmin();
+  app.listen(PORT, () => {
+    console.log(`İzleKazan çalışıyor: ${PORT}`);
+    console.log(`Veri kaynağı: ${supabase ? "Supabase" : "db.json"}`);
+  });
+}
+
+startServer().catch((error) => {
+  console.error("Sunucu başlatılamadı:", error);
+  process.exit(1);
+});
