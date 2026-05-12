@@ -84,6 +84,7 @@ const rotatingSlogans = [
   "Premium Üyelik Sadece İzlemek İçin Değil, Ek Gelir Fırsatı İçin.",
   "Film Keyfini Ek Gelir Modeliyle Birleştiren Yeni Platform."
 ];
+const rotatingSloganColors = ["#f6b51e", "#38bdf8", "#a78bfa", "#34d399"];
 let rotatingSloganIndex = 0;
 
 function startRotatingSlogans() {
@@ -91,17 +92,19 @@ function startRotatingSlogans() {
   if (!el || el.dataset.started === "1") return;
   el.dataset.started = "1";
   el.innerText = rotatingSlogans[0];
+  el.style.setProperty("--slogan-color", rotatingSloganColors[0]);
 
   setInterval(() => {
     el.classList.add("sloganOut");
     setTimeout(() => {
       rotatingSloganIndex = (rotatingSloganIndex + 1) % rotatingSlogans.length;
       el.innerText = rotatingSlogans[rotatingSloganIndex];
+      el.style.setProperty("--slogan-color", rotatingSloganColors[rotatingSloganIndex]);
       el.classList.remove("sloganOut");
       el.classList.add("sloganIn");
       setTimeout(() => el.classList.remove("sloganIn"), 520);
     }, 420);
-  }, 3200);
+  }, 5000);
 }
 
 async function init() {
