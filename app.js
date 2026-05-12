@@ -36,10 +36,14 @@ function refreshMenu() {
   const loginTop = $("loginTop");
   const logoutBtn = $("logoutBtn");
   const adminNav = $("adminNav");
+  const adminTop = $("adminTop");
+  const panelTop = $("panelTop");
 
   if (loginTop) loginTop.classList.toggle("hidden", isLoggedIn());
   if (logoutBtn) logoutBtn.classList.toggle("hidden", !isLoggedIn());
+  if (panelTop) panelTop.classList.toggle("hidden", !isLoggedIn());
   if (adminNav) adminNav.classList.toggle("hidden", !(me && me.role === "admin"));
+  if (adminTop) adminTop.classList.toggle("hidden", !(me && me.role === "admin"));
 }
 
 function page(id) {
@@ -576,12 +580,18 @@ async function admin() {
         <section class="adminSection wide">
           <h3>Ödeme Bildirimleri</h3>
           ${pendingPayments.map((p) => `
-            <div class="adminItem">
-              <div><b>${p.phone}</b><span>${p.amount} TL • Paket #${p.packageId}</span></div>
-              <span class="statusPill warning">Bekliyor</span>
-              <div class="adminActions">
-                <button onclick="payOk('${p.id}')">Onayla</button>
-                <button class="dangerBtn" onclick="payNo('${p.id}')">Reddet</button>
+            <div class="adminItem vertical paymentAdminItem">
+              <div class="paymentAdminHead">
+                <div>
+                  <b>${p.phone || "Telefon yok"}</b>
+                  <span>${p.amount} TL • Paket #${p.packageId}</span>
+                  <small>Bildirim No: ${p.id}</small>
+                </div>
+                <span class="statusPill warning">Bekliyor</span>
+              </div>
+              <div class="adminActions paymentActions">
+                <button onclick="payOk('${p.id}')">Ödemeyi Onayla</button>
+                <button class="dangerBtn" onclick="payNo('${p.id}')">Ödemeyi Reddet</button>
               </div>
             </div>`).join("") || empty("Bekleyen ödeme bildirimi yok")}
         </section>
