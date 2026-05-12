@@ -286,7 +286,42 @@ app.post("/api/withdraw",auth,(req,res)=>{
   d.withdrawals.push({id:uuidv4(),userId:u.id,fullName:req.body.fullName,phone:u.phone,iban:req.body.iban,amount,status:"pending",createdAt:now()});
   notify(d,u.id,"Çekim Talebi Alındı",`${amount} TL çekim talebiniz admin onayına gönderildi.`,"info"); saveDb(d); res.json({success:true});
 });
-app.get("/api/movies",auth,(req,res)=>{ const d=readDb(); releasePending(d); const u=user(req,d); const premium=isPremium(u); saveDb(d); res.json(d.movies.filter(m=>m.status==="published").map(m=>({...m,locked:!premium,link:premium?m.link:null}))); });
+app.get("/api/movies",(req,res)=>{
+  const d=readDb();
+  releasePending(d);
+
+  let u = null;
+  const h = req.headers.authorization || "";
+  const token = h.startsWith("Bearer ") ? h.slice(7) : null;
+
+  if(token){
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      u = d.users.find(x => x.id === decoded.id) || null;
+    } catch(e) {
+      u = null;
+    }
+  }
+
+  const premium = isPremium(u);
+  saveDb(d);
+
+  res.json(
+    d.movies
+      .filter(m => m.status === "published")
+      .map(m => ({
+        id: m.id,
+        title: m.title,
+        year: m.year,
+        category: m.category,
+        poster: m.poster,
+        description: m.description,
+        status: m.status,
+        locked: !premium,
+        link: premium ? m.link : null
+      }))
+  );
+});
 app.post("/api/movies",auth,(req,res)=>{
   const d=readDb(); const u=user(req,d); const {title,year,category,poster,description,link}=req.body;
   if(!title||!link) return res.status(400).json({error:"Film adı ve link zorunlu"});

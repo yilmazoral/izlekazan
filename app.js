@@ -468,19 +468,38 @@ function showAddMovie() {
 async function movies() {
   try {
     const m = await api("/api/movies");
+    const logged = isLoggedIn();
+
     $("movieList").innerHTML = m
       .map(
         (x) => `<div class="card movie ${x.locked ? "locked" : ""}">
-          <img src="${x.poster || "/assets/movie-poster.svg"}">
+          <div class="moviePosterWrap">
+            <img src="${x.poster || "/assets/movie-poster.svg"}" onerror="this.src='/assets/movie-poster.svg'">
+            ${x.locked ? '<span class="premiumBadge">Premium İçerik</span>' : '<span class="premiumBadge open">Erişim Açık</span>'}
+          </div>
           <h3>${x.title}</h3>
+          <div class="movieMeta">${x.category || "Film"}${x.year ? " • " + x.year : ""}</div>
           <p>${x.description || ""}</p>
-          ${x.locked ? '<span class="lock">Premium üyelik gerekli</span>' : `<button onclick='openFilmModal(${JSON.stringify(x.link || "")})'>Filmleri Göster</button>`}
+          ${x.locked
+            ? `<button onclick="premiumRequiredForMovie()">${logged ? "Premium Ol ve İzle" : "Üye Ol, Premium Al ve İzle"}</button><small class="movieHint">Film kataloğu herkese açıktır; izleme erişimi premium üyelere özeldir.</small>`
+            : `<button onclick='openFilmModal(${JSON.stringify(x.link || "")})'>Filmi İzle</button>`}
         </div>`
       )
-      .join("");
+      .join("") || '<div class="card">Yayında film bulunmuyor.</div>';
   } catch (e) {
-    $("movieList").innerHTML = '<div class="card">Filmleri görmek için giriş yapmalısınız.</div>';
+    $("movieList").innerHTML = '<div class="card">Film kataloğu şu anda yüklenemedi. Lütfen tekrar deneyin.</div>';
   }
+}
+
+function premiumRequiredForMovie() {
+  if (!isLoggedIn()) {
+    const go = confirm("Filmleri izlemek için önce üye olmanız ve premium paket almanız gerekmektedir. Üye olma ekranına gitmek ister misiniz?");
+    if (go) page("auth");
+    return;
+  }
+
+  const go = confirm("Bu filmi izlemek için premium üyelik gereklidir. Paketleri görüntülemek ister misiniz?");
+  if (go) page("packages");
 }
 
 async function addMovie() {
