@@ -43,6 +43,23 @@ const PACKAGES = [
 
 function now(){ return new Date().toISOString(); }
 function addDays(days){ const d = new Date(); d.setDate(d.getDate()+days); return d.toISOString(); }
+function addDaysToDate(dateValue, days){ const d = new Date(dateValue); d.setDate(d.getDate()+days); return d.toISOString(); }
+function expireExpiredPackages(d){
+  const t = new Date();
+  let changed = false;
+  d.users.forEach(u => {
+    if(u && Number(u.packageId || 0) > 0 && u.premiumUntil && new Date(u.premiumUntil) <= t){
+      u.lastExpiredPackageId = u.packageId;
+      u.packageId = 0;
+      u.premiumStartedAt = null;
+      u.premiumUntil = null;
+      if(u.role === "ceo") u.role = "user";
+      notify(d, u.id, "Premium Süresi Bitti", "Paket süreniz bitti. Film erişimi ve kazanç üretimi yeni paket alana kadar durduruldu.", "error");
+      changed = true;
+    }
+  });
+  return changed;
+}
 function daysLeft(dateStr){ if(!dateStr) return 0; return Math.max(0, Math.ceil((new Date(dateStr)-new Date())/(1000*60*60*24))); }
 function isPremium(u){ return !!(u && u.packageId > 0 && u.premiumUntil && new Date(u.premiumUntil) > new Date()); }
 
@@ -163,6 +180,51 @@ function saveDb(d){
 }
 
 function pub(u){ if(!u) return null; const {passwordHash, ...r}=u; return {...r, premiumActive:isPremium(u), premiumDaysLeft:daysLeft(u.premiumUntil)}; }
+function maskPart(value){
+  const text = String(value || "").trim();
+  if(!text) return "-***";
+  return text.charAt(0).toLocaleUpperCase("tr-TR") + "***";
+}
+function maskName(firstName, lastName){
+  return `${maskPart(firstName)} ${maskPart(lastName)}`;
+}
+function maskFullName(fullName){
+  const parts = String(fullName || "").trim().split(/\s+/).filter(Boolean);
+  if(!parts.length) return "-*** -***";
+  return maskName(parts[0], parts.slice(1).join(" "));
+}
+function maskPhone(phone){
+  const raw = String(phone || "").replace(/\D/g, "");
+  if(!raw) return "0*** *********";
+  return raw.slice(0, 4) + "*********";
+}
+function maskSensitiveText(d, text){
+  let out = String(text || "");
+  (d.users || []).forEach(u => {
+    const full = `${u.firstName || ""} ${u.lastName || ""}`.trim();
+    if(full.length > 1){
+      out = out.split(full).join(maskName(u.firstName, u.lastName));
+    }
+    if(u.phone){
+      out = out.split(String(u.phone)).join(maskPhone(u.phone));
+    }
+  });
+  return out;
+}
+function publicChild(c){
+  return {
+    id: c.id,
+    firstName: maskPart(c.firstName),
+    lastName: maskPart(c.lastName),
+    maskedName: maskName(c.firstName, c.lastName),
+    phone: maskPhone(c.phone),
+    maskedPhone: maskPhone(c.phone),
+    packageId: c.packageId || 0,
+    premiumStartedAt: c.premiumStartedAt || null,
+    premiumUntil: c.premiumUntil || null,
+    premiumActive: isPremium(c)
+  };
+}
 function makeRef(){ return "IK" + Math.random().toString(36).slice(2,8).toUpperCase() + Math.floor(10+Math.random()*89); }
 function notify(d,userId,title,message,type="info"){ d.notifications.push({id:uuidv4(),userId,title,message,type,read:false,createdAt:now()}); }
 function ticket(d,userId,subject,message,status="open"){ d.supportTickets.push({id:uuidv4(),userId,subject,message,replies:[],status,createdAt:now(),updatedAt:now()}); }
@@ -172,7 +234,12 @@ function releasePending(d){
   const t = new Date();
   d.pendingEarnings.filter(e=>e.status==="pending" && new Date(e.availableAt)<=t).forEach(e=>{
     const u=d.users.find(x=>x.id===e.userId);
-    if(u){ u.balance = Number((Number(u.balance||0)+Number(e.amount)).toFixed(2)); e.status="released"; tx(d,u.id,Number(e.amount),"bekleyen_devri",e.desc+" çekilebilir bakiyeye devredildi"); notify(d,u.id,"Bekleyen Kazanç Aktarıldı",`${e.amount} TL çekilebilir bakiyenize aktarıldı.`,"success"); }
+    if(u && isPremium(u)){
+      u.balance = Number((Number(u.balance||0)+Number(e.amount)).toFixed(2));
+      e.status="released";
+      tx(d,u.id,Number(e.amount),"bekleyen_devri",e.desc+" çekilebilir bakiyeye devredildi");
+      notify(d,u.id,"Bekleyen Kazanç Aktarıldı",`${e.amount} TL çekilebilir bakiyenize aktarıldı.`,"success");
+    }
   });
 }
 async function seedAdmin(){
@@ -211,8 +278,8 @@ async function seedAdmin(){
 
 function auth(req,res,next){ const h=req.headers.authorization||""; const token=h.startsWith("Bearer ")?h.slice(7):null; if(!token) return res.status(401).json({error:"Giriş gerekli"}); try{req.auth=jwt.verify(token,JWT_SECRET);next()}catch(e){res.status(401).json({error:"Oturum geçersiz"});} }
 function user(req,d){return d.users.find(u=>u.id===req.auth.id);}
-function adminOnly(req,res,next){const d=readDb();releasePending(d);const u=user(req,d);if(!u||u.role!=="admin")return res.status(403).json({error:"Admin yetkisi gerekli"});req.db=d;req.user=u;next();}
-function ceoOnly(req,res,next){const d=readDb();releasePending(d);const u=user(req,d);if(!u||(u.role!=="admin"&&u.packageId!==5))return res.status(403).json({error:"CEO yetkisi gerekli"});req.db=d;req.user=u;next();}
+function adminOnly(req,res,next){const d=readDb();expireExpiredPackages(d);releasePending(d);const u=user(req,d);if(!u||u.role!=="admin")return res.status(403).json({error:"Admin yetkisi gerekli"});saveDb(d);req.db=d;req.user=u;next();}
+function ceoOnly(req,res,next){const d=readDb();expireExpiredPackages(d);releasePending(d);const u=user(req,d);if(!u || !(u.role==="admin" || (isPremium(u) && u.packageId===5)))return res.status(403).json({error:"CEO yetkisi gerekli"});saveDb(d);req.db=d;req.user=u;next();}
 function distributeReferral(d,buyer,amount){
   let sid=buyer.sponsorId;
   for(let level=1; level<=3; level++){
@@ -222,7 +289,7 @@ function distributeReferral(d,buyer,amount){
     const pack=PACKAGES.find(p=>p.id===sponsor.packageId);
     if(pack && isPremium(sponsor) && level<=pack.depth){
       const earn=Number((amount*pack.rate).toFixed(2));
-      pending(d, sponsor.id, earn, "referans", `${buyer.firstName} ${buyer.lastName} ödemesinden ${level}. seviye referans kazancı`, 15);
+      pending(d, sponsor.id, earn, "referans", `${maskName(buyer.firstName, buyer.lastName)} ödemesinden ${level}. seviye referans kazancı`, 15);
       notify(d,sponsor.id,"Referans Kazancı Beklemede",`${earn} TL referans kazancı bekleyen bakiyenize eklendi. 15 gün sonra çekilebilir bakiyeye aktarılır.`,"success");
     }
     sid=sponsor.sponsorId;
@@ -249,13 +316,13 @@ app.post("/api/register",(req,res)=>{
   d.users.push(u); notify(d,u.id,"Hoş Geldiniz","Paket satın aldığınızda referans kodunuz aktif olacak.","info"); saveDb(d); res.json({success:true,user:pub(u)});
 });
 app.post("/api/login",(req,res)=>{
-  const d=readDb(); releasePending(d);
+  const d=readDb(); expireExpiredPackages(d); releasePending(d);
   const u=d.users.find(x=>x.email===String(req.body.email||"").toLowerCase());
   if(!u||!bcrypt.compareSync(req.body.password||"",u.passwordHash)) return res.status(400).json({error:"Email veya şifre hatalı"});
   if(u.banned) return res.status(403).json({error:"Hesabınız yasaklanmış"});
   const token=jwt.sign({id:u.id,role:u.role},JWT_SECRET,{expiresIn:"7d"}); saveDb(d); res.json({token,user:pub(u)});
 });
-app.get("/api/me",auth,(req,res)=>{ const d=readDb(); releasePending(d); const u=user(req,d); saveDb(d); res.json({user:pub(u),package:PACKAGES.find(p=>p.id===u.packageId)||null}); });
+app.get("/api/me",auth,(req,res)=>{ const d=readDb(); expireExpiredPackages(d); releasePending(d); const u=user(req,d); saveDb(d); res.json({user:pub(u),package:PACKAGES.find(p=>p.id===u.packageId)||null}); });
 app.post("/api/profile",auth,(req,res)=>{
   const d=readDb(); const u=user(req,d);
   const {firstName,lastName,email,phone,currentPassword,newPassword}=req.body;
@@ -266,16 +333,41 @@ app.post("/api/profile",auth,(req,res)=>{
   saveDb(d); res.json({success:true,user:pub(u)});
 });
 app.get("/api/dashboard",auth,(req,res)=>{
-  const d=readDb(); releasePending(d); const u=user(req,d); saveDb(d);
-  res.json({user:pub(u),package:PACKAGES.find(p=>p.id===u.packageId)||null,children:d.users.filter(x=>x.sponsorId===u.id).map(c=>({...pub(c), packageName:(PACKAGES.find(p=>p.id===c.packageId)||{}).name||"Paket Yok"})),payments:d.payments.filter(x=>x.userId===u.id),withdrawals:d.withdrawals.filter(x=>x.userId===u.id),movies:d.movies.filter(x=>x.addedBy===u.id),tx:d.transactions.filter(x=>x.userId===u.id).slice().reverse(),pendingEarnings:d.pendingEarnings.filter(x=>x.userId===u.id).slice().reverse(),notifications:d.notifications.filter(x=>x.userId===u.id).slice().reverse(),tickets:d.supportTickets.filter(x=>x.userId===u.id).slice().reverse()});
+  const d=readDb(); expireExpiredPackages(d); releasePending(d); const u=user(req,d); saveDb(d);
+  const children = d.users
+    .filter(x=>x.sponsorId===u.id)
+    .map(c=>({...publicChild(c), packageName:(PACKAGES.find(p=>p.id===c.packageId)||{}).name||"Paket Yok"}));
+  const txList = d.transactions
+    .filter(x=>x.userId===u.id)
+    .slice()
+    .reverse()
+    .map(x=>({...x, desc: maskSensitiveText(d, x.desc)}));
+  const pendingList = d.pendingEarnings
+    .filter(x=>x.userId===u.id)
+    .slice()
+    .reverse()
+    .map(x=>({...x, desc: maskSensitiveText(d, x.desc)}));
+  res.json({
+    user:pub(u),
+    package:PACKAGES.find(p=>p.id===u.packageId)||null,
+    children,
+    payments:d.payments.filter(x=>x.userId===u.id),
+    withdrawals:d.withdrawals.filter(x=>x.userId===u.id),
+    movies:d.movies.filter(x=>x.addedBy===u.id),
+    tx:txList,
+    pendingEarnings:pendingList,
+    notifications:d.notifications.filter(x=>x.userId===u.id).slice().reverse(),
+    tickets:d.supportTickets.filter(x=>x.userId===u.id).slice().reverse()
+  });
 });
 app.post("/api/payment",auth,(req,res)=>{
-  const d=readDb(); const u=user(req,d); const pack=PACKAGES.find(p=>p.id===Number(req.body.packageId));
+  const d=readDb(); expireExpiredPackages(d); const u=user(req,d); const pack=PACKAGES.find(p=>p.id===Number(req.body.packageId));
   if(!pack) return res.status(400).json({error:"Paket bulunamadı"});
   if(req.body.phone!==u.phone) return res.status(400).json({error:"Telefon hesabınızla eşleşmiyor"});
   if(Number(req.body.amount)!==pack.price) return res.status(400).json({error:"Tutar paket fiyatı ile aynı olmalı"});
+  if(isPremium(u) && Number(pack.id) < Number(u.packageId||0)) return res.status(400).json({error:"Mevcut paketinizden düşük paket seçemezsiniz"});
   if(d.payments.find(p=>p.userId===u.id&&p.status==="pending")) return res.status(400).json({error:"Bekleyen ödeme bildiriminiz var"});
-  d.payments.push({id:uuidv4(),userId:u.id,phone:u.phone,packageId:pack.id,amount:pack.price,note:req.body.note||u.phone,status:"pending",createdAt:now(),archive:false});
+  d.payments.push({id:uuidv4(),userId:u.id,userFullName:`${u.firstName} ${u.lastName}`,phone:u.phone,packageId:pack.id,packageName:pack.name,amount:pack.price,note:req.body.note||u.phone,status:"pending",createdAt:now(),archive:false});
   notify(d,u.id,"Ödeme Bildirimi Alındı",`${pack.name} için ödeme bildiriminiz admin onayına gönderildi.`,"info"); saveDb(d); res.json({success:true});
 });
 app.post("/api/withdraw",auth,(req,res)=>{
@@ -286,8 +378,31 @@ app.post("/api/withdraw",auth,(req,res)=>{
   d.withdrawals.push({id:uuidv4(),userId:u.id,fullName:req.body.fullName,phone:u.phone,iban:req.body.iban,amount,status:"pending",createdAt:now()});
   notify(d,u.id,"Çekim Talebi Alındı",`${amount} TL çekim talebiniz admin onayına gönderildi.`,"info"); saveDb(d); res.json({success:true});
 });
+app.get("/api/public/withdrawals",(req,res)=>{
+  const d=readDb(); expireExpiredPackages(d); releasePending(d); saveDb(d);
+  const list = d.withdrawals
+    .slice()
+    .reverse()
+    .map(w=>{
+      const u = d.users.find(x=>x.id===w.userId);
+      const nameSource = w.fullName || (u ? `${u.firstName || ""} ${u.lastName || ""}`.trim() : "");
+      const phoneSource = w.phone || (u ? u.phone : "");
+      return {
+        id: w.id,
+        maskedName: u ? maskName(u.firstName, u.lastName) : maskFullName(nameSource),
+        maskedPhone: maskPhone(phoneSource),
+        amount: w.amount,
+        status: w.status,
+        createdAt: w.createdAt,
+        approvedAt: w.approvedAt || null,
+        rejectReason: w.status === "rejected" ? (w.rejectReason || "Reddedildi") : undefined
+      };
+    });
+  res.json({withdrawals:list});
+});
 app.get("/api/movies",(req,res)=>{
   const d=readDb();
+  expireExpiredPackages(d);
   releasePending(d);
 
   let u = null;
@@ -323,7 +438,8 @@ app.get("/api/movies",(req,res)=>{
   );
 });
 app.post("/api/movies",auth,(req,res)=>{
-  const d=readDb(); const u=user(req,d); const {title,year,category,poster,description,link}=req.body;
+  const d=readDb(); expireExpiredPackages(d); const u=user(req,d); const {title,year,category,poster,description,link}=req.body;
+  if(!isPremium(u)) return res.status(403).json({error:"Film ekleme ve kazanç sistemi yalnızca aktif premium üyeler içindir"});
   if(!title||!link) return res.status(400).json({error:"Film adı ve link zorunlu"});
   if(d.movies.find(m=>m.link===link||(m.title.toLowerCase()===title.toLowerCase()&&m.year===year))) return res.status(400).json({error:"Bu film zaten eklenmiş"});
   d.movies.push({id:uuidv4(),title,year,category,poster,description,link,status:"ceo_pending",addedBy:u.id,ceoApprovedBy:null,adminApprovedBy:null,createdAt:now()});
@@ -342,12 +458,24 @@ app.post("/api/ceo/reject/:id",auth,ceoOnly,(req,res)=>{
   m.status="rejected"; m.rejectionReason=req.body.reason||"CEO tarafından reddedildi"; m.ceoApprovedBy=req.user.id;
   notify(d,m.addedBy,"Film Reddedildi",`${m.title}: ${m.rejectionReason}`,"error"); ticket(d,m.addedBy,"Reddedilen Film",`${m.title} reddedildi. Neden: ${m.rejectionReason}`,"answered"); saveDb(d); res.json({success:true});
 });
-app.get("/api/admin/all",auth,adminOnly,(req,res)=>{ const d=req.db; res.json({users:d.users.map(pub),payments:d.payments,withdrawals:d.withdrawals,movies:d.movies,tx:d.transactions,logs:d.logs,packages:PACKAGES,notifications:d.notifications,supportTickets:d.supportTickets,pendingEarnings:d.pendingEarnings}); });
+app.get("/api/admin/all",auth,adminOnly,(req,res)=>{ const d=req.db; const payments=d.payments.map(p=>{ const u=d.users.find(x=>x.id===p.userId); return {...p, userFullName:p.userFullName || (u?`${u.firstName} ${u.lastName}`:"İsim yok"), packageName:p.packageName || (PACKAGES.find(x=>x.id===p.packageId)||{}).name || `Paket #${p.packageId}`}; }); res.json({users:d.users.map(pub),payments,withdrawals:d.withdrawals,movies:d.movies,tx:d.transactions,logs:d.logs,packages:PACKAGES,notifications:d.notifications,supportTickets:d.supportTickets,pendingEarnings:d.pendingEarnings}); });
 app.post("/api/admin/payments/:id/approve",auth,adminOnly,(req,res)=>{
-  const d=req.db; const p=d.payments.find(x=>x.id===req.params.id); if(!p)return res.status(404).json({error:"Ödeme yok"});
-  const u=d.users.find(x=>x.id===p.userId); if(!u)return res.status(404).json({error:"Kullanıcı yok"}); const pack=PACKAGES.find(x=>x.id===p.packageId);
-  p.status="approved"; p.approvedAt=now(); p.archive=true; u.packageId=p.packageId; u.premiumStartedAt=now(); u.premiumUntil=addDays(pack.durationDays); if(u.packageId===5)u.role="ceo";
-  distributeReferral(d,u,Number(p.amount)); notify(d,u.id,"Ödeme Onaylandı",`${pack.name} paketiniz 1 yıl süreyle aktif edildi. Premium bitiş tarihi: ${new Date(u.premiumUntil).toLocaleDateString("tr-TR")}`,"success"); saveDb(d); res.json({success:true});
+  const d=req.db; expireExpiredPackages(d); const p=d.payments.find(x=>x.id===req.params.id); if(!p)return res.status(404).json({error:"Ödeme yok"});
+  const u=d.users.find(x=>x.id===p.userId); if(!u)return res.status(404).json({error:"Kullanıcı yok"}); const pack=PACKAGES.find(x=>x.id===p.packageId); if(!pack)return res.status(400).json({error:"Paket bulunamadı"});
+  const wasActive = isPremium(u);
+  const oldPackageId = wasActive ? Number(u.packageId || 0) : 0;
+  if(wasActive && Number(p.packageId) < oldPackageId) return res.status(400).json({error:"Bu ödeme mevcut paketten düşük bir paket için onaylanamaz"});
+  p.status="approved"; p.approvedAt=now(); p.archive=true; p.userFullName=p.userFullName || `${u.firstName} ${u.lastName}`; p.packageName=p.packageName || pack.name;
+  if(wasActive && Number(p.packageId) === oldPackageId){
+    u.premiumUntil = addDaysToDate(u.premiumUntil, pack.durationDays);
+    u.premiumStartedAt = u.premiumStartedAt || now();
+  } else {
+    u.packageId=p.packageId;
+    u.premiumStartedAt=now();
+    u.premiumUntil=addDays(pack.durationDays);
+  }
+  if(u.role !== "admin") u.role = Number(u.packageId) === 5 ? "ceo" : "user";
+  distributeReferral(d,u,Number(p.amount)); notify(d,u.id,"Ödeme Onaylandı",`${pack.name} paketiniz aktif edildi. Premium bitiş tarihi: ${new Date(u.premiumUntil).toLocaleDateString("tr-TR")}`,"success"); saveDb(d); res.json({success:true});
 });
 app.post("/api/admin/payments/:id/reject",auth,adminOnly,(req,res)=>{ const d=req.db; const p=d.payments.find(x=>x.id===req.params.id); if(!p)return res.status(404).json({error:"Ödeme yok"}); p.status="rejected"; p.rejectReason=req.body.reason||"Admin tarafından reddedildi"; p.archive=true; notify(d,p.userId,"Ödeme Reddedildi",p.rejectReason,"error"); ticket(d,p.userId,"Ödeme Reddedildi",`Ödeme bildiriminiz reddedildi. Neden: ${p.rejectReason}`,"answered"); saveDb(d); res.json({success:true}); });
 app.post("/api/admin/withdrawals/:id/approve",auth,adminOnly,(req,res)=>{ const d=req.db; const w=d.withdrawals.find(x=>x.id===req.params.id); if(!w)return res.status(404).json({error:"Çekim yok"}); const u=d.users.find(x=>x.id===w.userId); if(Number(u.balance)<Number(w.amount))return res.status(400).json({error:"Bakiye yetersiz"}); u.balance=Number((u.balance-w.amount).toFixed(2)); w.status="approved"; w.approvedAt=now(); tx(d,u.id,-w.amount,"çekim","Çekim onaylandı"); notify(d,u.id,"Çekim Onaylandı",`${w.amount} TL çekim talebiniz onaylandı.`,"success"); saveDb(d); res.json({success:true}); });
@@ -356,8 +484,8 @@ app.post("/api/admin/movies/:id/publish",auth,adminOnly,(req,res)=>{
   const d=req.db; const m=d.movies.find(x=>x.id===req.params.id); if(!m)return res.status(404).json({error:"Film yok"});
   m.status="published"; m.adminApprovedBy=req.user.id; m.publishedAt=now();
   const uploader=d.users.find(u=>u.id===m.addedBy); const ceo=d.users.find(u=>u.id===m.ceoApprovedBy);
-  if(uploader){pending(d,uploader.id,1,"film_yukleme",`${m.title} film yükleme kazancı`,15); notify(d,uploader.id,"Film Yayınlandı",`${m.title} yayınlandı. 1 TL bekleyen bakiyenize eklendi.`,"success");}
-  if(ceo && ceo.id!==uploader?.id){pending(d,ceo.id,1,"film_onay",`${m.title} film onay kazancı`,15); notify(d,ceo.id,"Film Yayınlandı",`${m.title} için 1 TL bekleyen bakiyenize eklendi.`,"success");}
+  if(uploader && isPremium(uploader)){pending(d,uploader.id,1,"film_yukleme",`${m.title} film yükleme kazancı`,15); notify(d,uploader.id,"Film Yayınlandı",`${m.title} yayınlandı. 1 TL bekleyen bakiyenize eklendi.`,"success");}
+  if(ceo && ceo.id!==uploader?.id && isPremium(ceo)){pending(d,ceo.id,1,"film_onay",`${m.title} film onay kazancı`,15); notify(d,ceo.id,"Film Yayınlandı",`${m.title} için 1 TL bekleyen bakiyenize eklendi.`,"success");}
   saveDb(d); res.json({success:true});
 });
 app.post("/api/admin/movies/:id/reject",auth,adminOnly,(req,res)=>{ const d=req.db; const m=d.movies.find(x=>x.id===req.params.id); if(!m)return res.status(404).json({error:"Film yok"}); m.status="rejected"; m.rejectionReason=req.body.reason||"Admin tarafından reddedildi"; notify(d,m.addedBy,"Film Reddedildi",`${m.title}: ${m.rejectionReason}`,"error"); ticket(d,m.addedBy,"Reddedilen Film",`${m.title} admin tarafından reddedildi. Neden: ${m.rejectionReason}`,"answered"); saveDb(d); res.json({success:true}); });

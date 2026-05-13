@@ -38,12 +38,16 @@ function refreshMenu() {
   const adminNav = $("adminNav");
   const adminTop = $("adminTop");
   const panelTop = $("panelTop");
+  const isAdmin = !!(me && me.role === "admin");
+
+  document.body.classList.toggle("loggedIn", isLoggedIn());
+  document.body.classList.toggle("adminLogged", isAdmin);
 
   if (loginTop) loginTop.classList.toggle("hidden", isLoggedIn());
   if (logoutBtn) logoutBtn.classList.toggle("hidden", !isLoggedIn());
   if (panelTop) panelTop.classList.toggle("hidden", !isLoggedIn());
-  if (adminNav) adminNav.classList.toggle("hidden", !(me && me.role === "admin"));
-  if (adminTop) adminTop.classList.toggle("hidden", !(me && me.role === "admin"));
+  if (adminNav) adminNav.classList.toggle("hidden", !isAdmin);
+  if (adminTop) adminTop.classList.toggle("hidden", !isAdmin);
 }
 
 function page(id) {
@@ -59,7 +63,10 @@ function page(id) {
   target.classList.add("active");
 
   const hero = $("hero");
-  if (hero) hero.style.display = id === "home" ? "block" : "none";
+  if (hero) {
+    hero.style.display = "block";
+    hero.classList.toggle("subpage", id !== "home");
+  }
 
   window.scrollTo(0, 0);
 
@@ -70,6 +77,7 @@ function page(id) {
     ceo();
   }
   if (id === "admin") admin();
+  if (id === "withdrawalsPublic") publicWithdrawals();
 }
 
 function logout() {
@@ -129,23 +137,46 @@ async function init() {
   checkResetLink();
 }
 
+function getCurrentPackageId() {
+  return me && me.premiumActive ? Number(me.packageId || 0) : 0;
+}
+
+function packageButtonState(pack) {
+  const currentId = getCurrentPackageId();
+  if (!isLoggedIn() || !currentId) return { disabled: false, text: "Paketi Seç", className: "" };
+  if (pack.id < currentId) return { disabled: true, text: "Mevcut Paketinden Düşük", className: "disabledPackage" };
+  if (pack.id === currentId) return { disabled: false, text: "Paketi Yenile", className: "currentPackage" };
+  return { disabled: false, text: "Paketi Yükselt", className: "upgradePackage" };
+}
+
 async function loadPackages() {
   const packs = await api("/api/packages");
+  if (isLoggedIn()) {
+    try {
+      const d = await api("/api/me");
+      me = d.user;
+      refreshMenu();
+    } catch (e) {}
+  }
   const el = $("packageList");
   if (!el) return;
 
   el.innerHTML = packs
-    .map(
-      (x) => `
-      <div class="package">
+    .map((x) => {
+      const state = packageButtonState(x);
+      const currentNote = state.className === "currentPackage" ? `<div class="packageNote">Mevcut paketiniz. Yenileme yaparsanız yeni süre mevcut bitiş tarihinden sonra başlar.</div>` : "";
+      const disabledNote = state.disabled ? `<div class="packageNote muted">Bu paket mevcut paketinizden düşük olduğu için seçilemez.</div>` : "";
+      return `
+      <div class="package ${state.className}">
         <span class="badge">${x.badge}</span>
         <h3>${x.name}</h3>
         <div class="price">${x.price} TL / Yıl</div>
         <p>1 yıl geçerli | ${x.depth} seviye | %${x.rate * 100} prim</p>
         <ul>${x.features.map((f) => `<li>${f}</li>`).join("")}</ul>
-        <button onclick="choosePack(${x.id}, ${x.price})">Paketi Seç</button>
-      </div>`
-    )
+        ${currentNote}${disabledNote}
+        <button ${state.disabled ? "disabled" : ""} onclick="choosePack(${x.id}, ${x.price})">${state.text}</button>
+      </div>`;
+    })
     .join("");
 }
 
@@ -153,6 +184,11 @@ async function choosePack(id, price) {
   if(!isLoggedIn()){
     const go = confirm("Paket satın almak için önce üye olmanız gerekmektedir.");
     if(go) page("auth");
+    return;
+  }
+  const currentId = getCurrentPackageId();
+  if (currentId && id < currentId) {
+    toast("Mevcut paketinizden düşük paket seçemezsiniz.");
     return;
   }
   selectedPackageId = id;
@@ -165,10 +201,10 @@ async function choosePack(id, price) {
   box.innerHTML = `
     <h2>${p.name}</h2>
     <div class="price">${p.price} TL / Yıl</div>
-    <p>Bu paket 1 yıl / 365 gün geçerlidir. Paket aktif olunca premium film erişimi açılır.</p>
+    <p>Bu paket 1 yıl / 365 gün geçerlidir. Aynı aktif paketi yenilerseniz yeni süre mevcut bitiş tarihinizin sonrasına eklenir.</p>
     <ul>${p.features.map((f) => `<li>${f}</li>`).join("")}</ul>
     <div class="actionRow">
-      <button onclick="showPaymentGuide(${p.id}, ${p.price})">Paketi Satın Al</button>
+      <button onclick="showPaymentGuide(${p.id}, ${p.price})">${getCurrentPackageId() === p.id ? "Paketi Yenile" : getCurrentPackageId() ? "Paketi Yükselt" : "Paketi Satın Al"}</button>
       <button class="ghost" onclick="page('packages')">Diğer Paketleri İncele</button>
     </div>`;
   page("packageInfo");
@@ -181,8 +217,8 @@ function showPaymentGuide(id, price) {
   if (!box) return;
 
   box.innerHTML = `
-    <h2>Paketi Satın Al</h2>
-    <p class="muted">Aşağıdaki IBAN'a ödeme yapın. Açıklama bölümüne kayıtlı telefon numaranızı yazın.</p>
+    <h2>${getCurrentPackageId() === id ? "Paketi Yenile" : getCurrentPackageId() ? "Paketi Yükselt" : "Paketi Satın Al"}</h2>
+    <p class="muted">Aşağıdaki IBAN'a ödeme yapın. Açıklama bölümüne kayıtlı telefon numaranızı yazın. Aynı aktif paketi yenilerseniz yeni süre mevcut bitiş tarihinden sonra başlar.</p>
     <div class="ibanBox">
       <b>IBAN:</b> TR78 0015 7000 0000 0037 7980 62<br>
       <b>Alıcı:</b> YILMAZ ORAL<br>
@@ -254,7 +290,7 @@ async function dash() {
           <h3>Hoş geldin, ${d.user.firstName} ${d.user.lastName}</h3>
           <p>${d.package ? d.package.name : "Paket aktif değil"} • Premium başlangıç: ${pStart} • Premium bitiş: ${pEnd}</p>
         </div>
-        <button onclick="page('packages')">Paketi Yükselt / Yenile</button>
+        <button onclick="page('packages')">${d.user.premiumActive && d.user.packageId === 5 ? "Paketi Yenile" : "Paketi Yükselt / Yenile"}</button>
       </div>
 
       <div class="panelGrid">
@@ -301,7 +337,7 @@ async function dash() {
           <table>
             <thead><tr><th>Ad Soyad</th><th>Telefon</th><th>Paket</th><th>Premium Başlangıç</th><th>Premium Bitiş</th><th>Durum</th></tr></thead>
             <tbody>
-              ${d.children.map((c) => `<tr><td>${c.firstName} ${c.lastName}</td><td>${c.phone}</td><td>${c.packageName}</td><td>${c.premiumStartedAt ? new Date(c.premiumStartedAt).toLocaleDateString("tr-TR") : "-"}</td><td>${c.premiumUntil ? new Date(c.premiumUntil).toLocaleDateString("tr-TR") : "-"}</td><td>${c.premiumActive ? "Premium" : "Pasif"}</td></tr>`).join("") || `<tr><td colspan="6">Alt üye yok</td></tr>`}
+              ${d.children.map((c) => `<tr><td>${c.maskedName || (c.firstName + " " + c.lastName)}</td><td>${c.maskedPhone || c.phone}</td><td>${c.packageName}</td><td>${c.premiumStartedAt ? new Date(c.premiumStartedAt).toLocaleDateString("tr-TR") : "-"}</td><td>${c.premiumUntil ? new Date(c.premiumUntil).toLocaleDateString("tr-TR") : "-"}</td><td>${c.premiumActive ? "Premium" : "Pasif"}</td></tr>`).join("") || `<tr><td colspan="6">Alt üye yok</td></tr>`}
             </tbody>
           </table>
         </div>
@@ -326,7 +362,12 @@ async function dash() {
       <div class="card">
         <h3>IBAN Ödeme Bildir</h3>
         <p><b>IBAN:</b> TR78 0015 7000 0000 0037 7980 62<br><b>Alıcı:</b> YILMAZ ORAL<br><b>Açıklama:</b> Telefon numaranızı yazınız</p>
-        <select id="packSel">${packs.map((p) => `<option value="${p.id}" data-price="${p.price}">${p.name} - ${p.price} TL / Yıl</option>`).join("")}</select>
+        <select id="packSel">${packs.map((p) => {
+          const currentId = d.user.premiumActive ? Number(d.user.packageId || 0) : 0;
+          const disabled = currentId && p.id < currentId;
+          const label = disabled ? " - Seçilemez" : currentId === p.id ? " - Yenile" : currentId ? " - Yükselt" : "";
+          return `<option value="${p.id}" data-price="${p.price}" ${disabled ? "disabled" : ""}>${p.name} - ${p.price} TL / Yıl${label}</option>`;
+        }).join("")}</select>
         <input id="payAmount" placeholder="Tutar">
         <input id="payPhone" value="${d.user.phone}" placeholder="Telefon">
         <button onclick="payment()">Ödeme Bildir</button>
@@ -349,8 +390,10 @@ async function dash() {
         ${d.tickets.map((t) => `<p><b>${t.subject}</b> - ${t.status}<br>${t.message}<br>${t.replies.map((r) => `↳ Admin: ${r.message}`).join("<br>")}</p>`).join("") || "Kayıt yok"}
       </div>`;
 
+    const firstEnabledOption = Array.from($("packSel").options).find((opt) => !opt.disabled);
+    if (firstEnabledOption) $("packSel").value = firstEnabledOption.value;
     $("packSel").onchange = () => ($("payAmount").value = $("packSel").options[$("packSel").selectedIndex].dataset.price);
-    $("payAmount").value = $("packSel").options[0].dataset.price;
+    $("payAmount").value = $("packSel").options[$("packSel").selectedIndex].dataset.price;
   } catch (e) {
     $("dash").innerHTML = '<div class="card">Devam etmek için giriş yapmalısınız.</div>';
   }
@@ -469,6 +512,24 @@ function showAddMovie() {
   window.scrollTo(0, $("addMovieBox").offsetTop - 10);
 }
 
+async function openFirstMovie() {
+  try {
+    const m = await api("/api/movies");
+    if (!m.length) {
+      toast("Yayında film bulunmuyor");
+      return;
+    }
+    const first = m[0];
+    if (first.locked) {
+      premiumRequiredForMovie();
+      return;
+    }
+    openFilmModal(first.link || "");
+  } catch (e) {
+    toast(e.message || "Film açılamadı");
+  }
+}
+
 async function movies() {
   try {
     const m = await api("/api/movies");
@@ -547,6 +608,33 @@ async function noMovie(id) {
   ceo();
 }
 
+async function publicWithdrawals() {
+  const box = $("publicWithdrawalsBox");
+  if (!box) return;
+  box.innerHTML = `<div class="card">Çekim talepleri yükleniyor...</div>`;
+  try {
+    const d = await api("/api/public/withdrawals");
+    const list = d.withdrawals || [];
+    const statusText = (s) => s === "approved" ? "Onaylandı" : s === "rejected" ? "Reddedildi" : s === "pending" ? "Bekliyor" : s;
+    const statusClass = (s) => s === "approved" ? "success" : s === "rejected" ? "danger" : "warning";
+    box.innerHTML = `
+      <div class="card publicWithdrawInfo">
+        <h3>Çekim Talepleri</h3>
+        <p class="muted">Bu sayfa herkese açıktır. Üye gizliliği için ad-soyad ve telefon bilgileri gizlilik için maskelenmiş olarak gösterilir.</p>
+      </div>
+      <div class="tableWrap publicWithdrawTable">
+        <table>
+          <thead><tr><th>Üye</th><th>Telefon</th><th>Tutar</th><th>Durum</th><th>Tarih</th></tr></thead>
+          <tbody>
+            ${list.map((w) => `<tr><td>${w.maskedName}</td><td>${w.maskedPhone}</td><td>${w.amount} TL</td><td><span class="statusPill ${statusClass(w.status)}">${statusText(w.status)}</span></td><td>${w.createdAt ? new Date(w.createdAt).toLocaleString("tr-TR") : "-"}</td></tr>`).join("") || `<tr><td colspan="5">Henüz çekim talebi yok</td></tr>`}
+          </tbody>
+        </table>
+      </div>`;
+  } catch (e) {
+    box.innerHTML = `<div class="card">Çekim talepleri alınamadı: ${e.message}</div>`;
+  }
+}
+
 async function admin() {
   try {
     const d = await api("/api/admin/all");
@@ -556,6 +644,7 @@ async function admin() {
     const supportTickets = d.supportTickets.slice().reverse();
     const withdrawals = d.withdrawals.slice().reverse();
     const users = d.users.slice().reverse();
+    const paymentName = (p) => p.userFullName || ((d.users.find((u) => u.id === p.userId) || {}).firstName ? `${(d.users.find((u) => u.id === p.userId) || {}).firstName} ${(d.users.find((u) => u.id === p.userId) || {}).lastName}` : "İsim yok");
 
     const statusText = (s) => s === "approved" ? "Onaylandı" : s === "rejected" ? "Reddedildi" : s === "pending" ? "Bekliyor" : s;
     const statusClass = (s) => s === "approved" ? "success" : s === "rejected" ? "danger" : "warning";
@@ -583,7 +672,8 @@ async function admin() {
             <div class="adminItem vertical paymentAdminItem">
               <div class="paymentAdminHead">
                 <div>
-                  <b>${p.phone || "Telefon yok"}</b>
+                  <b>${paymentName(p)}</b>
+                  <span>${p.phone || "Telefon yok"}</span>
                   <span>${p.amount} TL • Paket #${p.packageId}</span>
                   <small>Bildirim No: ${p.id}</small>
                 </div>
@@ -636,8 +726,8 @@ async function admin() {
           <h3>Ödeme Arşivi</h3>
           <div class="tableWrap">
             <table>
-              <thead><tr><th>Telefon</th><th>Tutar</th><th>Paket</th><th>Durum</th><th>Not</th></tr></thead>
-              <tbody>${archivedPayments.map((p) => `<tr><td>${p.phone}</td><td>${p.amount} TL</td><td>#${p.packageId}</td><td><span class="statusPill ${statusClass(p.status)}">${statusText(p.status)}</span></td><td>${p.rejectReason || "-"}</td></tr>`).join("") || `<tr><td colspan="5">Arşiv boş</td></tr>`}</tbody>
+              <thead><tr><th>Ad Soyad</th><th>Telefon</th><th>Tutar</th><th>Paket</th><th>Durum</th><th>Not</th></tr></thead>
+              <tbody>${archivedPayments.map((p) => `<tr><td>${paymentName(p)}</td><td>${p.phone}</td><td>${p.amount} TL</td><td>#${p.packageId}</td><td><span class="statusPill ${statusClass(p.status)}">${statusText(p.status)}</span></td><td>${p.rejectReason || "-"}</td></tr>`).join("") || `<tr><td colspan="6">Arşiv boş</td></tr>`}</tbody>
             </table>
           </div>
         </section>
@@ -706,14 +796,11 @@ async function wdNo(id) {
 }
 
 function openFilmModal(url) {
-  const modal = $("filmModal");
-  const frame = $("filmFrame");
-  if (!modal || !frame) {
-    window.open(url, "_blank");
+  if (!url) {
+    toast("Film bağlantısı bulunamadı");
     return;
   }
-  frame.src = url;
-  modal.classList.remove("hidden");
+  window.open(url, "_blank", "noopener,noreferrer");
 }
 
 function closeFilmModal() {
