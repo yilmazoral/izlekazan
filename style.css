@@ -83,3 +83,50 @@ body.adminLogged .bottomNav button{min-width:92px;}
 .publicWithdrawTable th{color:var(--gold);font-size:13px;text-transform:uppercase;letter-spacing:.04em}
 .publicWithdrawTable td{color:#dce7f0}
 @media(max-width:760px){.bottomNav button{min-width:76px}.publicWithdrawTable{padding:10px}.publicWithdrawTable table{min-width:620px}}
+
+/* Son mobil menü ve gizlilik düzeltmeleri */
+.navlinks button.hidden,
+.bottomNav button.hidden{display:none!important;}
+.privacyNote{background:rgba(56,189,248,.09);border:1px solid rgba(56,189,248,.24);color:#cfe8f5;border-radius:14px;padding:11px 13px;line-height:1.5;margin:10px 0 14px;font-size:14px;}
+@media(max-width:760px){
+  body{padding-bottom:118px;}
+  .bottomNav{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:0;
+    overflow:visible!important;
+    justify-content:stretch!important;
+    padding:6px 6px calc(6px + env(safe-area-inset-bottom));
+  }
+  .bottomNav button{
+    min-width:0!important;
+    width:100%!important;
+    flex:none!important;
+    margin:0!important;
+    padding:7px 2px!important;
+    border-radius:12px;
+    font-size:17px;
+    line-height:1.05;
+  }
+  .bottomNav span{font-size:10px!important;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+  body:not(.loggedIn) .bottomNav .bottomPanel,
+  body:not(.loggedIn) .bottomNav .bottomAdmin,
+  body:not(.loggedIn) .bottomNav .bottomLogout{display:none!important;}
+
+  body.loggedIn:not(.adminLogged) .bottomNav{grid-template-columns:repeat(4,minmax(0,1fr));}
+  body.loggedIn:not(.adminLogged) .bottomNav .bottomHome,
+  body.loggedIn:not(.adminLogged) .bottomNav .bottomPackages,
+  body.loggedIn:not(.adminLogged) .bottomNav .bottomHow,
+  body.loggedIn:not(.adminLogged) .bottomNav .bottomFaq{display:none!important;}
+
+  body.adminLogged .bottomNav{grid-template-columns:repeat(4,minmax(0,1fr));}
+  body.adminLogged .bottomNav .bottomHome,
+  body.adminLogged .bottomNav .bottomPackages,
+  body.adminLogged .bottomNav .bottomHow,
+  body.adminLogged .bottomNav .bottomFaq,
+  body.adminLogged .bottomNav .bottomPanel{display:none!important;}
+}
+@media(min-width:761px){
+  .navlinks button.hidden{display:none!important;}
+}

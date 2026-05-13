@@ -38,14 +38,19 @@ function refreshMenu() {
   const adminNav = $("adminNav");
   const adminTop = $("adminTop");
   const panelTop = $("panelTop");
+  const bottomPanelNav = $("bottomPanelNav");
+  const bottomLogoutNav = $("bottomLogoutNav");
+  const logged = isLoggedIn();
   const isAdmin = !!(me && me.role === "admin");
 
-  document.body.classList.toggle("loggedIn", isLoggedIn());
+  document.body.classList.toggle("loggedIn", logged);
   document.body.classList.toggle("adminLogged", isAdmin);
 
-  if (loginTop) loginTop.classList.toggle("hidden", isLoggedIn());
-  if (logoutBtn) logoutBtn.classList.toggle("hidden", !isLoggedIn());
-  if (panelTop) panelTop.classList.toggle("hidden", !isLoggedIn());
+  if (loginTop) loginTop.classList.toggle("hidden", logged);
+  if (logoutBtn) logoutBtn.classList.toggle("hidden", !logged);
+  if (panelTop) panelTop.classList.toggle("hidden", !logged);
+  if (bottomPanelNav) bottomPanelNav.classList.toggle("hidden", !logged || isAdmin);
+  if (bottomLogoutNav) bottomLogoutNav.classList.toggle("hidden", !logged);
   if (adminNav) adminNav.classList.toggle("hidden", !isAdmin);
   if (adminTop) adminTop.classList.toggle("hidden", !isAdmin);
 }
@@ -333,6 +338,7 @@ async function dash() {
 
       <div class="card">
         <h3>Alt Üyelerim</h3>
+        <p class="privacyNote">Kullanıcı gizliliğini korumak amacıyla ad, soyad ve telefon bilgileri maskelenmiş olarak gösterilmektedir.</p>
         <div class="tableWrap">
           <table>
             <thead><tr><th>Ad Soyad</th><th>Telefon</th><th>Paket</th><th>Premium Başlangıç</th><th>Premium Bitiş</th><th>Durum</th></tr></thead>
@@ -620,7 +626,7 @@ async function publicWithdrawals() {
     box.innerHTML = `
       <div class="card publicWithdrawInfo">
         <h3>Çekim Talepleri</h3>
-        <p class="muted">Bu sayfa herkese açıktır. Üye gizliliği için ad-soyad ve telefon bilgileri gizlilik için maskelenmiş olarak gösterilir.</p>
+        <p class="muted">Bu sayfa herkese açıktır. Kullanıcı gizliliğini korumak amacıyla ad, soyad ve telefon bilgileri maskelenmiş olarak gösterilmektedir.</p>
       </div>
       <div class="tableWrap publicWithdrawTable">
         <table>
