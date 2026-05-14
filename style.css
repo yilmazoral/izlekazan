@@ -169,3 +169,11 @@ body.watchMode .watchShell iframe{width:100vw!important;height:100vh!important;m
   body.watchMode .watchShell iframe{height:calc(100vh - 118px)!important;}
   body.watchMode .bottomNav{display:grid!important;}
 }
+
+/* Mobil görünüm: alt menü olduğu için üst menü gizlenir */
+@media(max-width:760px){
+  .topnav{display:none!important;}
+  .hero.subpage .topnav{display:none!important;}
+  .hero{padding-top:16px!important;}
+  .heroText{margin-top:38px!important;}
+}
