@@ -531,7 +531,7 @@ async function openFirstMovie() {
       premiumRequiredForMovie();
       return;
     }
-    openFilmModal(first.link || "");
+    openFilmModal(first.watchLink || first.embedLink || first.link || "");
   } catch (e) {
     toast(e.message || "Film açılamadı");
   }
@@ -554,7 +554,7 @@ async function movies() {
           <p>${x.description || ""}</p>
           ${x.locked
             ? `<button onclick="premiumRequiredForMovie()">${logged ? "Premium Ol ve İzle" : "Üye Ol, Premium Al ve İzle"}</button><small class="movieHint">Film kataloğu herkese açıktır; izleme erişimi premium üyelere özeldir.</small>`
-            : `<button onclick='openFilmModal(${JSON.stringify(x.link || "")})'>Filmi İzle</button>`}
+            : `<button onclick='openFilmModal(${JSON.stringify(x.watchLink || x.embedLink || x.link || "")})'>Filmi İzle</button>`}
         </div>`
       )
       .join("") || '<div class="card">Yayında film bulunmuyor.</div>';
@@ -584,6 +584,7 @@ async function addMovie() {
         category: $("mc").value,
         poster: $("mp").value,
         link: $("ml").value,
+        embedLink: $("mel") ? $("mel").value : "",
         description: $("md").value
       })
     });
@@ -697,7 +698,7 @@ async function admin() {
               <div><b>${m.title}</b><span>${m.category || "Kategori yok"} • ${m.year || "Yıl yok"}</span></div>
               <p>${m.description || "Açıklama girilmemiş"}</p>
               <div class="adminActions">
-                <button onclick='openFilmModal(${JSON.stringify(m.link || "")})'>Ön İzle</button>
+                <button onclick='openFilmModal(${JSON.stringify(m.embedLink || m.playerLink || m.link || "")})'>Ön İzle</button>
                 <button onclick="publishMovie('${m.id}')">Yayınla</button>
                 <button class="dangerBtn" onclick="adminRejectMovie('${m.id}')">Reddet</button>
               </div>
@@ -805,9 +806,21 @@ function openFilmModal(url) {
     return;
   }
 
+  const cleanUrl = String(url).trim();
+  if (!/^https?:\/\//i.test(cleanUrl)) {
+    toast("Film linki http veya https ile başlamalıdır");
+    return;
+  }
+
   lastPageBeforeWatch = (document.querySelector(".page.active") || {}).id || "movies";
   const frame = $("filmFrame");
-  if (frame) frame.src = url;
+  if (frame) {
+    frame.setAttribute("allowfullscreen", "true");
+    frame.setAttribute("webkitallowfullscreen", "true");
+    frame.setAttribute("mozallowfullscreen", "true");
+    frame.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share");
+    frame.src = cleanUrl;
+  }
   page("watch");
 }
 
@@ -818,13 +831,15 @@ function closeFilmModal() {
 }
 
 function fullscreenMovie() {
-  const shell = document.querySelector(".watchShell");
   const frame = $("filmFrame");
+  const shell = document.querySelector(".watchShell");
   const target = frame || shell;
   if (!target) return;
 
+  try { if (frame) frame.focus(); } catch (e) {}
+
   if (target.requestFullscreen) {
-    target.requestFullscreen().catch(() => toast("Tam ekran açılamadı. Tarayıcı izinlerini kontrol edin."));
+    target.requestFullscreen().catch(() => toast("Tam ekran açılamadı. Filmin içindeki oynatıcıdan da tam ekran butonunu deneyin."));
   } else if (target.webkitRequestFullscreen) {
     target.webkitRequestFullscreen();
   } else {

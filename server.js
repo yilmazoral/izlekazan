@@ -72,6 +72,7 @@ function defaultMovie(){
     poster: "/assets/movie-poster.svg",
     description: "Premium üyeler için reklamsız film platformu.",
     link: "https://sine5.news/",
+    embedLink: "https://sine5.news/",
     status: "published",
     addedBy: "system",
     ceoApprovedBy: "system",
@@ -436,16 +437,22 @@ app.get("/api/movies",(req,res)=>{
         description: m.description,
         status: m.status,
         locked: !premium,
-        link: premium ? m.link : null
+        link: premium ? m.link : null,
+        embedLink: premium ? (m.embedLink || m.playerLink || m.link || null) : null,
+        watchLink: premium ? (m.embedLink || m.playerLink || m.link || null) : null
       }))
   );
 });
 app.post("/api/movies",auth,(req,res)=>{
-  const d=readDb(); expireExpiredPackages(d); const u=user(req,d); const {title,year,category,poster,description,link}=req.body;
+  const d=readDb(); expireExpiredPackages(d); const u=user(req,d);
+  const {title,year,category,poster,description}=req.body;
+  const link = String(req.body.link || "").trim();
+  const embedLink = String(req.body.embedLink || req.body.playerLink || "").trim();
+  const watchLink = embedLink || link;
   if(!isPremium(u)) return res.status(403).json({error:"Film ekleme ve kazanç sistemi yalnızca aktif premium üyeler içindir"});
-  if(!title||!link) return res.status(400).json({error:"Film adı ve link zorunlu"});
-  if(d.movies.find(m=>m.link===link||(m.title.toLowerCase()===title.toLowerCase()&&m.year===year))) return res.status(400).json({error:"Bu film zaten eklenmiş"});
-  d.movies.push({id:uuidv4(),title,year,category,poster,description,link,status:"ceo_pending",addedBy:u.id,ceoApprovedBy:null,adminApprovedBy:null,createdAt:now()});
+  if(!title||!watchLink) return res.status(400).json({error:"Film adı ve film sayfa veya embed/player linki zorunlu"});
+  if(d.movies.find(m=>(m.link && m.link===link)||(m.embedLink && m.embedLink===embedLink)||(m.title.toLowerCase()===title.toLowerCase()&&m.year===year))) return res.status(400).json({error:"Bu film zaten eklenmiş"});
+  d.movies.push({id:uuidv4(),title,year,category,poster,description,link:link || watchLink,embedLink:embedLink || watchLink,status:"ceo_pending",addedBy:u.id,ceoApprovedBy:null,adminApprovedBy:null,createdAt:now()});
   notify(d,u.id,"Film Gönderildi",`${title} filmi CEO onayına gönderildi.`,"info"); saveDb(d); res.json({success:true});
 });
 app.get("/api/ceo/pending",auth,ceoOnly,(req,res)=>res.json(req.db.movies.filter(m=>m.status==="ceo_pending")));

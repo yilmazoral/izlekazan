@@ -133,13 +133,13 @@ body.adminLogged .bottomNav button{min-width:92px;}
 
 /* Film izleme sayfası, çekim listesi ve menü ikon güncellemeleri */
 .watchPage{padding-top:18px;max-width:none;width:100%;}
-.watchShell{width:min(1280px,100%);margin:0 auto;background:#020609;border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 28px 90px rgba(0,0,0,.45)}
+.watchShell{width:min(1480px,100%);margin:0 auto;background:#020609;border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 28px 90px rgba(0,0,0,.45)}
 .watchTop{min-height:64px;background:#09131d;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 16px}
 .watchTop b{display:block;color:var(--text)}
 .watchTop small{display:block;color:var(--muted);margin-top:3px;line-height:1.35}
 .watchActions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
 .watchActions button{padding:10px 14px}
-.watchShell iframe{display:block;width:100%;height:calc(100vh - 190px);min-height:620px;border:0;background:#000}
+.watchShell iframe{display:block;width:100%;height:calc(100vh - 170px);min-height:680px;border:0;background:#000}
 .watchHint{padding:10px 14px;margin:0;background:#071018;border-top:1px solid var(--line)}
 .publicWithdrawTable table{min-width:860px}
 @media(max-width:760px){
@@ -148,7 +148,7 @@ body.adminLogged .bottomNav button{min-width:92px;}
   .watchTop{display:block;padding:10px 12px}
   .watchActions{display:grid;grid-template-columns:1fr 1fr;margin-top:10px}
   .watchActions button{width:100%;min-width:0}
-  .watchShell iframe{height:calc(100vh - 230px);min-height:430px}
+  .watchShell iframe{height:calc(100vh - 210px);min-height:480px}
   .watchHint{font-size:12px}
   .publicWithdrawTable table{min-width:760px}
 }

@@ -79,13 +79,13 @@
         <button class="ghost" onclick="closeFilmModal()">Kapat</button>
       </div>
     </div>
-    <iframe id="filmFrame" src="" allowfullscreen allow="fullscreen; autoplay; encrypted-media; picture-in-picture"></iframe>
-    <p class="movieHint watchHint">Bazı film siteleri güvenlik ayarları nedeniyle gömülü açılmayabilir. Böyle bir durumda farklı bir film bağlantısı kullanılmalıdır.</p>
+    <iframe id="filmFrame" src="" title="İzleKazan Film Oynatıcı" allowfullscreen webkitallowfullscreen mozallowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share"></iframe>
+    <p class="movieHint watchHint">Tam ekran için önce bu sayfadaki “Tam Ekran” butonunu, ardından filmin kendi oynatıcısındaki tam ekran butonunu deneyin. En iyi sonuç için film eklerken embed/player linki kullanın.</p>
   </div>
 </section>
 
 <section id="panel" class="page"><h2>Üye Paneli</h2><div id="dash"></div></section>
-<section id="movies" class="page"><h2>Film Kataloğu</h2><p class="muted center">Filmlerin adı, afişi ve açıklaması herkese görünür. İzleme erişimi yalnızca aktif premium üyeler için açılır.</p><div class="movieActions"><button onclick="openFirstMovie()">🎬 Film İzle</button><button onclick="showAddMovie()">☁ Film Ekle Para Kazan</button></div><div id="movieList" class="movieGrid"></div><div id="addMovieBox" class="card hidden"><h2>Film Ekle Para Kazan</h2><input id="mt" placeholder="Film adı"><input id="my" placeholder="Yıl"><input id="mc" placeholder="Kategori"><input id="mp" placeholder="Afiş linki"><input id="ml" placeholder="Film linki"><textarea id="md" placeholder="Açıklama"></textarea><button onclick="addMovie()">CEO Onayına Gönder</button></div><div id="ceoBox"></div></section>
+<section id="movies" class="page"><h2>Film Kataloğu</h2><p class="muted center">Filmlerin adı, afişi ve açıklaması herkese görünür. İzleme erişimi yalnızca aktif premium üyeler için açılır.</p><div class="movieActions"><button onclick="openFirstMovie()">🎬 Film İzle</button><button onclick="showAddMovie()">☁ Film Ekle Para Kazan</button></div><div id="movieList" class="movieGrid"></div><div id="addMovieBox" class="card hidden"><h2>Film Ekle Para Kazan</h2><input id="mt" placeholder="Film adı"><input id="my" placeholder="Yıl"><input id="mc" placeholder="Kategori"><input id="mp" placeholder="Afiş linki"><input id="ml" placeholder="Film sayfa linki"><input id="mel" placeholder="Embed / Player linki (varsa - tam ekran için önerilir)"><textarea id="md" placeholder="Açıklama"></textarea><button onclick="addMovie()">CEO Onayına Gönder</button><p class="movieHint">Not: Tam ekranın daha düzgün çalışması için film sayfası yerine varsa embed/player linki kullanın.</p></div><div id="ceoBox"></div></section>
 <section id="withdrawalsPublic" class="page"><h2>Kazanç Çekim Talepleri</h2><p class="muted center">Kullanıcı gizliliğini korumak amacıyla ad, soyad ve telefon bilgileri maskelenmiş olarak gösterilmektedir.</p><div id="publicWithdrawalsBox"></div></section>
 <section id="admin" class="page"><h2>Admin Paneli</h2><div id="adminBox" class="card">Admin girişi gerekli.</div></section>
 </main>
