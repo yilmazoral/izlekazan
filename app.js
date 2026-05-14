@@ -59,6 +59,8 @@ function refreshMenu() {
 function page(id) {
   if (id === "auth" && isLoggedIn()) id = "panel";
 
+  document.body.classList.toggle("watchMode", id === "watch");
+
   document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
   const target = $(id);
   if (!target) {
@@ -70,8 +72,8 @@ function page(id) {
 
   const hero = $("hero");
   if (hero) {
-    hero.style.display = "block";
-    hero.classList.toggle("subpage", id !== "home");
+    hero.style.display = id === "watch" ? "none" : "block";
+    hero.classList.toggle("subpage", id !== "home" && id !== "watch");
   }
 
   window.scrollTo(0, 0);

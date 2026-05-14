@@ -152,3 +152,20 @@ body.adminLogged .bottomNav button{min-width:92px;}
   .watchHint{font-size:12px}
   .publicWithdrawTable table{min-width:760px}
 }
+
+
+/* Film izleme ekranı: alt menü hariç tamamen film sayfası */
+body.watchMode{background:#000!important;overflow:hidden;}
+body.watchMode main{width:100%!important;max-width:none!important;margin:0!important;}
+body.watchMode .watchPage{padding:0!important;min-height:100vh!important;}
+body.watchMode .watchShell{width:100vw!important;max-width:none!important;height:100vh!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:#000!important;}
+body.watchMode .watchTop,
+body.watchMode .watchHint{display:none!important;}
+body.watchMode .watchShell iframe{width:100vw!important;height:100vh!important;min-height:0!important;border:0!important;background:#000!important;display:block;}
+@media(max-width:900px){
+  body.watchMode{padding-bottom:118px!important;}
+  body.watchMode .watchPage{min-height:calc(100vh - 118px)!important;}
+  body.watchMode .watchShell{height:calc(100vh - 118px)!important;}
+  body.watchMode .watchShell iframe{height:calc(100vh - 118px)!important;}
+  body.watchMode .bottomNav{display:grid!important;}
+}
