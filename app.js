@@ -3,6 +3,7 @@ let token = localStorage.getItem("token") || "";
 let me = null;
 let selectedPackageId = null;
 let selectedPackagePrice = 0;
+let lastPageBeforeWatch = "movies";
 
 const $ = (id) => document.getElementById(id);
 
@@ -621,14 +622,14 @@ async function publicWithdrawals() {
   try {
     const d = await api("/api/public/withdrawals");
     const list = d.withdrawals || [];
-    const statusText = (s) => s === "approved" ? "Onaylandı" : s === "rejected" ? "Reddedildi" : s === "pending" ? "Bekliyor" : s;
+    const statusText = (s) => s === "approved" ? "Ödeme Yapıldı" : s === "rejected" ? "Reddedildi" : s === "pending" ? "Bekliyor" : s;
     const statusClass = (s) => s === "approved" ? "success" : s === "rejected" ? "danger" : "warning";
     box.innerHTML = `
       <div class="tableWrap publicWithdrawTable">
         <table>
-          <thead><tr><th>Üye</th><th>Telefon</th><th>Tutar</th><th>Durum</th><th>Tarih</th></tr></thead>
+          <thead><tr><th>Üye</th><th>Telefon</th><th>Paket</th><th>Tutar</th><th>Durum</th><th>Tarih</th></tr></thead>
           <tbody>
-            ${list.map((w) => `<tr><td>${w.maskedName}</td><td>${w.maskedPhone}</td><td>${w.amount} TL</td><td><span class="statusPill ${statusClass(w.status)}">${statusText(w.status)}</span></td><td>${w.createdAt ? new Date(w.createdAt).toLocaleString("tr-TR") : "-"}</td></tr>`).join("") || `<tr><td colspan="5">Henüz çekim talebi yok</td></tr>`}
+            ${list.map((w) => `<tr><td>${w.maskedName}</td><td>${w.maskedPhone}</td><td>${w.packageName || "Paket Yok"}</td><td>${w.amount} TL</td><td><span class="statusPill ${statusClass(w.status)}">${statusText(w.status)}</span></td><td>${w.createdAt ? new Date(w.createdAt).toLocaleString("tr-TR") : "-"}</td></tr>`).join("") || `<tr><td colspan="6">Henüz çekim talebi yok</td></tr>`}
           </tbody>
         </table>
       </div>`;
@@ -649,6 +650,7 @@ async function admin() {
     const paymentName = (p) => p.userFullName || ((d.users.find((u) => u.id === p.userId) || {}).firstName ? `${(d.users.find((u) => u.id === p.userId) || {}).firstName} ${(d.users.find((u) => u.id === p.userId) || {}).lastName}` : "İsim yok");
 
     const statusText = (s) => s === "approved" ? "Onaylandı" : s === "rejected" ? "Reddedildi" : s === "pending" ? "Bekliyor" : s;
+    const withdrawalStatusText = (s) => s === "approved" ? "Ödeme Yapıldı" : statusText(s);
     const statusClass = (s) => s === "approved" ? "success" : s === "rejected" ? "danger" : "warning";
     const empty = (text) => `<div class="emptyState">${text}</div>`;
 
@@ -706,8 +708,8 @@ async function admin() {
           <h3>Çekim Talepleri</h3>
           ${withdrawals.map((w) => `
             <div class="adminItem vertical">
-              <div><b>${w.amount} TL</b><span>${w.fullName || "İsim yok"}</span></div>
-              <span class="statusPill ${statusClass(w.status)}">${statusText(w.status)}</span>
+              <div><b>${w.amount} TL</b><span>${w.fullName || "İsim yok"}</span><span>${w.packageName || ((d.packages.find((p) => p.id === w.packageId) || {}).name) || "Paket Yok"}</span></div>
+              <span class="statusPill ${statusClass(w.status)}">${withdrawalStatusText(w.status)}</span>
               <small>${w.iban || "IBAN yok"}</small>
               ${w.status === "pending" ? `<div class="adminActions"><button onclick="wdOk('${w.id}')">Onayla</button><button class="dangerBtn" onclick="wdNo('${w.id}')">Reddet</button></div>` : ""}
             </div>`).join("") || empty("Çekim talebi yok")}
@@ -802,14 +804,32 @@ function openFilmModal(url) {
     toast("Film bağlantısı bulunamadı");
     return;
   }
-  window.open(url, "_blank", "noopener,noreferrer");
+
+  lastPageBeforeWatch = (document.querySelector(".page.active") || {}).id || "movies";
+  const frame = $("filmFrame");
+  if (frame) frame.src = url;
+  page("watch");
 }
 
 function closeFilmModal() {
-  const modal = $("filmModal");
   const frame = $("filmFrame");
   if (frame) frame.src = "";
-  if (modal) modal.classList.add("hidden");
+  page(lastPageBeforeWatch || "movies");
+}
+
+function fullscreenMovie() {
+  const shell = document.querySelector(".watchShell");
+  const frame = $("filmFrame");
+  const target = frame || shell;
+  if (!target) return;
+
+  if (target.requestFullscreen) {
+    target.requestFullscreen().catch(() => toast("Tam ekran açılamadı. Tarayıcı izinlerini kontrol edin."));
+  } else if (target.webkitRequestFullscreen) {
+    target.webkitRequestFullscreen();
+  } else {
+    toast("Bu tarayıcı tam ekran özelliğini desteklemiyor.");
+  }
 }
 
 async function forgotPassword() {

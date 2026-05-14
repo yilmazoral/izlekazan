@@ -375,7 +375,8 @@ app.post("/api/withdraw",auth,(req,res)=>{
   if(amount<50||amount%50!==0) return res.status(400).json({error:"Minimum 50 TL ve 50 TL katları çekilebilir"});
   if(amount>Number(u.balance||0)) return res.status(400).json({error:"Yetersiz bakiye"});
   if(d.withdrawals.find(w=>w.userId===u.id&&w.status==="pending")) return res.status(400).json({error:"Bekleyen çekim talebiniz var"});
-  d.withdrawals.push({id:uuidv4(),userId:u.id,fullName:req.body.fullName,phone:u.phone,iban:req.body.iban,amount,status:"pending",createdAt:now()});
+  const pack=PACKAGES.find(p=>p.id===Number(u.packageId||0));
+  d.withdrawals.push({id:uuidv4(),userId:u.id,fullName:req.body.fullName || `${u.firstName} ${u.lastName}`,phone:u.phone,iban:req.body.iban,amount,packageId:Number(u.packageId||0),packageName:pack?pack.name:"Paket Yok",status:"pending",createdAt:now()});
   notify(d,u.id,"Çekim Talebi Alındı",`${amount} TL çekim talebiniz admin onayına gönderildi.`,"info"); saveDb(d); res.json({success:true});
 });
 app.get("/api/public/withdrawals",(req,res)=>{
@@ -391,6 +392,8 @@ app.get("/api/public/withdrawals",(req,res)=>{
         id: w.id,
         maskedName: u ? maskName(u.firstName, u.lastName) : maskFullName(nameSource),
         maskedPhone: maskPhone(phoneSource),
+        packageId: w.packageId || (u ? Number(u.packageId || 0) : 0),
+        packageName: w.packageName || ((PACKAGES.find(p=>p.id===Number(w.packageId || (u ? u.packageId : 0)))||{}).name) || "Paket Yok",
         amount: w.amount,
         status: w.status,
         createdAt: w.createdAt,
@@ -458,7 +461,7 @@ app.post("/api/ceo/reject/:id",auth,ceoOnly,(req,res)=>{
   m.status="rejected"; m.rejectionReason=req.body.reason||"CEO tarafından reddedildi"; m.ceoApprovedBy=req.user.id;
   notify(d,m.addedBy,"Film Reddedildi",`${m.title}: ${m.rejectionReason}`,"error"); ticket(d,m.addedBy,"Reddedilen Film",`${m.title} reddedildi. Neden: ${m.rejectionReason}`,"answered"); saveDb(d); res.json({success:true});
 });
-app.get("/api/admin/all",auth,adminOnly,(req,res)=>{ const d=req.db; const payments=d.payments.map(p=>{ const u=d.users.find(x=>x.id===p.userId); return {...p, userFullName:p.userFullName || (u?`${u.firstName} ${u.lastName}`:"İsim yok"), packageName:p.packageName || (PACKAGES.find(x=>x.id===p.packageId)||{}).name || `Paket #${p.packageId}`}; }); res.json({users:d.users.map(pub),payments,withdrawals:d.withdrawals,movies:d.movies,tx:d.transactions,logs:d.logs,packages:PACKAGES,notifications:d.notifications,supportTickets:d.supportTickets,pendingEarnings:d.pendingEarnings}); });
+app.get("/api/admin/all",auth,adminOnly,(req,res)=>{ const d=req.db; const payments=d.payments.map(p=>{ const u=d.users.find(x=>x.id===p.userId); return {...p, userFullName:p.userFullName || (u?`${u.firstName} ${u.lastName}`:"İsim yok"), packageName:p.packageName || (PACKAGES.find(x=>x.id===p.packageId)||{}).name || `Paket #${p.packageId}`}; }); const withdrawals=d.withdrawals.map(w=>{ const u=d.users.find(x=>x.id===w.userId); const packageId=Number(w.packageId || (u?u.packageId:0) || 0); return {...w, fullName:w.fullName || (u?`${u.firstName} ${u.lastName}`:"İsim yok"), phone:w.phone || (u?u.phone:""), packageId, packageName:w.packageName || (PACKAGES.find(x=>x.id===packageId)||{}).name || "Paket Yok"}; }); res.json({users:d.users.map(pub),payments,withdrawals,movies:d.movies,tx:d.transactions,logs:d.logs,packages:PACKAGES,notifications:d.notifications,supportTickets:d.supportTickets,pendingEarnings:d.pendingEarnings}); });
 app.post("/api/admin/payments/:id/approve",auth,adminOnly,(req,res)=>{
   const d=req.db; expireExpiredPackages(d); const p=d.payments.find(x=>x.id===req.params.id); if(!p)return res.status(404).json({error:"Ödeme yok"});
   const u=d.users.find(x=>x.id===p.userId); if(!u)return res.status(404).json({error:"Kullanıcı yok"}); const pack=PACKAGES.find(x=>x.id===p.packageId); if(!pack)return res.status(400).json({error:"Paket bulunamadı"});
