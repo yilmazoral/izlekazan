@@ -624,10 +624,6 @@ async function publicWithdrawals() {
     const statusText = (s) => s === "approved" ? "Onaylandı" : s === "rejected" ? "Reddedildi" : s === "pending" ? "Bekliyor" : s;
     const statusClass = (s) => s === "approved" ? "success" : s === "rejected" ? "danger" : "warning";
     box.innerHTML = `
-      <div class="card publicWithdrawInfo">
-        <h3>Çekim Talepleri</h3>
-        <p class="muted">Bu sayfa herkese açıktır. Kullanıcı gizliliğini korumak amacıyla ad, soyad ve telefon bilgileri maskelenmiş olarak gösterilmektedir.</p>
-      </div>
       <div class="tableWrap publicWithdrawTable">
         <table>
           <thead><tr><th>Üye</th><th>Telefon</th><th>Tutar</th><th>Durum</th><th>Tarih</th></tr></thead>
