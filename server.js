@@ -404,6 +404,25 @@ app.get("/api/public/withdrawals",(req,res)=>{
     });
   res.json({withdrawals:list});
 });
+
+app.get("/api/public/members",(req,res)=>{
+  const d=readDb(); expireExpiredPackages(d); releasePending(d); saveDb(d);
+  const list = d.users
+    .filter(u => u.role !== "admin")
+    .slice()
+    .sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+    .map(u => ({
+      id: u.id,
+      maskedName: maskName(u.firstName, u.lastName),
+      maskedPhone: maskPhone(u.phone),
+      packageId: Number(u.packageId || 0),
+      packageName: (PACKAGES.find(p=>p.id===Number(u.packageId||0))||{}).name || "Paket Yok",
+      premiumActive: isPremium(u),
+      createdAt: u.createdAt
+    }));
+  res.json({members:list});
+});
+
 app.get("/api/movies",(req,res)=>{
   const d=readDb();
   expireExpiredPackages(d);

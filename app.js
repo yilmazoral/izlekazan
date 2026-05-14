@@ -57,6 +57,7 @@ function refreshMenu() {
 }
 
 function page(id) {
+  if (id === "withdrawalsPublic") id = "database";
   if (id === "auth" && isLoggedIn()) id = "panel";
 
   document.body.classList.toggle("watchMode", id === "watch");
@@ -85,7 +86,10 @@ function page(id) {
     ceo();
   }
   if (id === "admin") admin();
-  if (id === "withdrawalsPublic") publicWithdrawals();
+  if (id === "database") {
+    publicWithdrawals();
+    publicMembers();
+  }
 }
 
 function logout() {
@@ -101,7 +105,7 @@ function logout() {
 const rotatingSlogans = [
   "İzle, Paylaş, Kazanç Fırsatını Büyüt.",
   "Hem Film İzle Hem de Platformun Kazanç Modeline Dahil Ol.",
-  "Premium Üyelik Sadece İzlemek İçin Değil, Ek Gelir Fırsatı İçin.",
+  "Premium Üyelik Sadece Film İzlemek İçin Değil, Ek Gelir Fırsatı İçin.",
   "Film Keyfini Ek Gelir Modeliyle Birleştiren Yeni Platform."
 ];
 const rotatingSloganColors = ["#f6b51e", "#38bdf8", "#a78bfa", "#34d399"];
@@ -124,7 +128,7 @@ function startRotatingSlogans() {
       el.classList.add("sloganIn");
       setTimeout(() => el.classList.remove("sloganIn"), 520);
     }, 420);
-  }, 5000);
+  }, 7000);
 }
 
 async function init() {
@@ -522,6 +526,20 @@ function showAddMovie() {
 }
 
 async function openFirstMovie() {
+  const box = $("filmGateway");
+  if (box) {
+    box.classList.remove("hidden");
+    box.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+}
+
+async function handleVizyonClick() {
+  if (!isLoggedIn()) {
+    alert("Film izlemek için üye olmalısınız.");
+    page("auth");
+    return;
+  }
+
   try {
     const m = await api("/api/movies");
     if (!m.length) {
@@ -621,13 +639,14 @@ async function noMovie(id) {
 async function publicWithdrawals() {
   const box = $("publicWithdrawalsBox");
   if (!box) return;
-  box.innerHTML = `<div class="card">Çekim talepleri yükleniyor...</div>`;
+  box.innerHTML = `<div class="card">Kazanç çekim talepleri yükleniyor...</div>`;
   try {
     const d = await api("/api/public/withdrawals");
     const list = d.withdrawals || [];
-    const statusText = (s) => s === "approved" ? "Ödeme Yapıldı" : s === "rejected" ? "Reddedildi" : s === "pending" ? "Bekliyor" : s;
-    const statusClass = (s) => s === "approved" ? "success" : s === "rejected" ? "danger" : "warning";
+    const statusText = (st) => st === "approved" ? "Ödeme Yapıldı" : st === "rejected" ? "Reddedildi" : st === "pending" ? "Bekliyor" : st;
+    const statusClass = (st) => st === "approved" ? "success" : st === "rejected" ? "danger" : "warning";
     box.innerHTML = `
+      <h3 class="dbTitle">Kazanç Çekim Talepleri</h3>
       <div class="tableWrap publicWithdrawTable">
         <table>
           <thead><tr><th>Üye</th><th>Telefon</th><th>Paket</th><th>Tutar</th><th>Durum</th><th>Tarih</th></tr></thead>
@@ -639,6 +658,33 @@ async function publicWithdrawals() {
   } catch (e) {
     box.innerHTML = `<div class="card">Çekim talepleri alınamadı: ${e.message}</div>`;
   }
+}
+
+async function publicMembers() {
+  const box = $("publicMembersBox");
+  if (!box) return;
+  box.innerHTML = `<div class="card">Aramıza katılan üyeler yükleniyor...</div>`;
+  try {
+    const d = await api("/api/public/members");
+    const list = d.members || [];
+    box.innerHTML = `
+      <h3 class="dbTitle">Aramıza Katılanlar</h3>
+      <div class="tableWrap publicWithdrawTable">
+        <table>
+          <thead><tr><th>Üye</th><th>Telefon</th><th>Paket</th><th>Katılım Tarihi</th></tr></thead>
+          <tbody>
+            ${list.map((m) => `<tr><td>${m.maskedName}</td><td>${m.maskedPhone}</td><td>${m.packageName || "Paket Yok"}</td><td>${m.createdAt ? new Date(m.createdAt).toLocaleString("tr-TR") : "-"}</td></tr>`).join("") || `<tr><td colspan="4">Henüz üye kaydı yok</td></tr>`}
+          </tbody>
+        </table>
+      </div>`;
+  } catch (e) {
+    box.innerHTML = `<div class="card">Üye kayıtları alınamadı: ${e.message}</div>`;
+  }
+}
+
+function scrollToDb(id) {
+  const el = $(id);
+  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 async function admin() {

@@ -177,3 +177,27 @@ body.watchMode .watchShell iframe{width:100vw!important;height:100vh!important;m
   .hero{padding-top:16px!important;}
   .heroText{margin-top:38px!important;}
 }
+
+/* Toplu değişiklikler: sinema temalı giriş, veri tabanı, vizyon görseli */
+.compareBad h3:before,.compareGood h3:before{content:none!important;display:none!important}
+.compareLabel{display:block;width:max-content;max-width:100%;margin:8px 0 14px;padding:7px 12px;border-radius:999px;font-size:13px;font-weight:900;letter-spacing:.02em}
+.compareLabel.bad{color:#ffb4b4;background:rgba(255,107,107,.10);border:1px solid rgba(255,107,107,.28)}
+.compareLabel.good{color:var(--green);background:rgba(50,213,131,.10);border:1px solid rgba(50,213,131,.30)}
+
+.cinemaAuth{position:relative;overflow:hidden;padding-top:28px}
+.cinemaAuth:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 12% 48%,rgba(246,181,30,.22),transparent 22%),radial-gradient(circle at 80% 15%,rgba(246,181,30,.14),transparent 28%),linear-gradient(135deg,rgba(0,0,0,.65),rgba(10,16,21,.96));pointer-events:none}
+.cinemaAuthStage{position:relative;z-index:1;display:grid;grid-template-columns:repeat(2,minmax(280px,1fr));gap:28px;max-width:1040px;margin:0 auto;padding:30px;min-height:610px;align-items:center;border-radius:34px;background:linear-gradient(120deg,rgba(3,8,12,.72),rgba(12,18,22,.86)),repeating-linear-gradient(105deg,rgba(246,181,30,.06) 0 14px,transparent 14px 32px);border:1px solid rgba(246,181,30,.25);box-shadow:0 38px 120px rgba(0,0,0,.5);overflow:hidden}
+.cinemaAuthStage:before{content:"";position:absolute;left:-160px;bottom:-130px;width:430px;height:430px;border-radius:50%;background:repeating-radial-gradient(circle,rgba(246,181,30,.28) 0 8px,rgba(0,0,0,.15) 8px 22px);filter:blur(.2px);opacity:.42;animation:filmReel 18s linear infinite;pointer-events:none}
+.cinemaAuthStage:after{content:"";position:absolute;right:-90px;bottom:18px;width:640px;height:150px;background:linear-gradient(90deg,transparent,rgba(246,181,30,.16),transparent);transform:rotate(-10deg);filter:blur(8px);opacity:.72;animation:lightSweep 6s ease-in-out infinite;pointer-events:none}
+@keyframes filmReel{to{transform:rotate(360deg)}}
+@keyframes lightSweep{0%,100%{transform:translateX(-40px) rotate(-10deg);opacity:.35}50%{transform:translateX(35px) rotate(-10deg);opacity:.85}}
+.cinemaCard{position:relative;z-index:2;background:linear-gradient(180deg,rgba(10,15,18,.88),rgba(4,8,11,.94));border:1px solid rgba(246,181,30,.38);border-radius:26px;padding:30px;box-shadow:0 28px 90px rgba(0,0,0,.45),inset 0 0 0 1px rgba(255,255,255,.03);backdrop-filter:blur(14px);animation:cardFloat 5.5s ease-in-out infinite}
+.registerCard{animation-delay:.45s}.loginCard{min-height:430px}.registerCard{min-height:520px}
+@keyframes cardFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.cinemaCard h2{text-align:left!important;margin:18px 0 6px;font-size:34px;letter-spacing:-.8px;color:#fff}.cinemaCard p{margin:0 0 20px;color:#c9d4df;line-height:1.55}.authLogo{display:flex;align-items:center;gap:10px;color:var(--gold);letter-spacing:.8px}.cinemaCard input{background:rgba(5,10,14,.82);border-color:rgba(246,181,30,.18)}.cinemaCard input:focus{border-color:var(--gold);box-shadow:0 0 0 4px rgba(246,181,30,.12)}.cinemaCard button:not(.linkBtn){width:100%;margin-top:10px;background:linear-gradient(135deg,#a86810,#f6b51e,#ffd76a);box-shadow:0 18px 40px rgba(246,181,30,.18)}.cinemaCard .linkBtn{width:100%;border-color:rgba(246,181,30,.28)}.twoCols{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.databaseGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin:22px 0}.databaseGrid .card{border-color:rgba(246,181,30,.22)}.dbTitle{margin:28px 0 12px;color:var(--gold);font-size:24px}.publicWithdrawTable{margin-bottom:26px}.publicWithdrawTable table{min-width:860px}
+
+.filmGateway{max-width:720px;margin:0 auto 22px;text-align:center;background:linear-gradient(180deg,rgba(16,29,41,.96),rgba(7,16,24,.96));border:1px solid rgba(246,181,30,.36);border-radius:22px;padding:24px;box-shadow:0 24px 70px rgba(0,0,0,.32)}.filmGateway img{display:block;max-width:100%;min-height:86px;object-fit:contain;margin:0 auto 12px;border-radius:14px;border:1px solid rgba(246,181,30,.35);background:#111;cursor:pointer;transition:.2s}.filmGateway img:hover{transform:scale(1.015);filter:brightness(1.1)}.filmGateway p{color:var(--muted);margin:0}
+
+@media(max-width:760px){.cinemaAuthStage{grid-template-columns:1fr;padding:16px;border-radius:22px;gap:18px}.cinemaCard{padding:20px;border-radius:20px;min-height:auto}.cinemaCard h2{font-size:28px}.twoCols{grid-template-columns:1fr}.databaseGrid{grid-template-columns:1fr}.bottomNav span{font-size:9.5px!important}.filmGateway{padding:16px}.filmGateway img{min-height:60px}}
