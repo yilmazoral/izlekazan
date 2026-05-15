@@ -718,3 +718,156 @@ main{
 .miniRow{align-items:center;min-height:34px}.miniRow span:nth-child(2){font-weight:800;color:#fff}.miniRow span:nth-child(3){color:#ffc533}.membersCard .cardHead{justify-content:center}.memberCount{font-size:36px!important;letter-spacing:.02em;white-space:nowrap}.memberStatus{font-size:14px;line-height:1.45;color:#cbd9e5!important}.memberAvatars span,.memberAvatars b{width:48px!important;height:48px!important;font-size:13px}.memberAvatars b{font-size:12px!important}.ctaBanner{margin-top:2px!important}.ctaBanner b{font-size:clamp(24px,2.8vw,34px)!important}.ctaBanner button{min-width:240px}.compareBad,.compareGood{box-shadow:0 18px 45px rgba(0,0,0,.22)}#home .comparison .card{min-height:270px!important}.compareLabel{margin-top:4px}
 @media(max-width:1180px){.heroConceptCard{min-height:auto!important}.heroConceptImage img{min-height:360px!important}.homeHeroGrid{min-height:auto!important}.homeInfoGrid{grid-template-columns:1fr!important}.featureCard{min-height:auto}.memberCount{white-space:normal}}
 @media(max-width:760px){.navlinks button{font-size:12.5px!important;padding:11px 12px!important}.homeHeroGrid{gap:22px!important}.heroConceptCard{border-radius:22px!important}.heroConceptImage img{min-height:220px!important}.actionRail{margin-top:0!important}.actionItem{min-height:auto}.heroButtons button{min-width:0}.memberCount{font-size:29px!important}.featureCard .ghost{width:100%}.miniRow{grid-template-columns:1fr 1fr 1fr!important;font-size:12.5px}.ctaBanner b{font-size:24px!important}}
+
+/* Final correction: concept 4 should be a real landing layout, not a screenshot card */
+@media(min-width:1061px){
+  .cinematicLandingHero{
+    grid-template-columns:minmax(0, 0.93fr) minmax(520px, 1.07fr)!important;
+    gap:34px!important;
+    min-height:560px;
+  }
+}
+.cinematicLandingHero{
+  position:relative;
+  align-items:center!important;
+}
+.cinemaScene{
+  position:relative;
+  min-height:520px;
+  border-radius:0 0 32px 32px;
+  overflow:hidden;
+  background:
+    linear-gradient(90deg,rgba(7,16,24,.02) 0%,rgba(7,16,24,.38) 24%,rgba(7,16,24,.08) 100%),
+    linear-gradient(180deg,rgba(7,16,24,.05),rgba(7,16,24,.92)),
+    url('/assets/cinema-director-scene.png') center center / cover no-repeat;
+  border:0!important;
+  box-shadow:none!important;
+  align-self:stretch;
+  margin:0!important;
+}
+.cinemaScene:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 28% 52%,rgba(246,181,30,.16),transparent 30%),
+    radial-gradient(circle at 76% 22%,rgba(255,207,91,.18),transparent 26%);
+  pointer-events:none;
+}
+.cinemaScene:after{
+  content:"";
+  position:absolute;
+  left:-10%;
+  right:-6%;
+  bottom:0;
+  height:120px;
+  background:linear-gradient(0deg,rgba(7,16,24,.98),rgba(7,16,24,.0));
+  pointer-events:none;
+}
+.sceneOverlay{
+  position:absolute;
+  right:38px;
+  bottom:42px;
+  z-index:2;
+  max-width:360px;
+  padding:18px 20px;
+  border:1px solid rgba(246,181,30,.22);
+  border-radius:22px;
+  background:rgba(7,16,24,.58);
+  backdrop-filter:blur(10px);
+  box-shadow:0 18px 45px rgba(0,0,0,.32);
+}
+.sceneLogo{
+  color:var(--gold);
+  font-size:24px;
+  font-weight:900;
+  letter-spacing:.09em;
+}
+.sceneNote{
+  margin-top:6px;
+  color:#dce8f2;
+  line-height:1.45;
+  font-size:14px;
+}
+.premiumHeroText{
+  z-index:2;
+}
+.premiumHeroText h1{
+  text-shadow:0 20px 48px rgba(0,0,0,.42);
+}
+.premiumHeroText h1 b{
+  color:var(--gold)!important;
+}
+.premiumHeroText .rotatingSlogan{
+  color:#31e6b2!important;
+  max-width:560px;
+}
+.heroLead{
+  color:#edf4fb!important;
+  max-width:570px!important;
+}
+.homeHeroGrid:before{
+  content:"";
+  position:absolute;
+  inset:-18px -32px -44px -32px;
+  background:
+    radial-gradient(circle at 66% 38%,rgba(246,181,30,.14),transparent 34%),
+    linear-gradient(90deg,rgba(7,16,24,.94),rgba(7,16,24,.84) 42%,rgba(7,16,24,.18) 74%,rgba(7,16,24,.72));
+  z-index:-1;
+  border-radius:34px;
+}
+.heroButtons button{
+  min-width:210px;
+}
+.actionRail{
+  margin-top:-4px!important;
+}
+.actionItem{
+  min-height:132px;
+}
+.actionItem p{
+  max-width:230px;
+}
+.featureCard,
+.ctaBanner,
+.actionRail,
+#home .comparison .card{
+  backdrop-filter:blur(8px);
+}
+@media(max-width:1180px){
+  .cinemaScene{
+    min-height:360px;
+    border-radius:28px;
+  }
+  .homeHeroGrid:before{
+    inset:-12px -18px -28px -18px;
+  }
+}
+@media(max-width:760px){
+  .cinematicLandingHero{
+    gap:22px!important;
+  }
+  .cinemaScene{
+    min-height:230px;
+    background-position:center top;
+  }
+  .sceneOverlay{
+    left:14px;
+    right:14px;
+    bottom:14px;
+    padding:12px 14px;
+    border-radius:16px;
+  }
+  .sceneLogo{
+    font-size:17px;
+  }
+  .sceneNote{
+    font-size:12px;
+  }
+  .homeHeroGrid:before{
+    inset:-8px -12px -18px -12px;
+  }
+  .heroButtons button{
+    min-width:0;
+  }
+}
