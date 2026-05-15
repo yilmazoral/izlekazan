@@ -421,7 +421,6 @@ app.get("/api/public/members",(req,res)=>{
         packageName: (PACKAGES.find(p=>p.id===Number(u.packageId||0))||{}).name || "Paket Yok",
         premiumActive: isPremium(u),
         inviterMaskedName: inviter ? maskName(inviter.firstName, inviter.lastName) : "Sistem",
-        inviterMaskedPhone: inviter ? maskPhone(inviter.phone) : "-",
         createdAt: u.createdAt
       };
     });
