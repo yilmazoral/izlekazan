@@ -79,6 +79,7 @@ function page(id) {
 
   window.scrollTo(0, 0);
 
+  if (id === "home") loadHomeData();
   if (id === "packages") loadPackages();
   if (id === "panel") dash();
   if (id === "movies") {
@@ -648,6 +649,44 @@ async function noMovie(id) {
   await api("/api/ceo/reject/" + id, { method: "POST", body: JSON.stringify({ reason }) });
   toast("Film reddedildi");
   ceo();
+}
+
+
+async function loadHomeData() {
+  const rows = $("homeWithdrawRows");
+  const total = $("homeMemberTotal");
+  const avatars = $("homeMemberAvatars");
+
+  if (rows) {
+    rows.innerHTML = `<tr><td colspan="3">Veriler yükleniyor...</td></tr>`;
+    try {
+      const d = await api("/api/public/withdrawals");
+      const list = (d.withdrawals || []).filter((w) => w.status === "approved").slice(0, 4);
+      rows.innerHTML = list.map((w) => `
+        <tr>
+          <td>${w.maskedName || "Üye"}</td>
+          <td><b>${Number(w.amount || 0).toLocaleString("tr-TR")} TL</b></td>
+          <td>${w.createdAt ? new Date(w.createdAt).toLocaleDateString("tr-TR") : "-"}</td>
+        </tr>`).join("") || `<tr><td colspan="3">Henüz ödeme yapılmış çekim kaydı yok</td></tr>`;
+    } catch (e) {
+      rows.innerHTML = `<tr><td colspan="3">Veriler alınamadı</td></tr>`;
+    }
+  }
+
+  if (total || avatars) {
+    try {
+      const d = await api("/api/public/members");
+      const list = d.members || [];
+      if (total) total.textContent = list.length ? `${list.length} üye` : "Henüz kayıt yok";
+      if (avatars) {
+        const initials = (name) => String(name || "Üye").split(/\s+/).filter(Boolean).slice(0,2).map((p) => p[0]).join("").toUpperCase() || "Ü";
+        avatars.innerHTML = list.slice(0, 5).map((m) => `<span title="${m.maskedName || "Üye"}">${initials(m.maskedName)}</span>`).join("") + (list.length > 5 ? `<b>+${list.length - 5}</b>` : "");
+      }
+    } catch (e) {
+      if (total) total.textContent = "Veri alınamadı";
+      if (avatars) avatars.innerHTML = "";
+    }
+  }
 }
 
 async function publicWithdrawals() {
