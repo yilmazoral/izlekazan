@@ -101,6 +101,16 @@ function logout() {
   toast("Çıkış yapıldı");
 }
 
+function toggleAuthPanel(type) {
+  const loginPanel = $("loginPanel");
+  const registerPanel = $("registerPanel");
+  if (!loginPanel || !registerPanel) return;
+
+  const loginActive = type === "login";
+  loginPanel.classList.toggle("active", loginActive);
+  registerPanel.classList.toggle("active", !loginActive);
+}
+
 
 const rotatingSlogans = [
   "İzle, Paylaş, Kazanç Fırsatını Büyüt.",
@@ -260,6 +270,7 @@ async function register() {
       })
     });
     toast("Kayıt başarılı, giriş yapın");
+    toggleAuthPanel("login");
     page("auth");
   } catch (e) {
     toast(e.message);
@@ -669,11 +680,11 @@ async function publicMembers() {
     const list = d.members || [];
     box.innerHTML = `
       <h3 class="dbTitle">Aramıza Katılanlar</h3>
-      <div class="tableWrap publicWithdrawTable">
+      <div class="tableWrap publicWithdrawTable publicMembersTable">
         <table>
-          <thead><tr><th>Üye</th><th>Telefon</th><th>Paket</th><th>Katılım Tarihi</th></tr></thead>
+          <thead><tr><th>Üye</th><th>Telefon</th><th>Paket</th><th>Davet Eden</th><th>Davet Eden Telefon</th><th>Katılım Tarihi</th></tr></thead>
           <tbody>
-            ${list.map((m) => `<tr><td>${m.maskedName}</td><td>${m.maskedPhone}</td><td>${m.packageName || "Paket Yok"}</td><td>${m.createdAt ? new Date(m.createdAt).toLocaleString("tr-TR") : "-"}</td></tr>`).join("") || `<tr><td colspan="4">Henüz üye kaydı yok</td></tr>`}
+            ${list.map((m) => `<tr><td>${m.maskedName}</td><td>${m.maskedPhone}</td><td>${m.packageName || "Paket Yok"}</td><td>${m.inviterMaskedName || "Sistem"}</td><td>${m.inviterMaskedPhone || "-"}</td><td>${m.createdAt ? new Date(m.createdAt).toLocaleString("tr-TR") : "-"}</td></tr>`).join("") || `<tr><td colspan="6">Henüz üye kaydı yok</td></tr>`}
           </tbody>
         </table>
       </div>`;

@@ -411,15 +411,20 @@ app.get("/api/public/members",(req,res)=>{
     .filter(u => u.role !== "admin")
     .slice()
     .sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
-    .map(u => ({
-      id: u.id,
-      maskedName: maskName(u.firstName, u.lastName),
-      maskedPhone: maskPhone(u.phone),
-      packageId: Number(u.packageId || 0),
-      packageName: (PACKAGES.find(p=>p.id===Number(u.packageId||0))||{}).name || "Paket Yok",
-      premiumActive: isPremium(u),
-      createdAt: u.createdAt
-    }));
+    .map(u => {
+      const inviter = d.users.find(x => x.id === u.sponsorId);
+      return {
+        id: u.id,
+        maskedName: maskName(u.firstName, u.lastName),
+        maskedPhone: maskPhone(u.phone),
+        packageId: Number(u.packageId || 0),
+        packageName: (PACKAGES.find(p=>p.id===Number(u.packageId||0))||{}).name || "Paket Yok",
+        premiumActive: isPremium(u),
+        inviterMaskedName: inviter ? maskName(inviter.firstName, inviter.lastName) : "Sistem",
+        inviterMaskedPhone: inviter ? maskPhone(inviter.phone) : "-",
+        createdAt: u.createdAt
+      };
+    });
   res.json({members:list});
 });
 
