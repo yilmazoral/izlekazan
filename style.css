@@ -341,3 +341,18 @@ body.watchMode .watchShell iframe{width:100vw!important;height:100vh!important;m
   .publicMembersTable table{min-width:920px;}
   .filmGateway img{min-height:180px;}
 }
+
+/* Sadece Giriş Yap / Üye Ol form içi tekrar eden başlıkları kaldırır */
+#auth .authPanelContent .authLogo,
+#auth .authPanelContent > h2,
+#auth .authPanelContent > p{
+  display:none!important;
+}
+
+#auth .authPanelContent{
+  padding-top:24px!important;
+}
+
+#auth .authPanelContent input:first-of-type{
+  margin-top:0!important;
+}
