@@ -79,7 +79,6 @@ function page(id) {
 
   window.scrollTo(0, 0);
 
-  if (id === "home") loadHomeData();
   if (id === "packages") loadPackages();
   if (id === "panel") dash();
   if (id === "movies") {
@@ -576,11 +575,9 @@ async function movies() {
 
     $("movieList").innerHTML = m
       .map(
-        (x) => {
-          const posterSrc = x.locked ? "/assets/vizyon-filmleri.png" : (x.poster || "/assets/movie-poster.svg");
-          return `<div class="card movie ${x.locked ? "locked" : ""}">
+        (x) => `<div class="card movie ${x.locked ? "locked" : ""}">
           <div class="moviePosterWrap">
-            <img src="${posterSrc}" onerror="this.src='/assets/movie-poster.svg'">
+            <img src="${x.poster || "/assets/movie-poster.svg"}" onerror="this.src='/assets/movie-poster.svg'">
             ${x.locked ? '<span class="premiumBadge">Premium İçerik</span>' : '<span class="premiumBadge open">Erişim Açık</span>'}
           </div>
           <h3>${x.title}</h3>
@@ -589,8 +586,7 @@ async function movies() {
           ${x.locked
             ? `<button onclick="premiumRequiredForMovie()">${logged ? "Premium Ol ve İzle" : "Üye Ol, Premium Al ve İzle"}</button><small class="movieHint">Film kataloğu herkese açıktır; izleme erişimi premium üyelere özeldir.</small>`
             : `<button onclick='openFilmModal(${JSON.stringify(x.watchLink || x.embedLink || x.link || "")})'>Filmi İzle</button>`}
-        </div>`;
-        }
+        </div>`
       )
       .join("") || '<div class="card">Yayında film bulunmuyor.</div>';
   } catch (e) {
@@ -651,44 +647,6 @@ async function noMovie(id) {
   ceo();
 }
 
-
-async function loadHomeData() {
-  const rows = $("homeWithdrawRows");
-  const total = $("homeMemberTotal");
-  const avatars = $("homeMemberAvatars");
-
-  if (rows) {
-    rows.innerHTML = `<tr><td colspan="3">Veriler yükleniyor...</td></tr>`;
-    try {
-      const d = await api("/api/public/withdrawals");
-      const list = (d.withdrawals || []).filter((w) => w.status === "approved").slice(0, 4);
-      rows.innerHTML = list.map((w) => `
-        <tr>
-          <td>${w.maskedName || "Üye"}</td>
-          <td><b>${Number(w.amount || 0).toLocaleString("tr-TR")} TL</b></td>
-          <td>${w.createdAt ? new Date(w.createdAt).toLocaleDateString("tr-TR") : "-"}</td>
-        </tr>`).join("") || `<tr><td colspan="3">Henüz ödeme yapılmış çekim kaydı yok</td></tr>`;
-    } catch (e) {
-      rows.innerHTML = `<tr><td colspan="3">Veriler alınamadı</td></tr>`;
-    }
-  }
-
-  if (total || avatars) {
-    try {
-      const d = await api("/api/public/members");
-      const list = d.members || [];
-      if (total) total.textContent = list.length ? `${list.length} üye` : "Henüz kayıt yok";
-      if (avatars) {
-        const initials = (name) => String(name || "Üye").split(/\s+/).filter(Boolean).slice(0,2).map((p) => p[0]).join("").toUpperCase() || "Ü";
-        avatars.innerHTML = list.slice(0, 5).map((m) => `<span title="${m.maskedName || "Üye"}">${initials(m.maskedName)}</span>`).join("") + (list.length > 5 ? `<b>+${list.length - 5}</b>` : "");
-      }
-    } catch (e) {
-      if (total) total.textContent = "Veri alınamadı";
-      if (avatars) avatars.innerHTML = "";
-    }
-  }
-}
-
 async function publicWithdrawals() {
   const box = $("publicWithdrawalsBox");
   if (!box) return;
@@ -724,9 +682,9 @@ async function publicMembers() {
       <h3 class="dbTitle">Aramıza Katılanlar</h3>
       <div class="tableWrap publicWithdrawTable publicMembersTable">
         <table>
-          <thead><tr><th>Üye</th><th>Telefon</th><th>Paket</th><th>Davet Eden</th><th>Katılım Tarihi</th></tr></thead>
+          <thead><tr><th>Üye</th><th>Telefon</th><th>Paket</th><th>Davet Eden</th><th>Davet Eden Telefon</th><th>Katılım Tarihi</th></tr></thead>
           <tbody>
-            ${list.map((m) => `<tr><td>${m.maskedName}</td><td>${m.maskedPhone}</td><td>${m.packageName || "Paket Yok"}</td><td>${m.inviterMaskedName || "Sistem"}</td><td>${m.createdAt ? new Date(m.createdAt).toLocaleString("tr-TR") : "-"}</td></tr>`).join("") || `<tr><td colspan="5">Henüz üye kaydı yok</td></tr>`}
+            ${list.map((m) => `<tr><td>${m.maskedName}</td><td>${m.maskedPhone}</td><td>${m.packageName || "Paket Yok"}</td><td>${m.inviterMaskedName || "Sistem"}</td><td>${m.inviterMaskedPhone || "-"}</td><td>${m.createdAt ? new Date(m.createdAt).toLocaleString("tr-TR") : "-"}</td></tr>`).join("") || `<tr><td colspan="6">Henüz üye kaydı yok</td></tr>`}
           </tbody>
         </table>
       </div>`;
