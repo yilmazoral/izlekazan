@@ -341,3 +341,8 @@ body.watchMode .watchShell iframe{width:100vw!important;height:100vh!important;m
   .publicMembersTable table{min-width:920px;}
   .filmGateway img{min-height:180px;}
 }
+
+/* Premium kilitli film kartlarında Vizyon Filmleri önizleme görseli kullanılır */
+.movie.locked .moviePosterWrap img{
+  object-position:top center;
+}
