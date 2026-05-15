@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="İzleKazan; klasik film platformlarından farklı olarak premium üyelerine film erişimi yanında ek gelir potansiyeli sunan üyelik platformudur.">
+<title>İzleKazan | Film İzle, Kazanç Fırsatını Büyüt</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="hero" id="hero">
+<nav class="topnav"><div class="brand"><span class="brandIcon">▶</span><b>İZLEKAZAN</b></div><div class="navlinks"><button onclick="page('home')">Ana Sayfa</button><button onclick="page('packages')">Paketler</button><button onclick="page('movies')">Filmler</button><button onclick="page('database')">Veri Tabanı</button><button onclick="page('how')">⚙️ Nasıl Çalışır?</button><button onclick="page('faq')">S.S.S</button><button id="panelTop" class="hidden" onclick="page('panel')">Panelim</button><button id="adminTop" class="hidden" onclick="page('admin')">Admin Panel</button><button id="loginTop" onclick="page('auth')">Başla</button><button id="logoutBtn" class="hidden" onclick="logout()">Çıkış</button></div></nav>
+<div class="heroGrid"><section class="heroText"><span>Film İzlemenin Yeni Modeli</span><h1>SADECE İZLEME<br><b>KAZANÇ FIRSATINA KATIL</b></h1><div class="rotatingSloganWrap" aria-live="polite"><div class="rotatingSlogan" id="rotatingSlogan">İzle, Paylaş, Kazanç Fırsatını Büyüt.</div></div><p>İzleKazan, klasik film platformlarının tersine çalışan yeni nesil premium üyelik modelidir. Üyeler yalnızca film izlemekle kalmaz; referans sistemi, film ekleme katkısı ve panel üzerinden takip edilen gelir modeliyle ek kazanç fırsatlarına dahil olur.</p><div class="earnBanner"><b>Hedef:</b> Aktif premium üyeler için aylık düzenli ek gelir potansiyeli oluşturmak.</div><ul><li>Premium üyeler film arşivine erişirken kazanç sistemine dahil olur.</li><li>Referans, paket primleri ve film ekleme süreçleri panelden takip edilir.</li><li>Aktif çalışan ve ekip kuran üyeler için yüksek aylık kazanç hedefi mümkündür.</li><li>Üye, ödeme, çekim ve kazanç kayıtları sitede anlık olarak şeffaf bir şekilde paylaşılır.</li></ul><div class="heroRisk">İzleKazan sabit veya garanti gelir taahhüdü vermez. Kazanç fırsatları üyelik durumu, referans performansı, platform kuralları ve kullanıcı aktivitesine göre değişiklik gösterebilir.</div><button onclick="page(isLoggedIn()?'panel':'auth')">Premium Üyeliğe Başla</button><button class="ghost" onclick="page('packages')">Kazanç Paketlerini İncele</button><button class="ghost" onclick="page('movies')">Film İzle</button></section><aside class="heroVisual" aria-label="İzleKazan kazanç sistemi ön izleme"><div class="visualTop"><span></span><span></span><span></span></div><h3>Klasik Platformun Tersi</h3><div class="visualMetric"><b>İzle + Kazan</b><small>Premium üyelik sadece erişim değil, ek gelir potansiyeli sunar.</small></div><div class="visualMetric"><b>Aylık Hedef</b><small>Referans ağı ve içerik katkısıyla aylık kazanç hedefi büyütülebilir.</small></div><div class="visualMetric"><b>Şeffaf Panel</b><small>Bakiye, çekim talebi, referans ve ödeme kayıtları tek ekranda.</small></div><div class="visualFilm"><div class="playMini">₺</div><div><b>Premium Gelir Modeli</b><small>Film izle, kazanç modeline katıl, gelirini panelden takip et</small></div></div></aside></div>
+</header>
+<main>
+<section id="home" class="page active"><div class="stats"><div><b>Ek Gelir</b><span>Premium üyeler sadece film izlemez; sisteme aktif katılarak ek gelir potansiyeli yakalar.</span></div><div><b>Aylık Hedef</b><span>Referans ve katkı sistemiyle her ay büyüyen kazanç hedefi oluşturulabilir.</span></div><div><b>Kazanç Paneli</b><span>Bekleyen bakiye, çekilebilir bakiye, ödeme ve çekim işlemleri tek panelden takip edilir.</span></div><div><b>Şeffaf Veri</b><span>Üye, ödeme, çekim ve kazanç kayıtları sitede anlık olarak şeffaf biçimde paylaşılır.</span></div></div><div class="comparison"><div class="card compareBad"><h3>Klasik Film Platformları</h3><span class="compareLabel bad">Sadece İzle</span><p>Üye ödeme yapar, film izler ve sistemden finansal pay almaz.</p><p>Günlük yoğunluktan aylarca film izlemese bile abonelik ücreti her ay tahsil edilir.</p></div><div class="card compareGood"><h3>İzleKazan Modeli</h3><span class="compareLabel good">İzle + Kazan</span><p>Üyeler sadece film izlemekle kalmaz referans ve katkı sistemleriyle ek gelir sağlar.</p><p>Aylarca siteye giremese bile referans geliri kazanmaya devam eder.</p></div></div></section>
+<section id="packages" class="page"><h2>Üyelik Paketleri</h2><p class="muted center">Tüm paketler yıllıktır. Paket süresi 1 yıl / 365 gündür.</p><div id="packageList" class="packageGrid"></div></section>
+<section id="how" class="page"><h2>İzleKazan Nasıl Çalışır?</h2><p class="muted center">Klasik “para ver ve izle” modelinden farklı olarak premium üyeler referanslarıyla sisteme dahil olan her üye için komisyon geliri kazanmanın yanında siteye eklenen ve onaylanan her film için ekstra gelir elde ederler.</p><div class="steps"><div><b>01</b><h3>Premium Üye Ol</h3><p>Referans koduyla hesabını oluştur, yıllık paketini seç ve ödeme yap.</p></div><div><b>02</b><h3>Reklamsız İzle</h3><p>Premium erişimle film arşivine gir ve platformu kullanmaya başla.</p></div><div><b>03</b><h3>Sisteme Katkı Sağla</h3><p>Referans paylaş, uygun film ekle, onaylanan işlemlerle kazanç sistemine dahil ol.</p></div><div><b>04</b><h3>Gelirini Takip Et</h3><p>Bekleyen bakiye, çekilebilir bakiye ve aylık hedeflerini panelden kontrol et.</p></div></div><div class="card"><h3>Gelir Modeli</h3><div class="donut">₺</div><p>İzleKazan’da kazanç; paket seviyesi, aktiflik, referans ağı ve onaylanan katkılara göre oluşur. Amaç, aktif premium üyeler için sürdürülebilir ek gelir potansiyeli oluşturmaktır.</p><p class="muted">Kazanç garantisi verilmez; tüm işlemler sistem kurallarına ve admin onay süreçlerine bağlıdır.</p></div></section>
+<section id="faq" class="page"><h2>Sıkça Sorulan Sorular</h2><div class="faq">
+<details><summary>İzleKazan nedir?</summary><p>Klasik film platformlarından farklı olarak premium üyelerine film erişimi yanında referans, film ekleme ve panel üzerinden ek gelir potansiyeli sunan bir sistemdir.</p></details>
+<details><summary>Tüm üyeler para kazanabilir mi?</summary><p>Evet. Premium paket alan tüm üyeler pakette belirtilen oran kadar referans geliri kazanabilir. Ayrıca platforma ekledikleri her film için de ekstra kazanç elde ederler.</p></details>
+<details><summary>Platformda reklam var mı?</summary><p>Hayır. Platform tamamen reklamsız çalışır.</p></details>
+<details><summary>Üyelik ücretleri aylık mı yıllık mı?</summary><p>Tüm paketler yıllıktır ve 365 gün geçerlidir.</p></details>
+<details><summary>Herhangi bir Premium paket aldıktan sonra vazgeçersem para iadesi yapılıyor mu?</summary><p>Evet. 15 gün içinde destek bölümünden başvuru yapmanız durumunda aynı gün içinde paketiniz iptal edilip yatırdığınız para kesintisiz iade edilir.</p></details>
+<details><summary>Premium üyelik bitince ne olur?</summary><p>Film erişimi kapanır ve paket yenilemeniz gerekir.</p></details>
+<details><summary>Referans kodu olmadan kayıt olabilir miyim?</summary><p>Hayır. Sisteme katılmak için geçerli bir referans kodu gerekir.</p></details>
+<details><summary>Film izlemek ücretsiz mi?</summary><p>Hayır. Film erişimi premium üyeler içindir. Premium üyelik aynı zamanda platformun kazanç sistemine katılım imkânı sağlar.</p></details>
+<details><summary>Ek gelir nasıl oluşur?</summary><p>Ek gelir; seçilen paket, referans ağı, onaylanan film katkıları ve sistem kurallarına bağlı olarak oluşur. Kazanç tutarı kişiden kişiye değişebilir.</p></details>
+<details><summary>Kazançlar hemen çekilebilir mi?</summary><p>Hayır. Tüm kazançlar önce bekleyen bakiyeye düşer.</p></details>
+<details><summary>Bekleyen bakiye ne zaman aktarılır?</summary><p>15 gün sonra çekilebilir bakiyeye otomatik aktarılır.</p></details>
+<details><summary>Kazançlar neden 15 gün bekleyen bakiyede durur?</summary><p>Premium paketlerinin iptal/iade süresi 15 gündür. Bu süre içinde referansınızla üye olan kişi para iadesi talep etmezse 16. gün bekleyen referans geliri çekilebilir cüzdana aktarılır.</p></details>
+<details><summary>Çekilebilir bakiye nasıl görüntülenir?</summary><p>Panelde çekilebilir bakiye kartına tıklayarak tüm işlemleri görebilirsiniz.</p></details>
+<details><summary>Bekleyen bakiye detayları görülebilir mi?</summary><p>Evet. Bekleyen bakiye kartına tıklayınca tüm işlemler listelenir.</p></details>
+<details><summary>Referans kazançları nasıl çalışır?</summary><p>Satın alınan pakete göre belirli seviyelerde prim hesaplanır. Daha aktif çalışan ve daha güçlü ekip kuran üyeler daha yüksek aylık kazanç hedefleyebilir.</p></details>
+<details><summary>Alt üyelerimi görebilir miyim?</summary><p>Evet. Alt üyelerin paketleri ve premium durumları görüntülenebilir.</p></details>
+<details><summary>Ödeme nasıl yapılır?</summary><p>Belirtilen IBAN’a havale/EFT yapılarak ödeme gerçekleştirilir.</p></details>
+<details><summary>Ödeme yaptıktan sonra ne yapmalıyım?</summary><p>Ödeme Bildir butonuyla onay sürecine göndermeniz gerekir.</p></details>
+<details><summary>Ödeme reddedilirse ne olur?</summary><p>Red nedeni bildirim ve destek bölümünde görünür.</p></details>
+<details><summary>Ödeme neden reddedilir?</summary><p>Paket ücretinden eksik yapılan ödemelerde ya da açıklama bölümüne telefon numarası yazılmadan gönderilen ödemelerde; banka gönderenin ismini dekontta gizlediğinde veya aynı isimli 2 ya da daha fazla üye olması nedeniyle ödemeyi yapan kişi belirlenemediğinde ödeme iade edilir ve platform üzerinden yapılan ödeme bildirimi reddedilir.</p></details>
+<details><summary>Çekim talepleri nasıl yapılır?</summary><p>Panelden IBAN girerek çekim talebi oluşturabilirsiniz.</p></details>
+<details><summary>Minimum çekim tutarı nedir?</summary><p>Minimum çekim tutarı 50 TL’dir.</p></details>
+<details><summary>Şifremi unuttum ne yapmalıyım?</summary><p>Şifremi Unuttum bölümünden e-posta ile yeni şifre oluşturabilirsiniz.</p></details>
+
+
+<details><summary>Film neden reddedilir?</summary><p>Kırık link, düşük kalite veya uygun olmayan içerik nedeniyle reddedilebilir.</p></details>
+<details><summary>Platform mobil uyumlu mu?</summary><p>Evet. Telefon, tablet ve bilgisayarda kullanılabilir.</p></details>
+</div></section>
+<section id="auth" class="page authPage cinemaAuth">
+  <div class="cinemaAuthStage accordionAuth">
+    <div class="filmGlow"></div>
+
+    <div class="cinemaCard loginCard authPanel active" id="loginPanel">
+      <button type="button" class="authPanelTrigger" onclick="toggleAuthPanel('login')">
+        <span class="authPanelIcon">🎬</span>
+        <span><b>Giriş Yap</b><small>Hesabına gir ve kaldığın yerden devam et.</small></span>
+      </button>
+      <div class="authPanelContent">
+        <div class="authLogo"><span class="brandIcon">▶</span><b>İZLEKAZAN</b></div>
+        <h2>Giriş Yap</h2>
+        <p>Film keyfine kaldığın yerden devam et.</p>
+        <input id="le" type="email" autocomplete="email" placeholder="E-posta adresin">
+        <input id="ls" type="password" autocomplete="current-password" placeholder="Şifren">
+        <button onclick="login()">Giriş Yap</button>
+        <button class="linkBtn" onclick="page('forgot')">Şifremi Unuttum</button>
+      </div>
+    </div>
+
+    <div class="cinemaCard registerCard authPanel" id="registerPanel">
+      <button type="button" class="authPanelTrigger" onclick="toggleAuthPanel('register')">
+        <span class="authPanelIcon">⭐</span>
+        <span><b>Üye Ol</b><small>Premium erişim ve kazanç fırsatlarına katıl.</small></span>
+      </button>
+      <div class="authPanelContent">
+        <h2>Üye Ol</h2>
+        <p>Hemen katıl, premium erişim ve kazanç fırsatlarını keşfet.</p>
+        <div class="twoCols"><input id="rf" autocomplete="given-name" placeholder="Ad"><input id="rl" autocomplete="family-name" placeholder="Soyad"></div>
+        <input id="re" type="email" autocomplete="email" placeholder="E-posta">
+        <input id="rp" inputmode="tel" autocomplete="tel" placeholder="Telefon 05XXXXXXXXX">
+        <div class="twoCols"><input id="rs" type="password" autocomplete="new-password" placeholder="Şifre"><input id="rs2" type="password" autocomplete="new-password" placeholder="Şifre Tekrar"></div>
+        <input id="rr" placeholder="Referans Kodu (Zorunlu)">
+        <button onclick="register()">Üye Ol</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="forgot" class="page authPage">
+  <div class="card narrow">
+    <h2>Şifremi Unuttum</h2>
+    <p class="muted">E-posta adresinizi yazın. Şifre yenileme bağlantısı e-posta adresinize gönderilir.</p>
+    <input id="forgotEmail" type="email" autocomplete="email" placeholder="E-posta adresiniz">
+    <button onclick="forgotPassword()">Şifre Sıfırlama Bağlantısı Gönder</button>
+    <div id="forgotResult"></div>
+  </div>
+</section>
+<section id="reset" class="page authPage">
+  <div class="card narrow">
+    <h2>Yeni Şifre Belirle</h2>
+    <input id="resetPass" type="password" placeholder="Yeni şifre">
+    <button onclick="resetPassword()">Şifreyi Yenile</button>
+  </div>
+</section>
+<section id="packageInfo" class="page">
+  <div id="packageInfoBox" class="card"></div>
+</section>
+<section id="paymentGuide" class="page">
+  <div id="paymentGuideBox" class="card"></div>
+</section>
+<section id="watch" class="page watchPage">
+  <div class="watchShell">
+    <div class="watchTop">
+      <div>
+        <b>İzleKazan Film İzleme Ekranı</b>
+        <small>Film adresi tarayıcı adres çubuğunda görünmez. Tam ekran için butonu kullanın.</small>
+      </div>
+      <div class="watchActions">
+        <button onclick="fullscreenMovie()">Tam Ekran</button>
+        <button class="ghost" onclick="closeFilmModal()">Kapat</button>
+      </div>
+    </div>
+    <iframe id="filmFrame" src="" title="İzleKazan Film Oynatıcı" allowfullscreen webkitallowfullscreen mozallowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share"></iframe>
+    <p class="movieHint watchHint">Tam ekran için önce bu sayfadaki “Tam Ekran” butonunu, ardından filmin kendi oynatıcısındaki tam ekran butonunu deneyin. En iyi sonuç için film eklerken embed/player linki kullanın.</p>
+  </div>
+</section>
+
+<section id="panel" class="page"><h2>Üye Paneli</h2><div id="dash"></div></section>
+<section id="movies" class="page"><h2>Film Kataloğu</h2><p class="muted center">Filmlerin adı, afişi ve açıklaması herkese görünür. İzleme erişimi yalnızca aktif premium üyeler için açılır.</p><div class="movieActions"><button onclick="openFirstMovie()">🎬 Film İzle</button><button onclick="showAddMovie()">☁ Film Ekle Para Kazan</button></div><div id="filmGateway" class="filmGateway hidden"><img src="/assets/vizyon-filmleri.png" alt="Vizyon Filmleri" onclick="handleVizyonClick()"><p>Film sitesini görüntülemek için görsele tıklayın.</p></div><div id="movieList" class="movieGrid"></div><div id="addMovieBox" class="card hidden"><h2>Film Ekle Para Kazan</h2><input id="mt" placeholder="Film adı"><input id="my" placeholder="Yıl"><input id="mc" placeholder="Kategori"><input id="mp" placeholder="Afiş linki"><input id="ml" placeholder="Film sayfa linki"><input id="mel" placeholder="Embed / Player linki (varsa - tam ekran için önerilir)"><textarea id="md" placeholder="Açıklama"></textarea><button onclick="addMovie()">CEO Onayına Gönder</button><p class="movieHint">Not: Tam ekranın daha düzgün çalışması için film sayfası yerine varsa embed/player linki kullanın.</p></div><div id="ceoBox"></div></section>
+<section id="database" class="page"><h2>Veri Tabanı</h2><p class="muted center">Kullanıcı gizliliğini korumak amacıyla ad, soyad ve telefon bilgileri maskelenmiş olarak gösterilmektedir.</p><div class="databaseGrid"><div class="card"><h3>Kazanç Çekim Talepleri</h3><p>Platform üzerindeki çekim talepleri maskeli olarak listelenir.</p><button onclick="scrollToDb('publicWithdrawalsBox')">Çekim Taleplerini Gör</button></div><div class="card"><h3>Aramıza Katılanlar</h3><p>Platforma katılan yeni üyeler maskeli olarak listelenir.</p><button onclick="scrollToDb('publicMembersBox')">Yeni Üyeleri Gör</button></div></div><div id="publicWithdrawalsBox"></div><div id="publicMembersBox"></div></section>
+<section id="admin" class="page"><h2>Admin Paneli</h2><div id="adminBox" class="card">Admin girişi gerekli.</div></section>
+</main>
+<nav class="bottomNav" aria-label="Mobil alt menü"><button class="bottomHome" onclick="page('home')">⌂<span>Ana Sayfa</span></button><button class="bottomMovies" onclick="page('movies')">🎬<span>Filmler</span></button><button class="bottomDatabase" onclick="page('database')">▦<span>Veri Tabanı</span></button><button class="bottomPackages" onclick="page('packages')">▣<span>Paketler</span></button><button class="bottomHow" onclick="page('how')">⚙️<span>Nasıl Çalışır?</span></button><button class="bottomFaq" onclick="page('faq')">?<span>S.S.S</span></button><button id="bottomPanelNav" class="hidden bottomPanel" onclick="page('panel')">👤<span>Panelim</span></button><button id="adminNav" class="hidden bottomAdmin" onclick="page('admin')">⚙<span>Admin</span></button><button id="bottomLogoutNav" class="hidden bottomLogout" onclick="logout()">⎋<span>Çıkış</span></button></nav>
+<div id="toast"></div><script src="app.js"></script>
+</body></html>
