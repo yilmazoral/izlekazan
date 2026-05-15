@@ -1,125 +1,434 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="İzleKazan; klasik film platformlarından farklı olarak premium üyelerine film erişimi yanında ek gelir potansiyeli sunan üyelik platformudur.">
-<title>İzleKazan | Film İzle, Kazanç Fırsatını Büyüt</title><link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>İzleKazan | Yasal Film Platformu</title>
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header / Navbar */
+        .navbar {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 16px 0;
+        }
+
+        .nav-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            font-weight: 500;
+            color: #1e293b;
+            background: none;
+            -webkit-background-clip: unset;
+            background-clip: unset;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 28px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #334155;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #3b82f6;
+        }
+
+        .btn-outline {
+            border: 1px solid #cbd5e1;
+            padding: 8px 20px;
+            border-radius: 40px;
+            background: white;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white !important;
+            padding: 8px 24px;
+            border-radius: 40px;
+            box-shadow: 0 2px 6px rgba(59,130,246,0.2);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 64px 0 48px 0;
+            text-align: center;
+            background: linear-gradient(145deg, #ffffff 0%, #f1f5f9 100%);
+        }
+
+        .hero h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #1e293b, #3b82f6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: #475569;
+            max-width: 700px;
+            margin: 0 auto 32px auto;
+        }
+
+        .badge {
+            background: #e6f0ff;
+            color: #1e40af;
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        /* Paket Kartları */
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 56px 0 24px 0;
+            text-align: center;
+        }
+
+        .section-sub {
+            text-align: center;
+            color: #475569;
+            margin-bottom: 48px;
+            max-width: 720px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .pack-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 32px;
+            margin: 40px 0 20px;
+        }
+
+        .pack-card {
+            background: white;
+            border-radius: 28px;
+            padding: 28px 20px 32px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .pack-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 25px 35px -12px rgba(0,0,0,0.15);
+        }
+
+        .premium {
+            border-top: 4px solid #3b82f6;
+        }
+
+        .pack-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .pack-price {
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 16px 0 12px;
+        }
+
+        .pack-price small {
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: #64748b;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 24px 0 28px;
+            text-align: left;
+            padding-left: 8px;
+        }
+
+        .feature-list li {
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feature-list i {
+            color: #3b82f6;
+            width: 20px;
+            font-size: 0.9rem;
+        }
+
+        .btn-card {
+            display: inline-block;
+            background: #f1f5f9;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-weight: 600;
+            text-decoration: none;
+            color: #1e293b;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .btn-card.primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        /* Nasıl Çalışır? */
+        .steps {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin: 48px 0;
+        }
+
+        .step-item {
+            background: white;
+            border-radius: 32px;
+            padding: 28px 24px;
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.02);
+            border: 1px solid #eef2ff;
+        }
+
+        .step-number {
+            width: 48px;
+            height: 48px;
+            background: #eef2ff;
+            color: #2563eb;
+            font-weight: 800;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 60px;
+            margin: 0 auto 20px auto;
+        }
+
+        /* FAQ */
+        .faq-grid {
+            max-width: 800px;
+            margin: 40px auto;
+        }
+
+        .faq-item {
+            background: white;
+            margin-bottom: 16px;
+            border-radius: 20px;
+            padding: 20px 28px;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+        }
+
+        .faq-question {
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-answer {
+            margin-top: 14px;
+            color: #334155;
+            display: none;
+        }
+
+        .faq-item.active .faq-answer {
+            display: block;
+        }
+
+        /* Footer */
+        .footer {
+            background: #0f172a;
+            color: #cbd5e1;
+            padding: 48px 0 32px;
+            margin-top: 72px;
+        }
+
+        .footer a {
+            color: #94a3b8;
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.2rem; }
+            .nav-flex { flex-direction: column; }
+            .pack-grid { gap: 20px; }
+        }
+    </style>
 </head>
 <body>
-<header class="hero" id="hero">
-<nav class="topnav"><div class="brand"><span class="brandIcon">▶</span><b>İZLEKAZAN</b></div><div class="navlinks"><button onclick="page('home')">Ana Sayfa</button><button onclick="page('packages')">Paketler</button><button onclick="page('movies')">Filmler</button><button onclick="page('database')">Veri Tabanı</button><button onclick="page('how')">⚙️ Nasıl Çalışır?</button><button onclick="page('faq')">S.S.S</button><button id="panelTop" class="hidden" onclick="page('panel')">Panelim</button><button id="adminTop" class="hidden" onclick="page('admin')">Admin Panel</button><button id="loginTop" onclick="page('auth')">Başla</button><button id="logoutBtn" class="hidden" onclick="logout()">Çıkış</button></div></nav>
-<div class="heroGrid homeHeroGrid"><section class="heroText premiumHeroText"><span class="heroEyebrow">İzle, Kazan, Paylaş, Büyü!</span><h1>FİLM KEYFİ<br>ARTIK SANA<br><b>EK GELİR GETİRİYOR!</b></h1><div class="rotatingSloganWrap" aria-live="polite"><div class="rotatingSlogan" id="rotatingSlogan">Film Keyfini Ek Gelir Modeliyle Birleştiren Yeni Platform.</div></div><p class="heroLead">İzleKazan, premium üyelerin film keyfini referans sistemiyle ek gelir fırsatına dönüştüren yeni nesil platformdur. Film arşivine erişirken davet sistemiyle kazanç modeline dahil olursun.</p><div class="heroButtons"><button onclick="page(isLoggedIn()?'panel':'auth')">Hemen Üye Ol</button><button class="ghost" onclick="page('packages')">Kazanç Paketlerini İncele</button></div></section><aside class="heroConceptCard" aria-label="İzleKazan konsept ön izleme"><div class="heroConceptImage"><img src="/assets/home-concept-4.png" alt="İzleKazan premium ana sayfa konsepti"></div></aside></div></header>
-<main>
-<section id="home" class="page active"><div class="actionRail"><div class="actionItem"><span class="actionIcon">🎞</span><div><small>1</small><b>İZLE</b><p>Vizyon filmleri izle, keyfini çıkar.</p></div></div><div class="actionItem"><span class="actionIcon">👥</span><div><small>2</small><b>DAVET ET</b><p>Arkadaşlarını davet et, sistem büyür.</p></div></div><div class="actionItem"><span class="actionIcon">💰</span><div><small>3</small><b>KAZAN</b><p>Referans komisyonlarını kazan, gelirin artsın.</p></div></div><div class="actionItem"><span class="actionIcon">💳</span><div><small>4</small><b>ÇEKİM YAP</b><p>Kazançlarını hızlı ve güvenli şekilde çek.</p></div></div></div><div class="homeInfoGrid"><div class="featureCard whyCard"><h3>Neden İzleKazan?</h3><ul class="featureList"><li>Geniş kazanç fırsatı</li><li>Şeffaf ve güvenilir sistem</li><li>Güçlü referans ağı</li><li>7/24 destek ve rehberlik</li></ul><button class="ghost" onclick="page('how')">Sistemi Keşfet</button></div><div class="featureCard liveCard"><div class="cardHead"><h3>Canlı Ödeme Tablosu</h3><span class="liveTag">• CANLI</span></div><div class="miniTable"><div class="miniRow head"><span>Kullanıcı</span><span>Kazanç (₺)</span><span>Tarih</span></div><div class="miniRow"><span>Ahmet Y.</span><span>12.450,00 ₺</span><span>26.05.2026 14:23</span></div><div class="miniRow"><span>Elif S.</span><span>8.750,00 ₺</span><span>26.05.2026 14:19</span></div><div class="miniRow"><span>Mehmet K.</span><span>6.320,00 ₺</span><span>26.05.2026 14:17</span></div><div class="miniRow"><span>Zeynep A.</span><span>4.800,00 ₺</span><span>26.05.2026 13:58</span></div><div class="miniRow"><span>Serkan D.</span><span>3.610,00 ₺</span><span>26.05.2026 13:25</span></div></div><button class="ghost" onclick="page('database')">Tüm Ödemeleri Gör</button></div><div class="featureCard membersCard"><div class="cardHead"><h3>Aramıza Katılanlar</h3></div><div class="memberTotalLabel">TOPLAM ÜYE</div><div class="memberCount">250.842</div><div class="memberStatus">● Aktif Üye</div><div class="memberAvatars"><span>AY</span><span>ES</span><span>MK</span><span>ZA</span><span>SD</span><b>+12K</b></div><button class="ghost" onclick="page('database')">Topluluğa Katıl</button></div></div><div class="ctaBanner"><div><b>Bugün Katıl, Yarın Kazanmaya Başla!</b><p>Sen de İzleKazan ailesine katıl, film keyfini kazanca dönüştür.</p></div><button onclick="page(isLoggedIn()?'panel':'auth')">Üye Ol ve Başla</button></div><div class="comparison"><div class="card compareBad"><h3>Klasik Film Platformları</h3><span class="compareLabel bad">Sadece İzle</span><p>Üye ödeme yapar, film izler, reklamsız izlemek için daha çok para öder.</p><p>Günlük yoğunluktan aylarca film izlemese bile abonelik ücreti her ay tahsil edilir.</p><p>Kısacası üyeler sürekli para öder.</p></div><div class="card compareGood"><h3>İzleKazan Modeli</h3><span class="compareLabel good">İzle + Kazan</span><p>Üyeler sadece film izlemekle kalmaz referans sistemiyle ek gelir sağlar.</p><p>Üyeler aylarca siteye giremese bile referans geliri kazanmaya devam ederler.</p><p>Ödenen paranın kat ve kat fazlası kazanılabilir.</p></div></div></section>
-<section id="packages" class="page"><h2>Üyelik Paketleri</h2><p class="muted center">Tüm paketler yıllıktır. Paket süresi 1 yıl / 365 gündür.</p><div id="packageList" class="packageGrid"></div></section>
-<section id="how" class="page"><h2>İzleKazan Nasıl Çalışır?</h2><p class="muted center">Klasik “para ver ve izle” modelinden farklı olarak premium üyeler referanslarıyla sisteme dahil olan her üye için komisyon geliri kazanmanın yanında siteye eklenen ve onaylanan her film için ekstra gelir elde ederler.</p><div class="steps"><div><b>01</b><h3>Premium Üye Ol</h3><p>Referans koduyla hesabını oluştur, yıllık paketini seç ve ödeme yap.</p></div><div><b>02</b><h3>Reklamsız İzle</h3><p>Premium erişimle film arşivine gir ve platformu kullanmaya başla.</p></div><div><b>03</b><h3>Sisteme Katkı Sağla</h3><p>Referans paylaş, uygun film ekle, onaylanan işlemlerle kazanç sistemine dahil ol.</p></div><div><b>04</b><h3>Gelirini Takip Et</h3><p>Bekleyen bakiye, çekilebilir bakiye ve aylık hedeflerini panelden kontrol et.</p></div></div><div class="card"><h3>Gelir Modeli</h3><div class="donut">₺</div><p>İzleKazan’da kazanç; paket seviyesi, aktiflik, referans ağı ve onaylanan katkılara göre oluşur. Amaç, aktif premium üyeler için sürdürülebilir ek gelir potansiyeli oluşturmaktır.</p><p class="muted">Kazanç garantisi verilmez; tüm işlemler sistem kurallarına ve admin onay süreçlerine bağlıdır.</p></div></section>
-<section id="faq" class="page"><h2>Sıkça Sorulan Sorular</h2><div class="faq">
-<details><summary>İzleKazan nedir?</summary><p>Klasik film platformlarından farklı olarak premium üyelerine film erişimi yanında referans, film ekleme ve panel üzerinden ek gelir potansiyeli sunan bir sistemdir.</p></details>
-<details><summary>Tüm üyeler para kazanabilir mi?</summary><p>Evet. Premium paket alan tüm üyeler pakette belirtilen oran kadar referans geliri kazanabilir. Ayrıca platforma ekledikleri her film için de ekstra kazanç elde ederler.</p></details>
-<details><summary>Platformda reklam var mı?</summary><p>Hayır. Platform tamamen reklamsız çalışır.</p></details>
-<details><summary>Üyelik ücretleri aylık mı yıllık mı?</summary><p>Tüm paketler yıllıktır ve 365 gün geçerlidir.</p></details>
-<details><summary>Herhangi bir Premium paket aldıktan sonra vazgeçersem para iadesi yapılıyor mu?</summary><p>Evet. 15 gün içinde destek bölümünden başvuru yapmanız durumunda aynı gün içinde paketiniz iptal edilip yatırdığınız para kesintisiz iade edilir.</p></details>
-<details><summary>Premium üyelik bitince ne olur?</summary><p>Film erişimi kapanır ve paket yenilemeniz gerekir.</p></details>
-<details><summary>Referans kodu olmadan kayıt olabilir miyim?</summary><p>Hayır. Sisteme katılmak için geçerli bir referans kodu gerekir.</p></details>
-<details><summary>Film izlemek ücretsiz mi?</summary><p>Hayır. Film erişimi premium üyeler içindir. Premium üyelik aynı zamanda platformun kazanç sistemine katılım imkânı sağlar.</p></details>
-<details><summary>Ek gelir nasıl oluşur?</summary><p>Ek gelir; seçilen paket, referans ağı, onaylanan film katkıları ve sistem kurallarına bağlı olarak oluşur. Kazanç tutarı kişiden kişiye değişebilir.</p></details>
-<details><summary>Kazançlar hemen çekilebilir mi?</summary><p>Hayır. Tüm kazançlar önce bekleyen bakiyeye düşer.</p></details>
-<details><summary>Bekleyen bakiye ne zaman aktarılır?</summary><p>15 gün sonra çekilebilir bakiyeye otomatik aktarılır.</p></details>
-<details><summary>Kazançlar neden 15 gün bekleyen bakiyede durur?</summary><p>Premium paketlerinin iptal/iade süresi 15 gündür. Bu süre içinde referansınızla üye olan kişi para iadesi talep etmezse 16. gün bekleyen referans geliri çekilebilir cüzdana aktarılır.</p></details>
-<details><summary>Çekilebilir bakiye nasıl görüntülenir?</summary><p>Panelde çekilebilir bakiye kartına tıklayarak tüm işlemleri görebilirsiniz.</p></details>
-<details><summary>Bekleyen bakiye detayları görülebilir mi?</summary><p>Evet. Bekleyen bakiye kartına tıklayınca tüm işlemler listelenir.</p></details>
-<details><summary>Referans kazançları nasıl çalışır?</summary><p>Satın alınan pakete göre belirli seviyelerde prim hesaplanır. Daha aktif çalışan ve daha güçlü ekip kuran üyeler daha yüksek aylık kazanç hedefleyebilir.</p></details>
-<details><summary>Alt üyelerimi görebilir miyim?</summary><p>Evet. Alt üyelerin paketleri ve premium durumları görüntülenebilir.</p></details>
-<details><summary>Ödeme nasıl yapılır?</summary><p>Belirtilen IBAN’a havale/EFT yapılarak ödeme gerçekleştirilir.</p></details>
-<details><summary>Ödeme yaptıktan sonra ne yapmalıyım?</summary><p>Ödeme Bildir butonuyla onay sürecine göndermeniz gerekir.</p></details>
-<details><summary>Ödeme reddedilirse ne olur?</summary><p>Red nedeni bildirim ve destek bölümünde görünür.</p></details>
-<details><summary>Ödeme neden reddedilir?</summary><p>Paket ücretinden eksik yapılan ödemelerde ya da açıklama bölümüne telefon numarası yazılmadan gönderilen ödemelerde; banka gönderenin ismini dekontta gizlediğinde veya aynı isimli 2 ya da daha fazla üye olması nedeniyle ödemeyi yapan kişi belirlenemediğinde ödeme iade edilir ve platform üzerinden yapılan ödeme bildirimi reddedilir.</p></details>
-<details><summary>Çekim talepleri nasıl yapılır?</summary><p>Panelden IBAN girerek çekim talebi oluşturabilirsiniz.</p></details>
-<details><summary>Minimum çekim tutarı nedir?</summary><p>Minimum çekim tutarı 50 TL’dir.</p></details>
-<details><summary>Şifremi unuttum ne yapmalıyım?</summary><p>Şifremi Unuttum bölümünden e-posta ile yeni şifre oluşturabilirsiniz.</p></details>
 
+<nav class="navbar">
+    <div class="container nav-flex">
+        <div class="logo">İzle<span>Kazan</span></div>
+        <div class="nav-links">
+            <a href="#">Ana Sayfa</a>
+            <a href="#">Katalog</a>
+            <a href="#">Nasıl Çalışır?</a>
+            <a href="#">SSS</a>
+            <a href="#" class="btn-outline">Giriş Yap</a>
+            <a href="#" class="btn-primary">Üye Ol</a>
+        </div>
+    </div>
+</nav>
 
-<details><summary>Film neden reddedilir?</summary><p>Kırık link, düşük kalite veya uygun olmayan içerik nedeniyle reddedilebilir.</p></details>
-<details><summary>Platform mobil uyumlu mu?</summary><p>Evet. Telefon, tablet ve bilgisayarda kullanılabilir.</p></details>
-</div></section>
-<section id="auth" class="page authPage cinemaAuth">
-  <div class="cinemaAuthStage accordionAuth">
-    <div class="filmGlow"></div>
+<section class="hero">
+    <div class="container">
+        <div class="badge"><i class="fas fa-film"></i> Yeni Nesil Deneyim</div>
+        <h1>İzle, Paylaş,<br>Kazanç Fırsatını Büyüt</h1>
+        <p>Klasik film platformlarının tersine, üyelerimize özel referans sistemi ve ek gelir potansiyeli. Reklamsız, kesintisiz, kazançlı.</p>
+        <a href="#" class="btn-primary" style="display: inline-block; padding: 12px 32px;">Hemen Başla →</a>
+    </div>
+</section>
 
-    <div class="cinemaCard loginCard authPanel active" id="loginPanel">
-      <button type="button" class="authPanelTrigger" onclick="toggleAuthPanel('login')">
-        <span class="authPanelIcon">🎬</span>
-        <span><b>Giriş Yap</b><small>Hesabına gir ve kaldığın yerden devam et.</small></span>
-      </button>
-      <div class="authPanelContent">
-        <input id="le" type="email" autocomplete="email" placeholder="E-posta adresin">
-        <input id="ls" type="password" autocomplete="current-password" placeholder="Şifren">
-        <button onclick="login()">Giriş Yap</button>
-        <button class="linkBtn" onclick="page('forgot')">Şifremi Unuttum</button>
-      </div>
+<div class="container">
+    <!-- Üyelik Paketleri -->
+    <h2 class="section-title">Premium Üyelik Paketleri</h2>
+    <p class="section-sub">Yıllık üyelik • 365 gün geçerli • Reklamsız erişim + kazanç sistemi</p>
+
+    <div class="pack-grid">
+        <div class="pack-card">
+            <div class="pack-name">Standart</div>
+            <div class="pack-price">100₺ <small>/ yıl</small></div>
+            <ul class="feature-list">
+                <li><i class="fas fa-check-circle"></i> 1 yıl premium film</li>
+                <li><i class="fas fa-check-circle"></i> Reklamsız izleme</li>
+                <li><i class="fas fa-chart-line"></i> 1.seviye referans %10</li>
+                <li><i class="fas fa-plus-circle"></i> Film ekleme kazancı</li>
+            </ul>
+            <a href="#" class="btn-card">Paketi Seç</a>
+        </div>
+        <div class="pack-card premium">
+            <div class="pack-name">Kıdemli</div>
+            <div class="pack-price">200₺ <small>/ yıl</small></div>
+            <ul class="feature-list">
+                <li><i class="fas fa-check-circle"></i> Tüm Standart özellikler</li>
+                <li><i class="fas fa-chart-line"></i> 2 seviye referans %10</li>
+                <li><i class="fas fa-users"></i> Geniş alt üye ağacı</li>
+                <li><i class="fas fa-database"></i> Kazanç geçmişi</li>
+            </ul>
+            <a href="#" class="btn-card primary">Paketi Seç</a>
+        </div>
+        <div class="pack-card">
+            <div class="pack-name">Ortak</div>
+            <div class="pack-price">300₺ <small>/ yıl</small></div>
+            <ul class="feature-list">
+                <li><i class="fas fa-check-circle"></i> 3 seviye referans %10</li>
+                <li><i class="fas fa-handshake"></i> Gelir ortaklığı</li>
+                <li><i class="fas fa-chart-simple"></i> Gelişmiş panel</li>
+                <li><i class="fas fa-film"></i> Film ekle + onay primi</li>
+            </ul>
+            <a href="#" class="btn-card">Paketi Seç</a>
+        </div>
+        <div class="pack-card">
+            <div class="pack-name">Kıdemli Ortak</div>
+            <div class="pack-price">500₺ <small>/ yıl</small></div>
+            <ul class="feature-list">
+                <li><i class="fas fa-crown"></i> 3 seviye referans %20</li>
+                <li><i class="fas fa-chart-line"></i> Yüksek cüzdan potansiyeli</li>
+                <li><i class="fas fa-trophy"></i> Öncelikli destek</li>
+            </ul>
+            <a href="#" class="btn-card">Paketi Seç</a>
+        </div>
     </div>
 
-    <div class="cinemaCard registerCard authPanel" id="registerPanel">
-      <button type="button" class="authPanelTrigger" onclick="toggleAuthPanel('register')">
-        <span class="authPanelIcon">⭐</span>
-        <span><b>Üye Ol</b><small>Premium erişim ve kazanç fırsatlarına katıl.</small></span>
-      </button>
-      <div class="authPanelContent">
-        <div class="twoCols"><input id="rf" autocomplete="given-name" placeholder="Ad"><input id="rl" autocomplete="family-name" placeholder="Soyad"></div>
-        <input id="re" type="email" autocomplete="email" placeholder="E-posta">
-        <input id="rp" inputmode="tel" autocomplete="tel" placeholder="Telefon 05XXXXXXXXX">
-        <div class="twoCols"><input id="rs" type="password" autocomplete="new-password" placeholder="Şifre"><input id="rs2" type="password" autocomplete="new-password" placeholder="Şifre Tekrar"></div>
-        <input id="rr" placeholder="Referans Kodu (Zorunlu)">
-        <button onclick="register()">Üye Ol</button>
-      </div>
+    <!-- Nasıl Çalışır? -->
+    <h2 class="section-title" style="margin-top: 56px;">Nasıl Çalışır?</h2>
+    <div class="steps">
+        <div class="step-item"><div class="step-number">1</div><h3>Premium Üye Ol</h3><p>Referans koduyla kaydol, yıllık paketini seç.</p></div>
+        <div class="step-item"><div class="step-number">2</div><h3>Reklamsız İzle</h3><p>Film arşivine sınırsız eriş.</p></div>
+        <div class="step-item"><div class="step-number">3</div><h3>Sisteme Katkı Sağla</h3><p>Referans getir, film ekle, kazanç sistemine dahil ol.</p></div>
+        <div class="step-item"><div class="step-number">4</div><h3>Gelirini Takip Et</h3><p>Paneli kullan, çekim talebi oluştur.</p></div>
     </div>
-  </div>
-</section>
 
-<section id="forgot" class="page authPage">
-  <div class="card narrow">
-    <h2>Şifremi Unuttum</h2>
-    <p class="muted">E-posta adresinizi yazın. Şifre yenileme bağlantısı e-posta adresinize gönderilir.</p>
-    <input id="forgotEmail" type="email" autocomplete="email" placeholder="E-posta adresiniz">
-    <button onclick="forgotPassword()">Şifre Sıfırlama Bağlantısı Gönder</button>
-    <div id="forgotResult"></div>
-  </div>
-</section>
-<section id="reset" class="page authPage">
-  <div class="card narrow">
-    <h2>Yeni Şifre Belirle</h2>
-    <input id="resetPass" type="password" placeholder="Yeni şifre">
-    <button onclick="resetPassword()">Şifreyi Yenile</button>
-  </div>
-</section>
-<section id="packageInfo" class="page">
-  <div id="packageInfoBox" class="card"></div>
-</section>
-<section id="paymentGuide" class="page">
-  <div id="paymentGuideBox" class="card"></div>
-</section>
-<section id="watch" class="page watchPage">
-  <div class="watchShell">
-    <div class="watchTop">
-      <div>
-        <b>İzleKazan Film İzleme Ekranı</b>
-        <small>Film adresi tarayıcı adres çubuğunda görünmez. Tam ekran için butonu kullanın.</small>
-      </div>
-      <div class="watchActions">
-        <button onclick="fullscreenMovie()">Tam Ekran</button>
-        <button class="ghost" onclick="closeFilmModal()">Kapat</button>
-      </div>
+    <!-- Sıkça Sorulan Sorular -->
+    <h2 class="section-title">Sıkça Sorulan Sorular</h2>
+    <div class="faq-grid">
+        <div class="faq-item"><div class="faq-question">İzleKazan nedir? <i class="fas fa-chevron-down"></i></div><div class="faq-answer">Film izleme + referans sistemiyle ek gelir fırsatı sunan premium platform.</div></div>
+        <div class="faq-item"><div class="faq-question">Üyelik ücretleri aylık mı? <i class="fas fa-chevron-down"></i></div><div class="faq-answer">Tüm paketler yıllıktır, 365 gün geçerlidir.</div></div>
+        <div class="faq-item"><div class="faq-question">15 gün iade garantisi var mı? <i class="fas fa-chevron-down"></i></div><div class="faq-answer">Evet, 15 gün içinde kesintisiz iade.</div></div>
+        <div class="faq-item"><div class="faq-question">Kazançlarım ne zaman çekilebilir? <i class="fas fa-chevron-down"></i></div><div class="faq-answer">15 gün bekleyen bakiye sonrası çekilebilir cüzdana aktarılır.</div></div>
     </div>
-    <iframe id="filmFrame" src="" title="İzleKazan Film Oynatıcı" allowfullscreen webkitallowfullscreen mozallowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share"></iframe>
-    <p class="movieHint watchHint">Tam ekran için önce bu sayfadaki “Tam Ekran” butonunu, ardından filmin kendi oynatıcısındaki tam ekran butonunu deneyin. En iyi sonuç için film eklerken embed/player linki kullanın.</p>
-  </div>
-</section>
+</div>
 
-<section id="panel" class="page"><h2>Üye Paneli</h2><div id="dash"></div></section>
-<section id="movies" class="page"><h2>Film Kataloğu</h2><p class="muted center">Filmlerin adı, afişi ve açıklaması herkese görünür. İzleme erişimi yalnızca aktif premium üyeler için açılır.</p><div class="movieActions"><button onclick="openFirstMovie()">🎬 Film İzle</button><button onclick="showAddMovie()">☁ Film Ekle Para Kazan</button></div><div id="filmGateway" class="filmGateway hidden"><img src="/assets/vizyon-filmleri.png" alt="Vizyon Filmleri" onclick="handleVizyonClick()"><p>Film sitesini görüntülemek için görsele tıklayın.</p></div><div id="movieList" class="movieGrid"></div><div id="addMovieBox" class="card hidden"><h2>Film Ekle Para Kazan</h2><input id="mt" placeholder="Film adı"><input id="my" placeholder="Yıl"><input id="mc" placeholder="Kategori"><input id="mp" placeholder="Afiş linki"><input id="ml" placeholder="Film sayfa linki"><input id="mel" placeholder="Embed / Player linki (varsa - tam ekran için önerilir)"><textarea id="md" placeholder="Açıklama"></textarea><button onclick="addMovie()">CEO Onayına Gönder</button><p class="movieHint">Not: Tam ekranın daha düzgün çalışması için film sayfası yerine varsa embed/player linki kullanın.</p></div><div id="ceoBox"></div></section>
-<section id="database" class="page"><h2>Veri Tabanı</h2><p class="muted center">Kullanıcı gizliliğini korumak amacıyla ad, soyad ve telefon bilgileri maskelenmiş olarak gösterilmektedir.</p><div class="databaseGrid"><div class="card"><h3>Kazanç Çekim Talepleri</h3><p>Platform üzerindeki çekim talepleri maskeli olarak listelenir.</p><button onclick="scrollToDb('publicWithdrawalsBox')">Çekim Taleplerini Gör</button></div><div class="card"><h3>Aramıza Katılanlar</h3><p>Platforma katılan yeni üyeler maskeli olarak listelenir.</p><button onclick="scrollToDb('publicMembersBox')">Yeni Üyeleri Gör</button></div></div><div id="publicWithdrawalsBox"></div><div id="publicMembersBox"></div></section>
-<section id="admin" class="page"><h2>Admin Paneli</h2><div id="adminBox" class="card">Admin girişi gerekli.</div></section>
-</main>
-<nav class="bottomNav" aria-label="Mobil alt menü"><button class="bottomHome" onclick="page('home')">⌂<span>Ana Sayfa</span></button><button class="bottomMovies" onclick="page('movies')">🎬<span>Filmler</span></button><button class="bottomDatabase" onclick="page('database')">▦<span>Veri Tabanı</span></button><button class="bottomPackages" onclick="page('packages')">▣<span>Paketler</span></button><button class="bottomHow" onclick="page('how')">⚙️<span>Nasıl Çalışır?</span></button><button class="bottomFaq" onclick="page('faq')">?<span>S.S.S</span></button><button id="bottomPanelNav" class="hidden bottomPanel" onclick="page('panel')">👤<span>Panelim</span></button><button id="adminNav" class="hidden bottomAdmin" onclick="page('admin')">⚙<span>Admin</span></button><button id="bottomLogoutNav" class="hidden bottomLogout" onclick="logout()">⎋<span>Çıkış</span></button></nav>
-<div id="toast"></div><script src="app.js"></script>
-</body></html>
+<footer class="footer">
+    <div class="container">
+        <div class="logo" style="color:white; background: none; -webkit-background-clip: unset;">İzleKazan</div>
+        <p style="margin: 20px 0 12px;">© 2025 İzleKazan - Tüm hakları saklıdır. Garanti gelir taahhüdü yoktur.</p>
+        <p><a href="#">KVKK</a> | <a href="#">Kullanıcı Sözleşmesi</a> | <a href="#">İletişim</a></p>
+    </div>
+</footer>
+
+<script>
+    // FAQ accordion
+    document.querySelectorAll('.faq-item').forEach(item => {
+        item.addEventListener('click', () => {
+            item.classList.toggle('active');
+        });
+    });
+</script>
+</body>
+</html>
