@@ -346,3 +346,233 @@ body.watchMode .watchShell iframe{width:100vw!important;height:100vh!important;m
 .movie.locked .moviePosterWrap img{
   object-position:top center;
 }
+
+/* Ana sayfa seçenek 1: Kurumsal Premium Landing düzeni */
+:root{--landingMax:1180px;}
+.topnav,
+.heroGrid{
+  width:min(calc(100vw - 72px),var(--landingMax));
+  max-width:var(--landingMax);
+  margin-left:auto;
+  margin-right:auto;
+}
+.hero{
+  min-height:720px;
+  padding-left:0!important;
+  padding-right:0!important;
+}
+.heroGrid{
+  grid-template-columns:minmax(0,1.04fr) minmax(360px,.96fr);
+  gap:44px;
+  align-items:center;
+}
+.heroText{
+  max-width:640px;
+  margin-top:86px;
+}
+.heroText h1{
+  max-width:660px;
+}
+.heroText p{
+  max-width:620px;
+}
+.heroText .earnBanner,
+.heroText .heroRisk{
+  max-width:620px;
+}
+.heroMoviePreview{
+  margin-top:88px!important;
+  padding:18px!important;
+  border-radius:28px!important;
+  background:linear-gradient(180deg,rgba(16,29,41,.92),rgba(7,16,24,.96))!important;
+}
+.heroPreviewTop{
+  display:flex!important;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:14px!important;
+  color:var(--text);
+}
+.heroPreviewTop strong{
+  color:var(--text);
+  letter-spacing:.04em;
+}
+.heroPreviewTop small{
+  color:var(--gold);
+  border:1px solid rgba(246,181,30,.34);
+  border-radius:999px;
+  padding:6px 10px;
+  background:rgba(246,181,30,.10);
+  font-weight:900;
+}
+.heroPreviewFrame{
+  border:1px solid rgba(246,181,30,.24);
+  border-radius:20px;
+  overflow:hidden;
+  background:#050b10;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.03),0 18px 46px rgba(0,0,0,.34);
+}
+.heroPreviewFrame img{
+  display:block;
+  width:100%;
+  height:258px;
+  object-fit:cover;
+  object-position:top center;
+  filter:saturate(1.02) contrast(1.02);
+}
+.heroPreviewMetrics{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:14px;
+}
+.heroPreviewMetrics div{
+  background:rgba(7,16,24,.88);
+  border:1px solid var(--line);
+  border-radius:17px;
+  padding:14px;
+}
+.heroPreviewMetrics b{
+  display:block;
+  color:var(--gold);
+  margin-bottom:5px;
+}
+.heroPreviewMetrics small{
+  display:block;
+  color:var(--muted);
+  line-height:1.45;
+}
+main{
+  width:min(calc(100vw - 72px),var(--landingMax));
+  max-width:var(--landingMax);
+}
+#home{
+  max-width:var(--landingMax)!important;
+  padding-top:42px;
+  padding-bottom:54px;
+}
+#home .stats{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:18px!important;
+  margin:0 0 24px!important;
+  width:100%!important;
+  max-width:none!important;
+}
+#home .stats > div{
+  min-height:150px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+  padding:24px 22px;
+}
+#home .stats b{
+  font-size:clamp(24px,2.15vw,31px);
+  line-height:1.05;
+}
+#home .comparison{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:22px!important;
+  margin:0!important;
+  width:100%!important;
+  max-width:none!important;
+}
+#home .comparison .card{
+  min-height:276px;
+  padding:28px;
+}
+#home .comparison h3{
+  font-size:21px;
+  margin-bottom:10px;
+}
+#home .comparison p{
+  color:#e5eef7;
+  line-height:1.58;
+  margin:13px 0;
+}
+#home .compareBad,
+#home .compareGood{
+  position:relative;
+  overflow:hidden;
+}
+#home .compareBad:after,
+#home .compareGood:after{
+  content:"";
+  position:absolute;
+  inset:auto 0 0 0;
+  height:3px;
+  opacity:.8;
+}
+#home .compareBad:after{background:linear-gradient(90deg,rgba(255,107,107,.8),transparent)}
+#home .compareGood:after{background:linear-gradient(90deg,rgba(50,213,131,.8),transparent)}
+
+@media(max-width:1060px){
+  .topnav,
+  .heroGrid,
+  main{
+    width:min(calc(100vw - 44px),var(--landingMax));
+  }
+  .heroGrid{
+    grid-template-columns:1fr;
+  }
+  .heroMoviePreview{
+    display:block!important;
+    margin-top:20px!important;
+  }
+  .heroText{
+    margin-top:54px;
+    max-width:760px;
+  }
+  #home .stats{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+@media(max-width:760px){
+  main,
+  .heroGrid{
+    width:min(calc(100vw - 28px),var(--landingMax));
+  }
+  .hero{
+    min-height:auto;
+    padding-bottom:34px;
+  }
+  .heroText{
+    margin-top:34px!important;
+  }
+  .heroText h1{
+    font-size:clamp(34px,10vw,46px);
+  }
+  .heroText p,
+  .heroText li{
+    font-size:15.5px;
+  }
+  .heroText button{
+    width:100%;
+    margin-right:0;
+    margin-top:10px;
+  }
+  .heroPreviewFrame img{
+    height:190px;
+  }
+  .heroPreviewMetrics{
+    grid-template-columns:1fr;
+  }
+  #home{
+    padding-top:26px;
+  }
+  #home .stats,
+  #home .comparison{
+    grid-template-columns:1fr!important;
+  }
+  #home .stats > div{
+    min-height:auto;
+  }
+  #home .comparison .card{
+    min-height:auto;
+    padding:22px;
+  }
+}
+@media(max-width:420px){
+  .heroPreviewFrame img{height:154px;}
+}
