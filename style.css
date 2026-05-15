@@ -576,3 +576,91 @@ main{
 @media(max-width:420px){
   .heroPreviewFrame img{height:154px;}
 }
+
+/* Giriş / Üye Ol ekranı son düzeltme: PC ve mobil hizalama */
+#auth.cinemaAuth{
+  width:100%;
+  max-width:1180px;
+  margin-left:auto;
+  margin-right:auto;
+  padding:42px 0 64px!important;
+  min-height:calc(100vh - 120px);
+}
+#auth.cinemaAuth:before{
+  border-radius:34px;
+}
+.cinemaAuthStage.accordionAuth{
+  display:flex!important;
+  grid-template-columns:none!important;
+  align-items:flex-start!important;
+  justify-content:center!important;
+  gap:28px!important;
+  width:100%;
+  max-width:1080px!important;
+  min-height:0!important;
+  margin:0 auto!important;
+  padding:28px!important;
+  overflow:visible!important;
+}
+.cinemaAuthStage.accordionAuth .cinemaCard{
+  flex:1 1 0;
+  min-width:0;
+  align-self:flex-start!important;
+  margin:0!important;
+  transform:none;
+}
+.cinemaAuthStage.accordionAuth .cinemaCard.active{
+  transform:translateY(0) scale(1.01)!important;
+}
+.accordionAuth .cinemaCard{
+  max-height:112px!important;
+}
+.accordionAuth .cinemaCard.active{
+  max-height:720px!important;
+}
+.accordionAuth .registerCard.active{
+  max-height:820px!important;
+}
+.authPanelContent{
+  padding:0 28px 28px!important;
+}
+.authPanelContent h2{
+  margin-top:20px!important;
+}
+.authPanelContent input{
+  margin:7px 0!important;
+}
+.accordionAuth .authPanelTrigger{
+  min-height:112px;
+}
+@media(max-width:980px){
+  #auth.cinemaAuth{
+    max-width:760px;
+    padding-top:28px!important;
+  }
+  .cinemaAuthStage.accordionAuth{
+    flex-direction:column!important;
+    gap:16px!important;
+    padding:18px!important;
+  }
+  .cinemaAuthStage.accordionAuth .cinemaCard{
+    width:100%;
+    flex:none;
+  }
+}
+@media(max-width:760px){
+  #auth.cinemaAuth{
+    width:min(calc(100vw - 28px),720px);
+    padding-top:22px!important;
+    padding-bottom:108px!important;
+  }
+  .cinemaAuthStage.accordionAuth{
+    border-radius:22px!important;
+    padding:14px!important;
+  }
+  .accordionAuth .cinemaCard{max-height:100px!important;}
+  .accordionAuth .cinemaCard.active{max-height:760px!important;}
+  .accordionAuth .registerCard.active{max-height:920px!important;}
+  .accordionAuth .authPanelTrigger{min-height:100px;padding:16px!important;}
+  .authPanelContent{padding:0 18px 20px!important;}
+}
