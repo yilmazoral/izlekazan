@@ -583,3 +583,10 @@ main{max-width:1180px;margin:0 auto;padding:34px 18px 92px}
     --film-scroll-range:430px !important;
   }
 }
+
+
+/* Film katalogundaki Premium İçerik görseli sadece vitrin olarak görünür; tıklanamaz. */
+.moviePosterWrap,
+.moviePosterWrap img{cursor:default;}
+.moviePosterWrap img{pointer-events:none;}
+.moviePosterWrap img[src*="film-afisleri-vitrin"]{object-fit:cover;object-position:center center;}

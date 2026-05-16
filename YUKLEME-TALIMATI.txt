@@ -1,12 +1,13 @@
-GÜNCELLEME TALİMATI
+İzleKazan ana sayfa profesyonel tasarım güncellemesi
 
-Bu pakette film izleme ekranındaki iframe kırpması yeniden ayarlandı.
-Amaç: film sitesinin üst kısmı ve alt/footer yazıları görünmeden sadece orta film afişleri alanının görünmesi.
-
-GitHub ana dizinine özellikle şu dosyaları yükleyin:
+Bu paketteki dosyalar:
 - index.html
 - style.css
-- app.js
-- server.js
+- site-update.js
 
-Render otomatik yeniden deploy olduktan sonra telefonda gizli sekmede test edin.
+GitHub'da izlekazan deposuna girin ve bu 3 dosyayı ana dizine yükleyin.
+Var olan index.html ve style.css dosyalarını değiştirin.
+site-update.js dosyasını yeni dosya olarak ekleyin.
+
+app.js ve server.js dosyalarına dokunmayın.
+Render otomatik deploy ederse birkaç dakika içinde yayına geçer.

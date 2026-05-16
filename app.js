@@ -584,11 +584,18 @@ async function movies() {
     const m = await api("/api/movies");
     const logged = isLoggedIn();
 
+    const showcasePoster = "/assets/film-afisleri-vitrin.png";
+
     $("movieList").innerHTML = m
-      .map(
-        (x) => `<div class="card movie ${x.locked ? "locked" : ""}">
-          <div class="moviePosterWrap">
-            <img src="${x.poster || "/assets/movie-poster.svg"}" onerror="this.src='/assets/movie-poster.svg'">
+      .map((x) => {
+        const isDefaultFilmPlatform = /reklamsız film platformu/i.test(x.title || "");
+        const posterSrc = (!x.poster || String(x.poster).includes("movie-poster.svg") || isDefaultFilmPlatform)
+          ? showcasePoster
+          : x.poster;
+
+        return `<div class="card movie ${x.locked ? "locked" : ""}">
+          <div class="moviePosterWrap" aria-label="Film afişleri vitrini">
+            <img src="${posterSrc}" alt="Film afişleri vitrini" onerror="this.src='/assets/film-afisleri-vitrin.png'">
             ${x.locked ? '<span class="premiumBadge">Premium İçerik</span>' : '<span class="premiumBadge open">Erişim Açık</span>'}
           </div>
           <h3>${x.title}</h3>
@@ -597,8 +604,8 @@ async function movies() {
           ${x.locked
             ? `<button onclick='openLockedMovie(${JSON.stringify(x.watchLink || x.previewLink || x.embedLink || x.link || "")})'>Film Sitesini Aç</button><small class="movieHint">Film sitesi görüntülenir; izlemek için üye olup premium paket almanız gerekir.</small>`
             : `<button onclick='openFilmModal(${JSON.stringify(x.watchLink || x.previewLink || x.embedLink || x.link || "")}, false)'>Filmi İzle</button>`}
-        </div>`
-      )
+        </div>`;
+      })
       .join("") || '<div class="card">Yayında film bulunmuyor.</div>';
   } catch (e) {
     $("movieList").innerHTML = '<div class="card">Film kataloğu şu anda yüklenemedi. Lütfen tekrar deneyin.</div>';

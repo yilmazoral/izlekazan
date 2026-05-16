@@ -56,7 +56,7 @@ function defaultMovie() {
     title: "Reklamsız Film Platformu",
     year: "2026",
     category: "Film Arşivi",
-    poster: "/assets/movie-poster.svg",
+    poster: "/assets/film-afisleri-vitrin.png",
     description: "Premium üyeler için reklamsız film platformu.",
     link: "https://lovefilmizle.net",
     embedLink: "https://lovefilmizle.net",
@@ -453,7 +453,7 @@ app.post("/api/movies", auth, userRequired, async (req, res) => {
   const { title, year, category, poster, link, embedLink, description } = req.body || {};
   if (!title || !link) return res.status(400).json({ error: "Film adı ve link zorunludur" });
   const isCeo = req.user.role === "admin" || (isPremium(req.user) && Number(req.user.packageId) === 5);
-  const movie = { id: id(), title, year, category, poster: poster || "/assets/movie-poster.svg", link, embedLink: embedLink || link, description, status: isCeo ? "admin_pending" : "ceo_pending", addedBy: req.user.id, ceoApprovedBy: isCeo ? req.user.id : null, adminApprovedBy: null, createdAt: now() };
+  const movie = { id: id(), title, year, category, poster: poster || "/assets/film-afisleri-vitrin.png", link, embedLink: embedLink || link, description, status: isCeo ? "admin_pending" : "ceo_pending", addedBy: req.user.id, ceoApprovedBy: isCeo ? req.user.id : null, adminApprovedBy: null, createdAt: now() };
   req.db.movies.push(movie);
   await saveDb(req.db);
   res.json({ ok: true, movie });
