@@ -436,7 +436,10 @@ app.get("/api/movies", authOptional, (req, res) => {
   const d = readDb(); processDb(d);
   const u = req.auth ? d.users.find(x => x.id === req.auth.id) : null;
   const canWatch = !!(u && isPremium(u));
-  const movies = d.movies.filter(m => m.status === "published").map(m => ({ ...m, watchLink: canWatch ? (m.embedLink || m.link) : "", locked: !canWatch }));
+  const movies = d.movies.filter(m => m.status === "published").map(m => {
+    const sourceLink = m.embedLink || m.link || "";
+    return { ...m, previewLink: sourceLink, watchLink: canWatch ? sourceLink : "", locked: !canWatch };
+  });
   res.json(movies);
 });
 function authOptional(req, res, next) {

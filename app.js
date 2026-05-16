@@ -564,7 +564,7 @@ async function openFirstMovie() {
     }
 
     const first = m[0];
-    const url = first.watchLink || first.embedLink || first.link || "";
+    const url = first.watchLink || first.previewLink || first.embedLink || first.link || "";
     openFilmModal(url, !!first.locked);
   } catch (e) {
     toast(e.message || "Film açılamadı");
@@ -595,8 +595,8 @@ async function movies() {
           <div class="movieMeta">${x.category || "Film"}${x.year ? " • " + x.year : ""}</div>
           <p>${x.description || ""}</p>
           ${x.locked
-            ? `<button onclick='openLockedMovie(${JSON.stringify(x.watchLink || x.embedLink || x.link || "")})'>Film Sitesini Aç</button><small class="movieHint">Film sitesi görüntülenir; izlemek için üye olup premium paket almanız gerekir.</small>`
-            : `<button onclick='openFilmModal(${JSON.stringify(x.watchLink || x.embedLink || x.link || "")}, false)'>Filmi İzle</button>`}
+            ? `<button onclick='openLockedMovie(${JSON.stringify(x.watchLink || x.previewLink || x.embedLink || x.link || "")})'>Film Sitesini Aç</button><small class="movieHint">Film sitesi görüntülenir; izlemek için üye olup premium paket almanız gerekir.</small>`
+            : `<button onclick='openFilmModal(${JSON.stringify(x.watchLink || x.previewLink || x.embedLink || x.link || "")}, false)'>Filmi İzle</button>`}
         </div>`
       )
       .join("") || '<div class="card">Yayında film bulunmuyor.</div>';
