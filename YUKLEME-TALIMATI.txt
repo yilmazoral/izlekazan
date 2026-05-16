@@ -1,9 +1,11 @@
-YÜKLEME TALİMATI
+İzleKazan güncelleme paketi
 
-1) Bu ZIP içindeki klasörün içindeki tüm dosyaları GitHub izlekazan deposunun ana dizinine yükleyin.
-2) index.html, style.css, app.js, site-update.js ve server.js eski dosyaların yerine geçsin.
-3) assets klasörünü olduğu gibi yükleyin.
-4) Render otomatik deploy işlemi bittikten sonra siteyi gizli sekmede kontrol edin.
+Bu pakette film izleme ekranı için üst alan kırpma ve afiş alanı kaydırma düzeltmesi vardır.
 
-Bu sürümde mobilde Üye Ol paneli açılınca sayfa otomatik olarak Üye Ol formunun başlangıcına kayar.
-Giriş Yap bölümüne dönmek için kullanıcı sayfayı yukarı kaydırır.
+GitHub deposunda özellikle şu dosyaları değiştirin:
+- index.html
+- style.css
+- app.js
+
+server.js dosyası bu değişiklik için zorunlu değildir.
+Render yeniden deploy olduktan sonra siteyi gizli sekmede test edin.

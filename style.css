@@ -395,3 +395,48 @@ main{max-width:1180px;margin:0 auto;padding:34px 18px 92px}
 .watchShell.lockedWatch:-webkit-full-screen #filmFrame{
   pointer-events:none !important;
 }
+
+/* === FİLM SİTESİ ÜST ALAN KIRPMA VE AFİŞ KAYDIRMA === */
+.watchShell.croppedWatch .watchFrameBox{
+  --film-crop-top:220px;
+  --film-scroll-range:2100px;
+  --film-scroll-y:0px;
+  overflow:hidden !important;
+}
+.watchShell.croppedWatch #filmFrame{
+  position:absolute;
+  left:0;
+  top:calc(-1 * var(--film-crop-top));
+  width:100%;
+  height:calc(100% + var(--film-crop-top) + var(--film-scroll-range));
+  transform:translate3d(0, calc(-1 * var(--film-scroll-y)), 0);
+  transform-origin:top center;
+}
+.watchShell.croppedWatch .filmLockOverlay{
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  touch-action:pan-y;
+}
+.filmScrollSpacer{
+  width:1px;
+  min-height:calc(100% + var(--film-scroll-range, 2100px));
+  pointer-events:none;
+}
+.watchShell.croppedWatch:fullscreen .watchFrameBox,
+.watchShell.croppedWatch:-webkit-full-screen .watchFrameBox{
+  --film-crop-top:220px;
+  --film-scroll-range:2600px;
+}
+@media (max-width:820px){
+  .watchShell.croppedWatch .watchFrameBox{
+    --film-crop-top:165px;
+    --film-scroll-range:2500px;
+  }
+  .watchShell.croppedWatch:fullscreen .watchFrameBox,
+  .watchShell.croppedWatch:-webkit-full-screen .watchFrameBox{
+    --film-crop-top:165px;
+    --film-scroll-range:2800px;
+  }
+}

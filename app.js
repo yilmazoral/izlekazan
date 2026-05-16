@@ -5,6 +5,7 @@ let selectedPackageId = null;
 let selectedPackagePrice = 0;
 let lastPageBeforeWatch = "movies";
 let filmIsLocked = false;
+let filmLockPointerStart = null;
 const LOCKED_FILM_MESSAGE = "Filmleri izlemek için üye olmanız ve premium paket olmanız gerekmektedir.";
 
 const $ = (id) => document.getElementById(id);
@@ -885,7 +886,13 @@ function openFilmModal(url, locked = false) {
   lastPageBeforeWatch = (document.querySelector(".page.active") || {}).id || "movies";
 
   const shell = document.querySelector(".watchShell");
-  if (shell) shell.classList.toggle("lockedWatch", filmIsLocked);
+  if (shell) {
+    shell.classList.toggle("lockedWatch", filmIsLocked);
+    shell.classList.add("croppedWatch");
+  }
+
+  const box = document.querySelector(".watchFrameBox");
+  if (box) box.style.setProperty("--film-scroll-y", "0px");
 
   const frame = $("filmFrame");
   if (frame) {
@@ -909,6 +916,7 @@ function openFilmModal(url, locked = false) {
 
   const overlay = $("filmLockOverlay");
   if (overlay) {
+    overlay.scrollTop = 0;
     overlay.classList.toggle("hidden", !filmIsLocked);
     overlay.setAttribute("aria-hidden", filmIsLocked ? "false" : "true");
   }
@@ -921,7 +929,47 @@ function lockedFilmClick(event) {
     event.preventDefault();
     event.stopPropagation();
   }
+
+  const overlay = $("filmLockOverlay");
+  const endX = event && typeof event.clientX === "number" ? event.clientX : (filmLockPointerStart ? filmLockPointerStart.x : 0);
+  const endY = event && typeof event.clientY === "number" ? event.clientY : (filmLockPointerStart ? filmLockPointerStart.y : 0);
+  const moved = filmLockPointerStart
+    ? Math.abs(endX - filmLockPointerStart.x) + Math.abs(endY - filmLockPointerStart.y)
+    : 0;
+  const scrolled = overlay && filmLockPointerStart
+    ? Math.abs(overlay.scrollTop - filmLockPointerStart.scrollTop)
+    : 0;
+
+  // Kullanıcı afişleri görmek için kaydırıyorsa uyarıyı tetikleme; gerçek tıklamada göster.
+  if (moved > 10 || scrolled > 10) return;
+
   alert(LOCKED_FILM_MESSAGE);
+}
+
+function rememberFilmLockPointer(event) {
+  const overlay = $("filmLockOverlay");
+  const p = event && event.touches && event.touches[0] ? event.touches[0] : event;
+  filmLockPointerStart = {
+    x: p && typeof p.clientX === "number" ? p.clientX : 0,
+    y: p && typeof p.clientY === "number" ? p.clientY : 0,
+    scrollTop: overlay ? overlay.scrollTop : 0
+  };
+}
+
+function syncLockedFilmScroll() {
+  const overlay = $("filmLockOverlay");
+  const box = document.querySelector(".watchFrameBox");
+  if (!overlay || !box) return;
+  box.style.setProperty("--film-scroll-y", overlay.scrollTop + "px");
+}
+
+function bindFilmLockOverlayScroll() {
+  const overlay = $("filmLockOverlay");
+  if (!overlay || overlay.dataset.scrollBound === "1") return;
+  overlay.dataset.scrollBound = "1";
+  overlay.addEventListener("scroll", syncLockedFilmScroll, { passive: true });
+  overlay.addEventListener("pointerdown", rememberFilmLockPointer, { passive: true });
+  overlay.addEventListener("touchstart", rememberFilmLockPointer, { passive: true });
 }
 
 function closeFilmModal() {
@@ -931,7 +979,9 @@ function closeFilmModal() {
   const overlay = $("filmLockOverlay");
   if (overlay) overlay.classList.add("hidden");
   const shell = document.querySelector(".watchShell");
-  if (shell) shell.classList.remove("lockedWatch");
+  if (shell) shell.classList.remove("lockedWatch", "croppedWatch");
+  const box = document.querySelector(".watchFrameBox");
+  if (box) box.style.setProperty("--film-scroll-y", "0px");
   page(lastPageBeforeWatch || "movies");
 }
 
@@ -979,6 +1029,8 @@ function handleFullscreenGuard() {
 
 document.addEventListener("fullscreenchange", handleFullscreenGuard);
 document.addEventListener("webkitfullscreenchange", handleFullscreenGuard);
+document.addEventListener("DOMContentLoaded", bindFilmLockOverlayScroll);
+bindFilmLockOverlayScroll();
 
 async function forgotPassword() {
   try {
