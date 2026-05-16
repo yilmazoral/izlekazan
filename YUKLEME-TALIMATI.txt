@@ -1,7 +1,12 @@
-İzleKazan final mobil düzeltme yükleme talimatı
+İzleKazan güncel dosya paketi
 
-1) GitHub deposunda index.html dosyasını bu paketteki index.html ile değiştirin.
-2) style.css dosyasını bu paketteki style.css ile değiştirin.
-3) Diğer dosyaları değiştirmek zorunda değilsiniz; komple yükleme yapacaksanız paket içindeki tüm dosyaları ana dizine yükleyin.
+Bu pakette üye girişi/üye ol formları güncellendi.
 
-ÖNEMLİ: Bu sürümde index.html içinde style.css?v=20260516-final2 kullanıldı. Bu sayede telefon tarayıcısı eski CSS dosyasını önbellekten çekmez.
+Yapılanlar:
+- Giriş ekranına e-posta veya telefon numarası ile giriş desteği eklendi.
+- Giriş, şifre ve şifre tekrar alanlarına Göster/Gizle butonu eklendi.
+- Telefon numarası 05XXXXXXXXX, 5XXXXXXXXX veya +90 formatıyla girilse de giriş kontrolü yapılır.
+- Mobil üst menü ve üye ol formu için önceki düzeltmeler korundu.
+
+GitHub ana dizinine ZIP içindeki izlekazan_tum_dosyalar klasörünün içindeki tüm dosyaları yükleyin.
+Önemli: Bu güncelleme için index.html, style.css, app.js, site-update.js ve server.js dosyalarını mutlaka değiştirin.

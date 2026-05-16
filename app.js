@@ -279,9 +279,10 @@ async function register() {
 
 async function login() {
   try {
+    const loginValue = $("le").value;
     const d = await api("/api/login", {
       method: "POST",
-      body: JSON.stringify({ email: $("le").value, password: $("ls").value })
+      body: JSON.stringify({ login: loginValue, email: loginValue, password: $("ls").value })
     });
     token = d.token;
     me = d.user;

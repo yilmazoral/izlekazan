@@ -2,6 +2,18 @@
 // Bu dosya app.js yüklendikten sonra çalışır ve mevcut sistemi bozmadan küçük davranış düzeltmeleri yapar.
 
 (function () {
+
+  // Şifre alanlarında göster/gizle düğmesi.
+  window.togglePassword = function togglePassword(inputId, button) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const show = input.type === "password";
+    input.type = show ? "text" : "password";
+    if (button) {
+      button.textContent = show ? "Gizle" : "Göster";
+      button.setAttribute("aria-label", show ? "Şifreyi gizle" : "Şifreyi göster");
+    }
+  };
   function safeCell(value, fallback = "-") {
     return value === undefined || value === null || value === "" ? fallback : value;
   }

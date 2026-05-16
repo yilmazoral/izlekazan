@@ -159,6 +159,14 @@ function maskPhone(phone) {
   if (!raw) return "0*** *********";
   return raw.slice(0, 4) + "*********";
 }
+function normalizePhone(phone) {
+  let raw = String(phone || "").replace(/\D/g, "");
+  if (!raw) return "";
+  if (raw.startsWith("90") && raw.length === 12) raw = "0" + raw.slice(2);
+  if (raw.startsWith("5") && raw.length === 10) raw = "0" + raw;
+  return raw;
+}
+
 function makeRef() { return "IK" + Math.random().toString(36).slice(2, 8).toUpperCase() + Math.floor(10 + Math.random() * 89); }
 function notify(d, userId, title, message, type = "info") {
   d.notifications.push({ id: id(), userId, title, message, type, read: false, createdAt: now() });
@@ -319,9 +327,9 @@ app.post("/api/register", async (req, res) => {
   if (!firstName || !lastName || !email || !phone || !password) return res.status(400).json({ error: "Tüm alanları doldurun" });
   if (password !== password2) return res.status(400).json({ error: "Şifreler eşleşmiyor" });
   const emailNorm = String(email).trim().toLowerCase();
-  const phoneNorm = String(phone).trim();
+  const phoneNorm = normalizePhone(phone) || String(phone).trim();
   if (d.users.some(u => String(u.email).toLowerCase() === emailNorm)) return res.status(400).json({ error: "Bu e-posta zaten kayıtlı" });
-  if (d.users.some(u => String(u.phone) === phoneNorm)) return res.status(400).json({ error: "Bu telefon zaten kayıtlı" });
+  if (d.users.some(u => normalizePhone(u.phone) === phoneNorm)) return res.status(400).json({ error: "Bu telefon zaten kayıtlı" });
   const sponsor = d.users.find(u => String(u.referralCode || "").toUpperCase() === String(referralCode || "").trim().toUpperCase());
   if (!sponsor) return res.status(400).json({ error: "Geçerli bir referans kodu girilmelidir" });
   const user = {
@@ -337,9 +345,15 @@ app.post("/api/register", async (req, res) => {
 
 app.post("/api/login", (req, res) => {
   const d = readDb(); processDb(d);
-  const { email, password } = req.body || {};
-  const u = d.users.find(x => String(x.email || "").toLowerCase() === String(email || "").trim().toLowerCase());
-  if (!u || !bcrypt.compareSync(String(password || ""), u.passwordHash || "")) return res.status(401).json({ error: "E-posta veya şifre hatalı" });
+  const { email, login, username, password } = req.body || {};
+  const identifier = String(login || username || email || "").trim();
+  const identifierLower = identifier.toLowerCase();
+  const identifierPhone = normalizePhone(identifier);
+  const u = d.users.find(x =>
+    String(x.email || "").toLowerCase() === identifierLower ||
+    (identifierPhone && normalizePhone(x.phone) === identifierPhone)
+  );
+  if (!u || !bcrypt.compareSync(String(password || ""), u.passwordHash || "")) return res.status(401).json({ error: "E-posta/telefon veya şifre hatalı" });
   if (u.banned) return res.status(403).json({ error: "Hesabınız pasif durumda" });
   const token = jwt.sign({ id: u.id, email: u.email, role: u.role }, JWT_SECRET, { expiresIn: "30d" });
   res.json({ token, user: publicUser(u) });
