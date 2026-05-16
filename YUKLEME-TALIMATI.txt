@@ -1,29 +1,7 @@
-İzleKazan tüm site dosyaları
+İzleKazan final mobil düzeltme yükleme talimatı
 
-GitHub'a yüklenecek dosya ve klasörler:
+1) GitHub deposunda index.html dosyasını bu paketteki index.html ile değiştirin.
+2) style.css dosyasını bu paketteki style.css ile değiştirin.
+3) Diğer dosyaları değiştirmek zorunda değilsiniz; komple yükleme yapacaksanız paket içindeki tüm dosyaları ana dizine yükleyin.
 
-- index.html
-- style.css
-- app.js
-- site-update.js
-- server.js
-- package.json
-- supabase-setup.sql
-- README.md
-- assets klasörü içindeki tüm dosyalar
-
-GitHub'da aynı isimli dosyalar varsa değiştirin. assets klasörünü de komple yükleyin.
-
-Render'da Start Command şu şekilde kalabilir:
-npm start
-
-Render Environment değişkenleri:
-SUPABASE_URL
-SUPABASE_SERVICE_ROLE_KEY
-JWT_SECRET
-ADMIN_EMAIL
-ADMIN_PASS
-PUBLIC_URL
-
-Önemli:
-SUPABASE_SERVICE_ROLE_KEY sadece Render Environment bölümünde kalmalı, frontend dosyalarına yazılmamalıdır.
+ÖNEMLİ: Bu sürümde index.html içinde style.css?v=20260516-final2 kullanıldı. Bu sayede telefon tarayıcısı eski CSS dosyasını önbellekten çekmez.

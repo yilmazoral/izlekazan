@@ -60,3 +60,228 @@ main{max-width:1180px;margin:0 auto;padding:34px 18px 92px}
 .bottomNav{position:fixed;z-index:50;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:2px;padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:rgba(2,6,23,.90);backdrop-filter:blur(14px);border-top:1px solid rgba(255,255,255,.10)}.bottomNav button{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:62px;padding:8px 7px;border-radius:14px;background:transparent;color:#cbd5e1;box-shadow:none;font-size:16px}.bottomNav span{font-size:10px;font-weight:800}#toast{position:fixed;z-index:100;left:50%;bottom:88px;transform:translateX(-50%);display:none;max-width:calc(100vw - 32px);padding:13px 17px;border-radius:999px;background:rgba(15,23,42,.96);border:1px solid rgba(246,181,30,.28);box-shadow:var(--shadow);color:var(--text);font-weight:800;text-align:center}
 @media (max-width:980px){.heroGrid{grid-template-columns:1fr;margin-top:32px}.heroVisual{transform:none}.stats,.steps{grid-template-columns:repeat(2,1fr)}.comparison,.databaseGrid,.faq{grid-template-columns:1fr}.databaseTeaser{flex-direction:column;align-items:flex-start}.teaserActions{justify-content:flex-start}.topnav{align-items:flex-start;flex-direction:column}.navlinks{justify-content:flex-start}.cinemaAuthStage{grid-template-columns:1fr}.hero{min-height:auto}.heroText h1{font-size:44px}}
 @media (max-width:640px){body{padding-bottom:78px}.hero{padding:10px 10px 38px}.topnav{border-radius:18px;padding:10px}.brandIcon{width:30px;height:30px}.navlinks{width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.navlinks button{font-size:12px;padding:9px 7px}.heroGrid{gap:22px}.heroText h1{font-size:38px}.heroLead{font-size:16px}.heroActions button,.teaserActions button,.movieActions button{width:100%}.stats,.steps{grid-template-columns:1fr}.card,.stats>div,.steps>div{padding:19px;border-radius:22px}.moviePosterWrap{margin:-19px -19px 14px}.twoCols{grid-template-columns:1fr}.bottomNav{justify-content:flex-start;overflow-x:auto}.bottomNav button{min-width:58px}.incomeModel{flex-direction:column;align-items:flex-start}.visualHeader h3{font-size:23px}table{min-width:650px}}
+
+/* === MOBİL GÖRÜNÜM DÜZELTMESİ ===
+   Üst menünün telefonda çok yer kaplamasını ve alt menünün içerik kapatmasını düzeltir. */
+@media (min-width: 821px){
+  body{padding-bottom:0}
+  .bottomNav{display:none}
+}
+
+@media (max-width: 820px){
+  html,body{overflow-x:hidden}
+  body{padding-bottom:122px}
+  main{padding:26px 12px 132px}
+  .hero{padding:12px 12px 34px;min-height:auto}
+  .topnav{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;border-radius:20px;min-height:62px}
+  .brand{font-size:15px;letter-spacing:.10em}
+  .brandIcon{width:34px;height:34px;border-radius:13px}
+  .navlinks{width:auto;display:flex;align-items:center;justify-content:flex-end;gap:0}
+  .navlinks button{display:none}
+  .navlinks #loginTop:not(.hidden),
+  .navlinks #logoutBtn:not(.hidden){display:inline-flex;align-items:center;justify-content:center;padding:11px 14px;font-size:13px;line-height:1.1;white-space:nowrap}
+  .heroGrid{margin-top:34px;gap:24px}
+  .heroText{padding-top:0}
+  .eyebrow,.sectionIntro span,.databaseTeaser span{font-size:11px;letter-spacing:.22em}
+  .heroText h1{font-size:clamp(34px,10.4vw,44px);line-height:1.04;letter-spacing:-.045em;margin:16px 0 12px}
+  .rotatingSloganWrap{min-height:auto;margin:12px 0 0}
+  .rotatingSlogan{font-size:clamp(20px,6vw,25px);line-height:1.45}
+  .heroLead{font-size:16px;line-height:1.72;margin:18px 0 14px}
+  .earnBanner{display:flex;width:100%;line-height:1.55;padding:12px 14px;margin:10px 0}
+  .heroChecks{gap:10px;margin:14px 0}
+  .heroRisk{font-size:13px;line-height:1.55}
+  .heroVisual{display:none}
+  .stats,.steps,.comparison,.databaseGrid,.faq{grid-template-columns:1fr}
+  .bottomNav{display:flex;justify-content:flex-start;overflow-x:auto;gap:4px;padding:7px 8px calc(9px + env(safe-area-inset-bottom));scrollbar-width:none}
+  .bottomNav::-webkit-scrollbar{display:none}
+  .bottomNav button{min-width:66px;padding:7px 6px;border-radius:13px;font-size:17px;flex:0 0 auto}
+  .bottomNav span{font-size:10px;line-height:1.2}
+  #toast{bottom:104px}
+}
+
+@media (max-width: 380px){
+  .brand b{font-size:13px}
+  .navlinks #loginTop:not(.hidden),
+  .navlinks #logoutBtn:not(.hidden){padding:10px 11px;font-size:12px}
+  .heroText h1{font-size:33px}
+  .rotatingSlogan{font-size:20px}
+}
+
+/* === ÜYE OL FORMU MOBİL KESİLME DÜZELTMESİ ===
+   Üye ol formundaki uzun alanlar telefonda alt menü altında kalmasın diye panel yüksekliği artırıldı. */
+.authPanel.active .authPanelContent{
+  max-height:1200px;
+}
+
+@media (max-width:820px){
+  .authPage{
+    padding-bottom:140px;
+  }
+  .cinemaAuthStage{
+    gap:18px;
+  }
+  .authPanel.active .authPanelContent{
+    max-height:1400px;
+    overflow:visible;
+    padding-bottom:34px;
+  }
+  .cinemaCard{
+    overflow:visible;
+  }
+  .authPanelContent input,
+  .authPanelContent select,
+  .authPanelContent textarea{
+    margin:7px 0;
+  }
+  .authPanelContent button{
+    margin-top:10px;
+    width:100%;
+  }
+}
+
+/* === FINAL MOBIL UST MENU VE UYE OL FORMU DUZELTMESI === */
+/* Bu blok dosyanın en sonunda kalmalı. Önceki mobil kuralları kesin olarak ezer. */
+@media (min-width: 821px){
+  body{padding-bottom:0 !important;}
+  .bottomNav{display:none !important;}
+}
+
+@media (max-width: 820px){
+  html,body{
+    overflow-x:hidden !important;
+    height:auto !important;
+  }
+  body{
+    padding-bottom:calc(150px + env(safe-area-inset-bottom)) !important;
+  }
+  main{
+    padding:24px 12px calc(190px + env(safe-area-inset-bottom)) !important;
+  }
+
+  /* ÜST MENÜ: Mobilde sadece logo + Giriş Yap / Üye Ol görünsün. */
+  .topnav{
+    width:100% !important;
+    max-width:1180px !important;
+    display:flex !important;
+    flex-direction:row !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    gap:8px !important;
+    padding:12px 14px !important;
+    border-radius:20px !important;
+    min-height:62px !important;
+  }
+  .brand{
+    flex:0 0 auto !important;
+    font-size:15px !important;
+    letter-spacing:.10em !important;
+  }
+  .brandIcon{
+    width:34px !important;
+    height:34px !important;
+    border-radius:13px !important;
+  }
+  .navlinks{
+    width:auto !important;
+    display:flex !important;
+    grid-template-columns:none !important;
+    flex-wrap:nowrap !important;
+    align-items:center !important;
+    justify-content:flex-end !important;
+    gap:0 !important;
+  }
+  .navlinks button{
+    display:none !important;
+  }
+  .navlinks #loginTop:not(.hidden),
+  .navlinks #logoutBtn:not(.hidden){
+    display:inline-flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    width:auto !important;
+    min-width:auto !important;
+    padding:11px 14px !important;
+    font-size:13px !important;
+    line-height:1.1 !important;
+    white-space:nowrap !important;
+  }
+
+  /* ALT MENÜ: Sabit kalsın ama formların üstünü kapatmasın. */
+  .bottomNav{
+    display:flex !important;
+    justify-content:flex-start !important;
+    overflow-x:auto !important;
+    gap:4px !important;
+    padding:7px 8px calc(10px + env(safe-area-inset-bottom)) !important;
+    scrollbar-width:none !important;
+  }
+  .bottomNav::-webkit-scrollbar{display:none !important;}
+  .bottomNav button{
+    min-width:66px !important;
+    flex:0 0 auto !important;
+    padding:7px 6px !important;
+  }
+
+  /* ÜYE OL / GİRİŞ: Aktif panel içeriği yükseklik sınırına takılmasın. */
+  #auth.authPage,
+  .authPage{
+    max-width:900px !important;
+    padding-bottom:calc(230px + env(safe-area-inset-bottom)) !important;
+    margin-bottom:calc(120px + env(safe-area-inset-bottom)) !important;
+  }
+  .cinemaAuthStage,
+  .accordionAuth{
+    display:block !important;
+    grid-template-columns:none !important;
+    gap:0 !important;
+    padding-bottom:calc(150px + env(safe-area-inset-bottom)) !important;
+  }
+  .cinemaCard,
+  .authPanel{
+    overflow:visible !important;
+    margin-bottom:18px !important;
+  }
+  .authPanelContent{
+    overflow:hidden !important;
+  }
+  .authPanel.active .authPanelContent{
+    max-height:none !important;
+    height:auto !important;
+    overflow:visible !important;
+    padding:18px 20px 46px !important;
+    opacity:1 !important;
+  }
+  .authPanel:not(.active) .authPanelContent{
+    max-height:0 !important;
+    height:0 !important;
+    overflow:hidden !important;
+    padding-top:0 !important;
+    padding-bottom:0 !important;
+    opacity:.35 !important;
+  }
+  .authPanelContent input,
+  .authPanelContent select,
+  .authPanelContent textarea{
+    margin:7px 0 !important;
+  }
+  .authPanelContent button{
+    width:100% !important;
+    min-height:54px !important;
+    margin:14px 0 12px !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+  }
+  .registerCard.authPanel.active{
+    padding-bottom:18px !important;
+  }
+}
+
+@media (max-width: 390px){
+  .brand b{font-size:13px !important;}
+  .navlinks #loginTop:not(.hidden),
+  .navlinks #logoutBtn:not(.hidden){
+    padding:10px 11px !important;
+    font-size:12px !important;
+  }
+}
