@@ -36,6 +36,22 @@ function isLoggedIn() {
   return !!token;
 }
 
+function requireZeroPhoneInput(id) {
+  const el = $(id);
+  const value = el ? String(el.value || "").trim() : "";
+  const digits = value.replace(/\D/g, "");
+  if (!digits || !digits.startsWith("0")) {
+    toast("Telefon numarası 0 ile başlamalıdır. Lütfen başına 0 koyarak 05XXXXXXXXX formatında yazın.");
+    if (el) {
+      el.focus();
+      el.classList.add("inputError");
+      setTimeout(() => el.classList.remove("inputError"), 1800);
+    }
+    return null;
+  }
+  return digits;
+}
+
 function refreshMenu() {
   const loginTop = $("loginTop");
   const logoutBtn = $("logoutBtn");
@@ -263,9 +279,9 @@ function showPaymentGuide(id, price) {
       <b>IBAN:</b> TR78 0015 7000 0000 0037 7980 62<br>
       <b>Alıcı:</b> YILMAZ ORAL<br>
       <b>Tutar:</b> ${price} TL<br>
-      <b>Açıklama:</b> Kayıtlı telefon numaranız
+      <b>Açıklama:</b> Kayıtlı telefon numaranız 05XXXXXXXXX
     </div>
-    <input id="payGuidePhone" placeholder="Kayıtlı telefon numaranız">
+    <input id="payGuidePhone" inputmode="tel" autocomplete="tel" placeholder="Kayıtlı telefon numaranız 05XXXXXXXXX">
     <div class="actionRow">
       <button onclick="paymentFromGuide()">Ödeme Yaptım</button>
       <button class="ghost" onclick="page('packages')">Paket Değiştir</button>
@@ -275,13 +291,15 @@ function showPaymentGuide(id, price) {
 
 async function register() {
   try {
+    const phoneNorm = requireZeroPhoneInput("rp");
+    if (!phoneNorm) return;
     await api("/api/register", {
       method: "POST",
       body: JSON.stringify({
         firstName: $("rf").value,
         lastName: $("rl").value,
         email: $("re").value,
-        phone: $("rp").value,
+        phone: phoneNorm,
         password: $("rs").value,
         password2: $("rs2").value,
         referralCode: $("rr").value
@@ -375,7 +393,7 @@ async function dash() {
 
       <div class="card">
         <h3>Alt Üyelerim</h3>
-        <p class="privacyNote">Kullanıcı gizliliğini korumak amacıyla ad, soyad ve telefon bilgileri maskelenmiş olarak gösterilmektedir.</p>
+        <p class="privacyNote">Kullanıcı gizliliği için ad görünür; soyadın yalnızca ilk harfi ve telefonun ilk 5 hanesi gösterilir.</p>
         <div class="tableWrap">
           <table>
             <thead><tr><th>Ad Soyad</th><th>Telefon</th><th>Paket</th><th>Premium Başlangıç</th><th>Premium Bitiş</th><th>Durum</th></tr></thead>
@@ -391,7 +409,7 @@ async function dash() {
         <input id="pf" value="${d.user.firstName}" placeholder="Ad">
         <input id="pl" value="${d.user.lastName}" placeholder="Soyad">
         <input id="pe" value="${d.user.email}" placeholder="Email">
-        <input id="pp" value="${d.user.phone}" placeholder="Telefon">
+        <input id="pp" inputmode="tel" autocomplete="tel" value="${d.user.phone}" placeholder="Telefon 05XXXXXXXXX">
         <input id="pcp" type="password" placeholder="Mevcut şifre">
         <input id="pnp" type="password" placeholder="Yeni şifre">
         <button onclick="saveProfile()">Bilgileri Güncelle</button>
@@ -412,7 +430,7 @@ async function dash() {
           return `<option value="${p.id}" data-price="${p.price}" ${disabled ? "disabled" : ""}>${p.name} - ${p.price} TL / Yıl${label}</option>`;
         }).join("")}</select>
         <input id="payAmount" placeholder="Tutar">
-        <input id="payPhone" value="${d.user.phone}" placeholder="Telefon">
+        <input id="payPhone" inputmode="tel" autocomplete="tel" value="${d.user.phone}" placeholder="Telefon 05XXXXXXXXX">
         <button onclick="payment()">Ödeme Bildir</button>
       </div>
 
@@ -449,13 +467,15 @@ function toggleList(id) {
 
 async function saveProfile() {
   try {
+    const phoneNorm = requireZeroPhoneInput("pp");
+    if (!phoneNorm) return;
     await api("/api/profile", {
       method: "POST",
       body: JSON.stringify({
         firstName: $("pf").value,
         lastName: $("pl").value,
         email: $("pe").value,
-        phone: $("pp").value,
+        phone: phoneNorm,
         currentPassword: $("pcp").value,
         newPassword: $("pnp").value
       })
@@ -483,13 +503,15 @@ function shareRef() {
 
 async function payment() {
   try {
+    const phoneNorm = requireZeroPhoneInput("payPhone");
+    if (!phoneNorm) return;
     await api("/api/payment", {
       method: "POST",
       body: JSON.stringify({
         packageId: $("packSel").value,
         amount: $("payAmount").value,
-        phone: $("payPhone").value,
-        note: $("payPhone").value
+        phone: phoneNorm,
+        note: phoneNorm
       })
     });
     toast("Ödeme bildirimi gönderildi");
@@ -505,13 +527,15 @@ async function paymentFromGuide() {
       page("auth");
       return;
     }
+    const phoneNorm = requireZeroPhoneInput("payGuidePhone");
+    if (!phoneNorm) return;
     await api("/api/payment", {
       method: "POST",
       body: JSON.stringify({
         packageId: selectedPackageId,
         amount: selectedPackagePrice,
-        phone: $("payGuidePhone").value,
-        note: $("payGuidePhone").value
+        phone: phoneNorm,
+        note: phoneNorm
       })
     });
     toast("Ödeme bildirimi admine gönderildi");
@@ -700,9 +724,9 @@ async function publicMembers() {
       <h3 class="dbTitle">Aramıza Katılanlar</h3>
       <div class="tableWrap publicWithdrawTable publicMembersTable">
         <table>
-          <thead><tr><th>Üye</th><th>Telefon</th><th>Paket</th><th>Davet Eden</th><th>Davet Eden Telefon</th><th>Katılım Tarihi</th></tr></thead>
+          <thead><tr><th>Üye</th><th>Telefon</th><th>Paket</th><th>Davet Eden</th><th>Katılım Tarihi</th></tr></thead>
           <tbody>
-            ${list.map((m) => `<tr><td>${m.maskedName}</td><td>${m.maskedPhone}</td><td>${m.packageName || "Paket Yok"}</td><td>${m.inviterMaskedName || "Sistem"}</td><td>${m.inviterMaskedPhone || "-"}</td><td>${m.createdAt ? new Date(m.createdAt).toLocaleString("tr-TR") : "-"}</td></tr>`).join("") || `<tr><td colspan="6">Henüz üye kaydı yok</td></tr>`}
+            ${list.map((m) => `<tr><td>${m.maskedName}</td><td>${m.maskedPhone}</td><td>${m.packageName || "Paket Yok"}</td><td>${m.inviterMaskedName || "Sistem"}</td><td>${m.createdAt ? new Date(m.createdAt).toLocaleString("tr-TR") : "-"}</td></tr>`).join("") || `<tr><td colspan="5">Henüz üye kaydı yok</td></tr>`}
           </tbody>
         </table>
       </div>`;

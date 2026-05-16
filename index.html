@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <meta name="description" content="İzleKazan; premium film erişimini referans, katkı ve şeffaf kazanç takibiyle birleştiren yeni nesil üyelik platformudur.">
   <title>İzleKazan | Film İzle, Ek Gelir Fırsatına Katıl</title>
-  <link rel="stylesheet" href="style.css?v=20260516-fullscreenkapat1">
+  <link rel="stylesheet" href="style.css?v=20260517-privacyphone1">
 </head>
 <body>
   <header class="hero" id="hero">
@@ -59,7 +59,7 @@
         <div class="visualMetric"><b>Premium Film Erişimi</b><small>Reklamsız film kataloğuna paketle eriş.</small></div>
         <div class="visualMetric"><b>Referans Geliri</b><small>Davet ettiğin üyeleri panelden takip et.</small></div>
         <div class="visualMetric"><b>Film Ekle Kazan</b><small>Onaylanan film katkılarınla ekstra gelir oluştur.</small></div>
-        <div class="visualMetric"><b>Şeffaf Veri Tabanı</b><small>Çekim ve katılım kayıtlarını maskeli olarak gör.</small></div>
+        <div class="visualMetric"><b>Şeffaf Veri Tabanı</b><small>Çekim ve katılım kayıtlarını gizlilik kurallarıyla gör.</small></div>
       </aside>
     </div>
   </header>
@@ -102,7 +102,7 @@
         <div>
           <span>Herkese Açık Şeffaflık Alanı</span>
           <h3>Veri Tabanı</h3>
-          <p>Kullanıcı gizliliği korunarak çekim talepleri ve platforma katılan yeni üyeler maskeli şekilde paylaşılır.</p>
+          <p>Kullanıcı gizliliği korunarak ad görünür, soyadın yalnızca ilk harfi ve telefonun ilk 5 hanesi gösterilir.</p>
         </div>
         <div class="teaserActions">
           <button onclick="page('database'); setTimeout(()=>scrollToDb('publicWithdrawalsBox'),350)">Çekim Taleplerini Gör</button>
@@ -175,7 +175,7 @@
         <details><summary>Şifremi unuttum ne yapmalıyım?</summary><p>Şifremi Unuttum bölümünden e-posta ile yeni şifre oluşturabilirsiniz.</p></details>
         <details><summary>Film neden reddedilir?</summary><p>Kırık link, düşük kalite veya uygun olmayan içerik nedeniyle reddedilebilir.</p></details>
         <details><summary>Platform mobil uyumlu mu?</summary><p>Evet. Telefon, tablet ve bilgisayarda kullanılabilir.</p></details>
-        <details><summary>Veri Tabanı bölümünde kişisel bilgiler görünür mü?</summary><p>Hayır. Herkese açık alanda ad, soyad ve telefon bilgileri maskeli gösterilir.</p></details>
+        <details><summary>Veri Tabanı bölümünde kişisel bilgiler görünür mü?</summary><p>Herkese açık alanda ad görünür; soyadın yalnızca ilk harfi, telefon numarasının ise ilk 5 hanesi gösterilir.</p></details>
         <details><summary>Üye olmak ve gelir elde etmek için yaş sınırı var mıdır?</summary><p>Üye olmak için yaş sınırı yoktur fakat ödeme almanız için banka hesabı ya da Papara, İninal, Tosla hesabınız olmalı ya da destek bölümüne ileterek kripto cüzdanınıza USDT (Tether) olarak da çekim yapabilirsiniz.</p></details>
       </div>
     </section>
@@ -207,7 +207,7 @@
           <div class="authPanelContent">
             <div class="twoCols"><input id="rf" autocomplete="given-name" placeholder="Ad"><input id="rl" autocomplete="family-name" placeholder="Soyad"></div>
             <input id="re" type="email" autocomplete="email" placeholder="E-posta">
-            <input id="rp" inputmode="tel" autocomplete="tel" placeholder="Telefon 05XXXXXXXXX">
+            <input id="rp" inputmode="tel" autocomplete="tel" placeholder="Telefon 05XXXXXXXXX (0 ile başlamalı)">
             <div class="twoCols">
               <div class="passwordWrap">
                 <input id="rs" type="password" autocomplete="new-password" placeholder="Şifre">
@@ -259,10 +259,10 @@
     </section>
 
     <section id="database" class="page">
-      <div class="sectionIntro"><span>Şeffaf Kayıtlar</span><h2>Veri Tabanı</h2><p>Kullanıcı gizliliğini korumak amacıyla ad, soyad ve telefon bilgileri maskelenmiş olarak gösterilmektedir.</p></div>
+      <div class="sectionIntro"><span>Şeffaf Kayıtlar</span><h2>Veri Tabanı</h2><p>Kullanıcı gizliliği için ad görünür; soyadın yalnızca ilk harfi ve telefonun ilk 5 hanesi gösterilir.</p></div>
       <div class="databaseGrid">
-        <div class="card"><h3>Kazanç Çekim Talepleri</h3><p>Platform üzerindeki çekim talepleri maskeli olarak listelenir.</p><button onclick="scrollToDb('publicWithdrawalsBox')">Çekim Taleplerini Gör</button></div>
-        <div class="card"><h3>Aramıza Katılanlar</h3><p>Platforma katılan yeni üyeler ve davet eden kişiler maskeli olarak listelenir.</p><button onclick="scrollToDb('publicMembersBox')">Yeni Üyeleri Gör</button></div>
+        <div class="card"><h3>Kazanç Çekim Talepleri</h3><p>Platform üzerindeki çekim talepleri gizlilik kurallarıyla listelenir.</p><button onclick="scrollToDb('publicWithdrawalsBox')">Çekim Taleplerini Gör</button></div>
+        <div class="card"><h3>Aramıza Katılanlar</h3><p>Platforma katılan yeni üyeler ve davet eden kişiler gizlilik kurallarıyla listelenir.</p><button onclick="scrollToDb('publicMembersBox')">Yeni Üyeleri Gör</button></div>
       </div>
       <div id="publicWithdrawalsBox"></div>
       <div id="publicMembersBox"></div>
@@ -284,7 +284,7 @@
   </nav>
 
   <div id="toast"></div>
-  <script src="app.js?v=20260516-fullscreenkapat1"></script>
-  <script src="site-update.js?v=20260516-fullscreenkapat1"></script>
+  <script src="app.js?v=20260517-privacyphone1"></script>
+  <script src="site-update.js?v=20260517-privacyphone1"></script>
 </body>
 </html>

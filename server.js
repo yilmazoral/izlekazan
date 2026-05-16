@@ -143,21 +143,24 @@ function publicUser(u) {
   const { passwordHash, ...safe } = u;
   return { ...safe, premiumActive: isPremium(u), premiumDaysLeft: daysLeft(u.premiumUntil) };
 }
-function maskPart(v) {
-  const text = String(v || "").trim();
-  if (!text) return "-***";
-  return text.charAt(0).toLocaleUpperCase("tr-TR") + "***";
+function maskSurname(last) {
+  const text = String(last || "").trim();
+  if (!text) return "-****";
+  return text.charAt(0).toLocaleUpperCase("tr-TR") + "****";
 }
-function maskName(first, last) { return `${maskPart(first)} ${maskPart(last)}`; }
+function maskName(first, last) {
+  const firstText = String(first || "").trim() || "İsim";
+  return `${firstText} ${maskSurname(last)}`;
+}
 function maskFullName(full) {
   const parts = String(full || "").trim().split(/\s+/).filter(Boolean);
-  if (!parts.length) return "-*** -***";
+  if (!parts.length) return "İsim -****";
   return maskName(parts[0], parts.slice(1).join(" "));
 }
 function maskPhone(phone) {
-  const raw = String(phone || "").replace(/\D/g, "");
-  if (!raw) return "0*** *********";
-  return raw.slice(0, 4) + "*********";
+  const raw = normalizePhone(phone) || String(phone || "").replace(/\D/g, "");
+  if (!raw) return "0**** ******";
+  return raw.slice(0, 5) + "*".repeat(Math.max(6, raw.length - 5));
 }
 function normalizePhone(phone) {
   let raw = String(phone || "").replace(/\D/g, "");
@@ -165,6 +168,17 @@ function normalizePhone(phone) {
   if (raw.startsWith("90") && raw.length === 12) raw = "0" + raw.slice(2);
   if (raw.startsWith("5") && raw.length === 10) raw = "0" + raw;
   return raw;
+}
+function zeroPrefixedPhone(phone) {
+  const raw = String(phone || "").replace(/\D/g, "");
+  return raw && raw.startsWith("0");
+}
+function requireZeroPrefixedPhone(phone, res) {
+  if (!zeroPrefixedPhone(phone)) {
+    res.status(400).json({ error: "Telefon numarası 0 ile başlamalıdır. Lütfen numaranızın başına 0 koyarak 05XXXXXXXXX formatında yazın." });
+    return null;
+  }
+  return normalizePhone(phone);
 }
 
 function makeRef() { return "IK" + Math.random().toString(36).slice(2, 8).toUpperCase() + Math.floor(10 + Math.random() * 89); }
@@ -262,7 +276,6 @@ function publicMember(d, u) {
     packageId: u.packageId || 0,
     packageName: pack ? pack.name : "Paket Yok",
     inviterMaskedName: inviter ? maskName(inviter.firstName, inviter.lastName) : "Sistem",
-    inviterMaskedPhone: inviter ? maskPhone(inviter.phone) : "-",
     createdAt: u.createdAt
   };
 }
@@ -271,8 +284,8 @@ function publicWithdrawal(d, w) {
   const pack = findPackage(w.packageId || (u && u.packageId));
   return {
     id: w.id,
-    maskedName: w.fullName ? maskFullName(w.fullName) : (u ? maskName(u.firstName, u.lastName) : "-*** -***"),
-    maskedPhone: u ? maskPhone(u.phone) : "0*** *********",
+    maskedName: w.fullName ? maskFullName(w.fullName) : (u ? maskName(u.firstName, u.lastName) : "İsim -****"),
+    maskedPhone: u ? maskPhone(u.phone) : "0**** ******",
     packageName: pack ? pack.name : "Paket Yok",
     packageId: pack ? pack.id : 0,
     amount: w.amount,
@@ -327,7 +340,8 @@ app.post("/api/register", async (req, res) => {
   if (!firstName || !lastName || !email || !phone || !password) return res.status(400).json({ error: "Tüm alanları doldurun" });
   if (password !== password2) return res.status(400).json({ error: "Şifreler eşleşmiyor" });
   const emailNorm = String(email).trim().toLowerCase();
-  const phoneNorm = normalizePhone(phone) || String(phone).trim();
+  const phoneNorm = requireZeroPrefixedPhone(phone, res);
+  if (!phoneNorm) return;
   if (d.users.some(u => String(u.email).toLowerCase() === emailNorm)) return res.status(400).json({ error: "Bu e-posta zaten kayıtlı" });
   if (d.users.some(u => normalizePhone(u.phone) === phoneNorm)) return res.status(400).json({ error: "Bu telefon zaten kayıtlı" });
   const sponsor = d.users.find(u => String(u.referralCode || "").toUpperCase() === String(referralCode || "").trim().toUpperCase());
@@ -383,7 +397,11 @@ app.post("/api/profile", auth, userRequired, async (req, res) => {
   if (firstName) u.firstName = String(firstName).trim();
   if (lastName) u.lastName = String(lastName).trim();
   if (email) u.email = String(email).trim().toLowerCase();
-  if (phone) u.phone = String(phone).trim();
+  if (phone) {
+    const phoneNorm = requireZeroPrefixedPhone(phone, res);
+    if (!phoneNorm) return;
+    u.phone = phoneNorm;
+  }
   if (newPassword) {
     if (!bcrypt.compareSync(String(currentPassword || ""), u.passwordHash || "")) return res.status(400).json({ error: "Mevcut şifre hatalı" });
     u.passwordHash = bcrypt.hashSync(String(newPassword), 10);
@@ -398,9 +416,11 @@ app.post("/api/payment", auth, userRequired, async (req, res) => {
   if (!pack) return res.status(400).json({ error: "Paket bulunamadı" });
   const currentId = isPremium(req.user) ? Number(req.user.packageId || 0) : 0;
   if (currentId && Number(pack.id) < currentId) return res.status(400).json({ error: "Mevcut paketinizden düşük paket seçemezsiniz" });
+  const paymentPhone = phone ? requireZeroPrefixedPhone(phone, res) : req.user.phone;
+  if (!paymentPhone) return;
   const payment = {
     id: id(), userId: req.user.id, userFullName: `${req.user.firstName} ${req.user.lastName}`,
-    packageId: pack.id, amount: Number(amount || pack.price), phone: phone || req.user.phone, note: note || "",
+    packageId: pack.id, amount: Number(amount || pack.price), phone: paymentPhone, note: note || "",
     status: "pending", createdAt: now()
   };
   req.db.payments.push(payment);

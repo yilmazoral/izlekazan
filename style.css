@@ -609,3 +609,9 @@ body:not(.watchMode) .watchShell{
 body.watchMode .watchShell{
   pointer-events:auto !important;
 }
+
+/* Telefon format uyarısı */
+.inputError{
+  border-color:#ef4444 !important;
+  box-shadow:0 0 0 4px rgba(239,68,68,.18) !important;
+}
