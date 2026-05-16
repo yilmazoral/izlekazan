@@ -372,3 +372,26 @@ main{max-width:1180px;margin:0 auto;padding:34px 18px 92px}
 .filmLockOverlay.hidden{
   display:none !important;
 }
+
+
+/* === TAM EKRANDA PREMIUM KİLİT KORUMASI === */
+.watchShell.lockedWatch #filmFrame{
+  pointer-events:none !important;
+  user-select:none !important;
+}
+.watchShell.lockedWatch .filmLockOverlay{
+  display:block;
+  pointer-events:auto !important;
+  z-index:999999 !important;
+}
+.watchShell.lockedWatch:fullscreen .filmLockOverlay,
+.watchShell.lockedWatch:-webkit-full-screen .filmLockOverlay{
+  position:absolute;
+  inset:0;
+  display:block !important;
+  z-index:999999 !important;
+}
+.watchShell.lockedWatch:fullscreen #filmFrame,
+.watchShell.lockedWatch:-webkit-full-screen #filmFrame{
+  pointer-events:none !important;
+}

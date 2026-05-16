@@ -4,6 +4,7 @@ let me = null;
 let selectedPackageId = null;
 let selectedPackagePrice = 0;
 let lastPageBeforeWatch = "movies";
+let filmIsLocked = false;
 const LOCKED_FILM_MESSAGE = "Filmleri izlemek için üye olmanız ve premium paket olmanız gerekmektedir.";
 
 const $ = (id) => document.getElementById(id);
@@ -880,20 +881,36 @@ function openFilmModal(url, locked = false) {
     return;
   }
 
+  filmIsLocked = !!locked;
   lastPageBeforeWatch = (document.querySelector(".page.active") || {}).id || "movies";
+
+  const shell = document.querySelector(".watchShell");
+  if (shell) shell.classList.toggle("lockedWatch", filmIsLocked);
+
   const frame = $("filmFrame");
   if (frame) {
-    frame.setAttribute("allowfullscreen", "true");
-    frame.setAttribute("webkitallowfullscreen", "true");
-    frame.setAttribute("mozallowfullscreen", "true");
-    frame.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share");
+    if (filmIsLocked) {
+      // Kilitli kullanımda iframe tıklamaları ve iframe tam ekran yetkisi kapatılır.
+      // Tam ekran butonu sadece dış kapsayıcıyı tam ekran yapar; uyarı katmanı üstte kalır.
+      frame.removeAttribute("allowfullscreen");
+      frame.removeAttribute("webkitallowfullscreen");
+      frame.removeAttribute("mozallowfullscreen");
+      frame.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share");
+      frame.setAttribute("tabindex", "-1");
+    } else {
+      frame.setAttribute("allowfullscreen", "true");
+      frame.setAttribute("webkitallowfullscreen", "true");
+      frame.setAttribute("mozallowfullscreen", "true");
+      frame.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share");
+      frame.removeAttribute("tabindex");
+    }
     frame.src = cleanUrl;
   }
 
   const overlay = $("filmLockOverlay");
   if (overlay) {
-    overlay.classList.toggle("hidden", !locked);
-    overlay.setAttribute("aria-hidden", locked ? "false" : "true");
+    overlay.classList.toggle("hidden", !filmIsLocked);
+    overlay.setAttribute("aria-hidden", filmIsLocked ? "false" : "true");
   }
 
   page("watch");
@@ -908,29 +925,60 @@ function lockedFilmClick(event) {
 }
 
 function closeFilmModal() {
+  filmIsLocked = false;
   const frame = $("filmFrame");
   if (frame) frame.src = "";
   const overlay = $("filmLockOverlay");
   if (overlay) overlay.classList.add("hidden");
+  const shell = document.querySelector(".watchShell");
+  if (shell) shell.classList.remove("lockedWatch");
   page(lastPageBeforeWatch || "movies");
 }
 
 function fullscreenMovie() {
-  const frame = $("filmFrame");
   const shell = document.querySelector(".watchShell");
-  const target = frame || shell;
-  if (!target) return;
+  const frame = $("filmFrame");
+  if (!shell && !frame) return;
 
-  try { if (frame) frame.focus(); } catch (e) {}
+  // Kilitli filmde iframe tam ekran yapılmaz; kapsayıcı tam ekran yapılır.
+  // Böylece premium uyarı katmanı tam ekranda da tıklamaları yakalamaya devam eder.
+  const target = shell || frame;
+  const overlay = $("filmLockOverlay");
+  if (filmIsLocked && overlay) {
+    overlay.classList.remove("hidden");
+    overlay.setAttribute("aria-hidden", "false");
+  }
 
   if (target.requestFullscreen) {
-    target.requestFullscreen().catch(() => toast("Tam ekran açılamadı. Filmin içindeki oynatıcıdan da tam ekran butonunu deneyin."));
+    target.requestFullscreen().catch(() => toast("Tam ekran açılamadı."));
   } else if (target.webkitRequestFullscreen) {
     target.webkitRequestFullscreen();
   } else {
     toast("Bu tarayıcı tam ekran özelliğini desteklemiyor.");
   }
 }
+
+function handleFullscreenGuard() {
+  if (!filmIsLocked) return;
+  const overlay = $("filmLockOverlay");
+  if (overlay) {
+    overlay.classList.remove("hidden");
+    overlay.setAttribute("aria-hidden", "false");
+  }
+  const shell = document.querySelector(".watchShell");
+  if (shell) shell.classList.add("lockedWatch");
+  const frame = $("filmFrame");
+  const fsElement = document.fullscreenElement || document.webkitFullscreenElement;
+  if (frame && fsElement === frame) {
+    try {
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    } catch (e) {}
+  }
+}
+
+document.addEventListener("fullscreenchange", handleFullscreenGuard);
+document.addEventListener("webkitfullscreenchange", handleFullscreenGuard);
 
 async function forgotPassword() {
   try {
