@@ -339,3 +339,11 @@ main{max-width:1180px;margin:0 auto;padding:34px 18px 92px}
     font-size:11px !important;
   }
 }
+
+/* === MOBİL AUTH PANEL KAYDIRMA AYARI === */
+@media (max-width: 820px){
+  #loginPanel,
+  #registerPanel{
+    scroll-margin-top:8px !important;
+  }
+}

@@ -1,12 +1,9 @@
-İzleKazan güncel dosya paketi
+YÜKLEME TALİMATI
 
-Bu pakette üye girişi/üye ol formları güncellendi.
+1) Bu ZIP içindeki klasörün içindeki tüm dosyaları GitHub izlekazan deposunun ana dizinine yükleyin.
+2) index.html, style.css, app.js, site-update.js ve server.js eski dosyaların yerine geçsin.
+3) assets klasörünü olduğu gibi yükleyin.
+4) Render otomatik deploy işlemi bittikten sonra siteyi gizli sekmede kontrol edin.
 
-Yapılanlar:
-- Giriş ekranına e-posta veya telefon numarası ile giriş desteği eklendi.
-- Giriş, şifre ve şifre tekrar alanlarına Göster/Gizle butonu eklendi.
-- Telefon numarası 05XXXXXXXXX, 5XXXXXXXXX veya +90 formatıyla girilse de giriş kontrolü yapılır.
-- Mobil üst menü ve üye ol formu için önceki düzeltmeler korundu.
-
-GitHub ana dizinine ZIP içindeki izlekazan_tum_dosyalar klasörünün içindeki tüm dosyaları yükleyin.
-Önemli: Bu güncelleme için index.html, style.css, app.js, site-update.js ve server.js dosyalarını mutlaka değiştirin.
+Bu sürümde mobilde Üye Ol paneli açılınca sayfa otomatik olarak Üye Ol formunun başlangıcına kayar.
+Giriş Yap bölümüne dönmek için kullanıcı sayfayı yukarı kaydırır.

@@ -109,6 +109,21 @@ function toggleAuthPanel(type) {
   const loginActive = type === "login";
   loginPanel.classList.toggle("active", loginActive);
   registerPanel.classList.toggle("active", !loginActive);
+
+  // Mobilde seçilen formu ekranın üstüne al.
+  // Böylece Üye Ol açıldığında üstteki Giriş Yap kartı ekranda kalmaz;
+  // kullanıcı Giriş Yap'a dönmek isterse sayfayı yukarı kaydırır.
+  if (window.matchMedia && window.matchMedia("(max-width: 820px)").matches) {
+    const target = loginActive ? loginPanel : registerPanel;
+    const moveToTarget = () => {
+      const y = target.getBoundingClientRect().top + window.pageYOffset - 8;
+      window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+    };
+    window.requestAnimationFrame(() => {
+      setTimeout(moveToTarget, 70);
+      setTimeout(moveToTarget, 360);
+    });
+  }
 }
 
 
