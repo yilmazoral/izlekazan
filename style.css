@@ -590,3 +590,22 @@ main{max-width:1180px;margin:0 auto;padding:34px 18px 92px}
 .moviePosterWrap img{cursor:default;}
 .moviePosterWrap img{pointer-events:none;}
 .moviePosterWrap img[src*="film-afisleri-vitrin"]{object-fit:cover;object-position:center center;}
+
+
+/* === FULLSCREEN KAPATMA KİLİTLENME DÜZELTMESİ === */
+#filmLockOverlay.hidden{
+  display:none !important;
+  pointer-events:none !important;
+}
+.watchShell:not(.lockedWatch) .filmLockOverlay{
+  pointer-events:none !important;
+}
+.watchShell.lockedWatch .filmLockOverlay{
+  pointer-events:auto !important;
+}
+body:not(.watchMode) .watchShell{
+  pointer-events:none !important;
+}
+body.watchMode .watchShell{
+  pointer-events:auto !important;
+}

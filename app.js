@@ -924,6 +924,7 @@ function openFilmModal(url, locked = false) {
   const overlay = $("filmLockOverlay");
   if (overlay) {
     overlay.scrollTop = 0;
+    overlay.style.pointerEvents = filmIsLocked ? "auto" : "none";
     overlay.classList.toggle("hidden", !filmIsLocked);
     overlay.setAttribute("aria-hidden", filmIsLocked ? "false" : "true");
   }
@@ -979,17 +980,75 @@ function bindFilmLockOverlayScroll() {
   overlay.addEventListener("touchstart", rememberFilmLockPointer, { passive: true });
 }
 
-function closeFilmModal() {
+function resetFilmWatchState() {
   filmIsLocked = false;
+  filmLockPointerStart = null;
+
   const frame = $("filmFrame");
-  if (frame) frame.src = "";
+  if (frame) {
+    frame.src = "about:blank";
+    frame.removeAttribute("tabindex");
+  }
+
   const overlay = $("filmLockOverlay");
-  if (overlay) overlay.classList.add("hidden");
+  if (overlay) {
+    overlay.classList.add("hidden");
+    overlay.setAttribute("aria-hidden", "true");
+    overlay.scrollTop = 0;
+    overlay.style.pointerEvents = "none";
+  }
+
   const shell = document.querySelector(".watchShell");
-  if (shell) shell.classList.remove("lockedWatch", "croppedWatch");
+  if (shell) {
+    shell.classList.remove("lockedWatch", "croppedWatch");
+    shell.style.pointerEvents = "";
+  }
+
   const box = document.querySelector(".watchFrameBox");
-  if (box) box.style.setProperty("--film-scroll-y", "0px");
-  page(lastPageBeforeWatch || "movies");
+  if (box) {
+    box.style.setProperty("--film-scroll-y", "0px");
+  }
+}
+
+function getFullscreenElement() {
+  return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement || null;
+}
+
+function exitFullscreenIfNeeded() {
+  if (!getFullscreenElement()) return Promise.resolve();
+
+  try {
+    if (document.exitFullscreen) return document.exitFullscreen().catch(() => {});
+    if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+      return Promise.resolve();
+    }
+    if (document.mozCancelFullScreen) {
+      document.mozCancelFullScreen();
+      return Promise.resolve();
+    }
+    if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+      return Promise.resolve();
+    }
+  } catch (e) {}
+
+  return Promise.resolve();
+}
+
+function closeFilmModal() {
+  const targetPage = lastPageBeforeWatch || "movies";
+
+  // Önce kilidi kapatıyoruz. Böylece tam ekrandan çıkarken fullscreenchange olayı
+  // premium kilit katmanını tekrar açıp ekranı tıklanamaz halde bırakmaz.
+  resetFilmWatchState();
+
+  exitFullscreenIfNeeded().finally(() => {
+    page(targetPage);
+    // Bazı mobil tarayıcılar fullscreen çıkışını gecikmeli tamamlıyor; ikinci temizlik ekran kilitlenmesini önler.
+    setTimeout(resetFilmWatchState, 80);
+    setTimeout(() => document.body.classList.remove("watchMode"), 120);
+  });
 }
 
 function fullscreenMovie() {
@@ -1016,21 +1075,27 @@ function fullscreenMovie() {
 }
 
 function handleFullscreenGuard() {
+  const watchActive = !!document.querySelector("#watch.page.active");
+
+  if (!watchActive) {
+    resetFilmWatchState();
+    return;
+  }
+
   if (!filmIsLocked) return;
+
   const overlay = $("filmLockOverlay");
   if (overlay) {
+    overlay.style.pointerEvents = "auto";
     overlay.classList.remove("hidden");
     overlay.setAttribute("aria-hidden", "false");
   }
   const shell = document.querySelector(".watchShell");
   if (shell) shell.classList.add("lockedWatch");
   const frame = $("filmFrame");
-  const fsElement = document.fullscreenElement || document.webkitFullscreenElement;
+  const fsElement = getFullscreenElement();
   if (frame && fsElement === frame) {
-    try {
-      if (document.exitFullscreen) document.exitFullscreen();
-      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-    } catch (e) {}
+    exitFullscreenIfNeeded();
   }
 }
 
