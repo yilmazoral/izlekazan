@@ -1,11 +1,12 @@
-İzleKazan güncelleme paketi
+GÜNCELLEME TALİMATI
 
-Bu pakette film izleme ekranı için üst alan kırpma ve afiş alanı kaydırma düzeltmesi vardır.
+Bu pakette film izleme ekranındaki iframe kırpması yeniden ayarlandı.
+Amaç: film sitesinin üst kısmı ve alt/footer yazıları görünmeden sadece orta film afişleri alanının görünmesi.
 
-GitHub deposunda özellikle şu dosyaları değiştirin:
+GitHub ana dizinine özellikle şu dosyaları yükleyin:
 - index.html
 - style.css
 - app.js
+- server.js
 
-server.js dosyası bu değişiklik için zorunlu değildir.
-Render yeniden deploy olduktan sonra siteyi gizli sekmede test edin.
+Render otomatik yeniden deploy olduktan sonra telefonda gizli sekmede test edin.
