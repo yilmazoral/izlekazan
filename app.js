@@ -4,6 +4,7 @@ let me = null;
 let selectedPackageId = null;
 let selectedPackagePrice = 0;
 let lastPageBeforeWatch = "movies";
+const LOCKED_FILM_MESSAGE = "Filmleri izlemek için üye olmanız ve premium paket olmanız gerekmektedir.";
 
 const $ = (id) => document.getElementById(id);
 
@@ -553,35 +554,27 @@ function showAddMovie() {
 }
 
 async function openFirstMovie() {
-  const box = $("filmGateway");
-  if (box) {
-    box.classList.remove("hidden");
-    box.scrollIntoView({ behavior: "smooth", block: "center" });
-  }
-}
-
-async function handleVizyonClick() {
-  if (!isLoggedIn()) {
-    alert("Film izlemek için üye olmalısınız.");
-    page("auth");
-    return;
-  }
-
   try {
     const m = await api("/api/movies");
     if (!m.length) {
       toast("Yayında film bulunmuyor");
       return;
     }
+
     const first = m[0];
-    if (first.locked) {
-      premiumRequiredForMovie();
-      return;
-    }
-    openFilmModal(first.watchLink || first.embedLink || first.link || "");
+    const url = first.watchLink || first.embedLink || first.link || "";
+    openFilmModal(url, !!first.locked);
   } catch (e) {
     toast(e.message || "Film açılamadı");
   }
+}
+
+async function handleVizyonClick() {
+  await openFirstMovie();
+}
+
+function openLockedMovie(url) {
+  openFilmModal(url, true);
 }
 
 async function movies() {
@@ -600,8 +593,8 @@ async function movies() {
           <div class="movieMeta">${x.category || "Film"}${x.year ? " • " + x.year : ""}</div>
           <p>${x.description || ""}</p>
           ${x.locked
-            ? `<button onclick="premiumRequiredForMovie()">${logged ? "Premium Ol ve İzle" : "Üye Ol, Premium Al ve İzle"}</button><small class="movieHint">Film kataloğu herkese açıktır; izleme erişimi premium üyelere özeldir.</small>`
-            : `<button onclick='openFilmModal(${JSON.stringify(x.watchLink || x.embedLink || x.link || "")})'>Filmi İzle</button>`}
+            ? `<button onclick='openLockedMovie(${JSON.stringify(x.watchLink || x.embedLink || x.link || "")})'>Film Sitesini Aç</button><small class="movieHint">Film sitesi görüntülenir; izlemek için üye olup premium paket almanız gerekir.</small>`
+            : `<button onclick='openFilmModal(${JSON.stringify(x.watchLink || x.embedLink || x.link || "")}, false)'>Filmi İzle</button>`}
         </div>`
       )
       .join("") || '<div class="card">Yayında film bulunmuyor.</div>';
@@ -875,7 +868,7 @@ async function wdNo(id) {
   admin();
 }
 
-function openFilmModal(url) {
+function openFilmModal(url, locked = false) {
   if (!url) {
     toast("Film bağlantısı bulunamadı");
     return;
@@ -896,12 +889,29 @@ function openFilmModal(url) {
     frame.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share");
     frame.src = cleanUrl;
   }
+
+  const overlay = $("filmLockOverlay");
+  if (overlay) {
+    overlay.classList.toggle("hidden", !locked);
+    overlay.setAttribute("aria-hidden", locked ? "false" : "true");
+  }
+
   page("watch");
+}
+
+function lockedFilmClick(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  alert(LOCKED_FILM_MESSAGE);
 }
 
 function closeFilmModal() {
   const frame = $("filmFrame");
   if (frame) frame.src = "";
+  const overlay = $("filmLockOverlay");
+  if (overlay) overlay.classList.add("hidden");
   page(lastPageBeforeWatch || "movies");
 }
 

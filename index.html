@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <meta name="description" content="İzleKazan; premium film erişimini referans, katkı ve şeffaf kazanç takibiyle birleştiren yeni nesil üyelik platformudur.">
   <title>İzleKazan | Film İzle, Ek Gelir Fırsatına Katıl</title>
-  <link rel="stylesheet" href="style.css?v=20260516-authscroll1">
+  <link rel="stylesheet" href="style.css?v=20260516-filmgate1">
 </head>
 <body>
   <header class="hero" id="hero">
@@ -239,8 +239,11 @@
     <section id="watch" class="page watchPage">
       <div class="watchShell">
         <div class="watchTop"><div><b>İzleKazan Film İzleme Ekranı</b><small>Film adresi tarayıcı adres çubuğunda görünmez. Tam ekran için butonu kullanın.</small></div><div class="watchActions"><button onclick="fullscreenMovie()">Tam Ekran</button><button class="ghost" onclick="closeFilmModal()">Kapat</button></div></div>
-        <iframe id="filmFrame" src="" title="İzleKazan Film Oynatıcı" allowfullscreen webkitallowfullscreen mozallowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share"></iframe>
-        <p class="movieHint watchHint">Tam ekran için önce bu sayfadaki “Tam Ekran” butonunu, ardından filmin kendi oynatıcısındaki tam ekran butonunu deneyin. En iyi sonuç için film eklerken embed/player linki kullanın.</p>
+        <div class="watchFrameBox">
+          <iframe id="filmFrame" src="" title="İzleKazan Film Oynatıcı" allowfullscreen webkitallowfullscreen mozallowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share"></iframe>
+          <div id="filmLockOverlay" class="filmLockOverlay hidden" onclick="lockedFilmClick(event)" onkeydown="if(event.key==='Enter'||event.key===' '){lockedFilmClick(event)}" role="button" tabindex="0" aria-label="Premium üyelik uyarısı"></div>
+        </div>
+        <p class="movieHint watchHint">Üye girişi veya aktif premium paket yoksa film sitesi görüntülenir; ancak izleme alanına tıklanınca üyelik ve premium paket uyarısı gösterilir.</p>
       </div>
     </section>
 
@@ -281,7 +284,7 @@
   </nav>
 
   <div id="toast"></div>
-  <script src="app.js?v=20260516-authscroll1"></script>
-  <script src="site-update.js?v=20260516-authscroll1"></script>
+  <script src="app.js?v=20260516-filmgate1"></script>
+  <script src="site-update.js?v=20260516-filmgate1"></script>
 </body>
 </html>

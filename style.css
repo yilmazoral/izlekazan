@@ -347,3 +347,28 @@ main{max-width:1180px;margin:0 auto;padding:34px 18px 92px}
     scroll-margin-top:8px !important;
   }
 }
+
+
+/* === FİLM SİTESİ PREMIUM KİLİT OVERLAY === */
+.watchFrameBox{
+  position:relative;
+  flex:1;
+  min-height:0;
+  background:#000;
+}
+.watchFrameBox #filmFrame{
+  display:block;
+  width:100%;
+  height:100%;
+}
+.filmLockOverlay{
+  position:absolute;
+  inset:0;
+  z-index:5;
+  background:rgba(0,0,0,0.01);
+  cursor:not-allowed;
+  touch-action:manipulation;
+}
+.filmLockOverlay.hidden{
+  display:none !important;
+}
