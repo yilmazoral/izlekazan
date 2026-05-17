@@ -21,7 +21,16 @@ const ADMIN_EMAIL = String(process.env.ADMIN_EMAIL || "yilmazoral@hotmail.com").
 const ADMIN_PASS = process.env.ADMIN_PASS || "059221";
 const PUBLIC_URL = process.env.PUBLIC_URL || `http://localhost:${PORT}`;
 const MOVIE_SITE_URL = process.env.MOVIE_SITE_URL || "https://sinemaizle.org/";
-const APP_VERSION = process.env.APP_VERSION || "v2026.05.17-008";
+function readVersionInfo() {
+  try {
+    const versionFile = path.join(__dirname, "VERSION.json");
+    if (fs.existsSync(versionFile)) {
+      return JSON.parse(fs.readFileSync(versionFile, "utf8"));
+    }
+  } catch (e) {}
+  return { currentVersion: process.env.APP_VERSION || "v2026.05.17-010", project: "İzleKazan" };
+}
+const APP_VERSION = process.env.APP_VERSION || readVersionInfo().currentVersion || "v2026.05.17-010";
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_KEY || "";
@@ -325,14 +334,8 @@ function sendResetMail(email, link) {
   }).then(() => true).catch(e => { console.error("E-posta gönderilemedi:", e.message); return false; });
 }
 
-app.get("/api/health", (req, res) => res.json({ ok: true, storage: supabase ? "supabase" : "db.json", time: now(), version: APP_VERSION }));
-app.get("/api/version", (req, res) => {
-  try {
-    const versionFile = path.join(__dirname, "VERSION.json");
-    if (fs.existsSync(versionFile)) return res.type("json").send(fs.readFileSync(versionFile, "utf8"));
-  } catch (e) {}
-  res.json({ currentVersion: APP_VERSION, project: "İzleKazan" });
-});
+app.get("/api/health", (req, res) => res.json({ ok: true, storage: supabase ? "supabase" : "db.json", time: now(), version: readVersionInfo().currentVersion || APP_VERSION }));
+app.get("/api/version", (req, res) => res.json(readVersionInfo()));
 app.get("/api/film-gateway", (req, res) => {
   res.setHeader("X-Robots-Tag", "noindex, nofollow");
   res.setHeader("Referrer-Policy", "no-referrer");

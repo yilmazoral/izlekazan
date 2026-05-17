@@ -1,15 +1,15 @@
 {
-  "currentVersion": "v2026.05.17-009",
+  "currentVersion": "v2026.05.17-010",
   "releaseDate": "2026-05-17",
   "project": "İzleKazan",
-  "releaseName": "zorunlu_ekrani_kapla_film_modu",
-  "summary": "Film ekranında tarayıcı fullscreen API’sine bağlı kalmadan İzleKazan içi zorunlu ekranı kapla modu eklendi.",
+  "releaseName": "surum_senkron_merkezi_fix",
+  "summary": "Sürüm numarası tutarsızlığı giderildi; görünür footer, /api/version, /api/health ve VERSION.json aynı kaynaktan senkronize edildi.",
   "changes": [
-    "Tam Ekran butonu artık requestFullscreen sonucuna bağımlı kalmadan film alanını viewport tamamına sabitler.",
-    "Film alanında sağ üstte Normal Görünüm ve Kapat kontrolleri eklendi.",
-    "Mobil ve PC’de gövde kaydırması kilitlenerek film alanının ekranı kaplaması güçlendirildi.",
-    "Önceki premium kontrolü, gizli film linki, referans davet linki ve panel akordeon özellikleri korundu.",
-    "Footer sürüm etiketi v2026.05.17-009 yapıldı."
+    "index.html meta sürümü, cache sürümleri ve görünür footer etiketi v2026.05.17-010 olarak güncellendi.",
+    "server.js içinde /api/version ve /api/health artık VERSION.json içindeki currentVersion değerini okur.",
+    "app.js içinde footer sürüm etiketi /api/version üzerinden otomatik güncellenir.",
+    "Önceki v2026.05.17-009 zorunlu ekranı kapla film modu korunmuştur.",
+    "Bundan sonra sürüm etiketi elle unutulsa bile canlı sitede VERSION.json değeri gösterilir."
   ],
   "protectedFeatures": [
     "Profesyonel kullanıcı paneli ve admin paneli tasarımı korunmalı.",
@@ -20,16 +20,17 @@
     "Premium olmayan kullanıcı gerçek film sitesine tam erişememeli.",
     "Mükerrer ödeme bildirimi ve mükerrer ödeme onayı engelli kalmalı.",
     "Açık veri tabanında ad açık, soyad ilk harf + yıldız, telefon ilk 5 hane + yıldız görünmeli.",
-    "Sitenin alt kısmında görünür sürüm etiketi bulunmalı."
+    "Sitenin alt kısmında görünür sürüm etiketi bulunmalı ve /api/version ile aynı olmalı."
   ],
   "files": {
-    "index.html": "95d3f9c9bc38e839",
+    "index.html": "8a1549a1a2410bae",
     "style.css": "5a28046402d33024",
-    "app.js": "b3e1e463550e3621",
-    "server.js": "430d586207069f62",
+    "app.js": "8a0dbecb93516228",
+    "server.js": "9e8769585e0dfa87",
     "site-update.js": "9f8d8bcd1c0a5944",
-    "SURUM-GECMISI.md": "0a30928c8629b756",
-    "YUKLEME-TALIMATI.txt": "b1e178c946a0aeee",
-    "assets/film-afisleri-vitrin.png": "c49d835eb1295ea6"
+    "SURUM-GECMISI.md": "6ab50bfee97754e9",
+    "YUKLEME-TALIMATI.txt": "247e8a71140b3729",
+    "assets/film-afisleri-vitrin.png": "c49d835eb1295ea6",
+    "VERSION.json": "a6e02bfbf815e2bd"
   }
 }

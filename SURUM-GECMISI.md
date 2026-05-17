@@ -1,5 +1,26 @@
 # İzleKazan Sürüm Geçmişi
 
+## v2026.05.17-010 — 2026-05-17
+
+**Özet:** Sürüm numarası karışıklığını kalıcı olarak düzeltmek için sürüm bilgisi tek merkezden okunacak hale getirildi.
+
+### Yapılanlar
+- `index.html` meta sürümü ve görünür footer etiketi `v2026.05.17-010` olarak güncellendi.
+- CSS/JS cache sürümleri `v20260517010` olarak güncellendi.
+- `server.js` içinde `/api/version` ve `/api/health` sürümü `VERSION.json` dosyasından okuyacak hale getirildi.
+- `app.js` footer sürüm yazısını canlı `/api/version` sonucuyla otomatik senkronize eder.
+- Önceki `v2026.05.17-009` zorunlu tam ekran film modu korunmuştur.
+
+### Korunan kritik özellikler
+- Profesyonel admin/kullanıcı paneli.
+- Üye paneli akordeon yapısı.
+- Referans davet linki ve otomatik referans kodu doldurma.
+- Supabase kalıcı veritabanı.
+- Gizli film gateway ve premium erişim kontrolü.
+- Mükerrer ödeme engeli.
+- Ad açık, soyad ilk harf gizli, telefon ilk 5 hane açık gizlilik formatı.
+
+
 ## v2026.05.17-007 — 2026-05-17
 
 **Özet:** Premium film izleme ekranında kırpma kaldırıldı ve player tam ekran izinleri güçlendirildi.

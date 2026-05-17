@@ -1,6 +1,21 @@
-İzleKazan v2026.05.17-007 yükleme talimatı
+İzleKazan v2026.05.17-010 yükleme talimatı
 
-1) ZIP içindeki dosyaları GitHub ana dizinine yükleyin.
-2) Özellikle index.html, style.css, app.js, server.js, VERSION.json ve SURUM-GECMISI.md dosyalarını değiştirin.
-3) Render deploy tamamlandıktan sonra /api/version ve site footer sürümünü kontrol edin.
-4) Film izleme ekranında premium kullanıcıyla test edin.
+Bu sürüm sürüm etiketi karışıklığını düzeltir.
+
+GitHub ana dizinine ZIP içindeki TÜM dosyaları yükleyin:
+- index.html
+- style.css
+- app.js
+- server.js
+- site-update.js
+- VERSION.json
+- SURUM-GECMISI.md
+- YUKLEME-TALIMATI.txt
+- assets klasörü
+
+Yükledikten sonra Render > Manual Deploy > Deploy latest commit yapın.
+
+Kontrol:
+1) Site footerında v2026.05.17-010 görünmeli.
+2) https://izlekazan.onrender.com/api/version içinde currentVersion: v2026.05.17-010 görünmeli.
+3) https://izlekazan.onrender.com/api/health içinde version: v2026.05.17-010 görünmeli.

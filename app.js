@@ -1349,3 +1349,21 @@ function checkResetLink() {
 }
 
 init();
+
+
+// v2026.05.17-010: Görünür sürüm etiketi artık VERSION.json / /api/version üzerinden otomatik senkronize edilir.
+async function syncSiteVersionLabel() {
+  const el = document.getElementById("siteVersionLabel");
+  if (!el) return;
+  try {
+    const res = await fetch("/api/version", { cache: "no-store" });
+    if (!res.ok) return;
+    const info = await res.json();
+    if (info && info.currentVersion) el.textContent = info.currentVersion;
+  } catch (e) {}
+}
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", syncSiteVersionLabel);
+} else {
+  syncSiteVersionLabel();
+}
