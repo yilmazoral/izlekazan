@@ -343,112 +343,151 @@ async function dash() {
     const pendingList = d.pendingEarnings.filter((x) => x.status === "pending").sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     const releasedList = d.tx.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     const pendingSum = pendingList.reduce((a, b) => a + Number(b.amount), 0).toFixed(2);
+    const firstName = d.user.firstName || "";
+    const lastName = d.user.lastName || "";
+    const userInitials = ((firstName[0] || "Ü") + (lastName[0] || "")).toUpperCase();
+    const packageName = d.package ? d.package.name : "Paket aktif değil";
+    const balanceSum = Number(d.user.balance || 0).toFixed(2);
+    const notifications = d.notifications || [];
+    const children = d.children || [];
+    const tickets = d.tickets || [];
+    const premiumActive = !!d.user.premiumActive;
+
 
     $("dash").innerHTML = `
-      <div class="panelHero">
-        <div>
-          <h3>Hoş geldin, ${d.user.firstName} ${d.user.lastName}</h3>
-          <p>${d.package ? d.package.name : "Paket aktif değil"} • Premium başlangıç: ${pStart} • Premium bitiş: ${pEnd}</p>
+      <div class="memberDashboard">
+        <div class="memberHero">
+          <div class="memberAvatar">${userInitials}</div>
+          <div class="memberHeroText">
+            <span class="panelKicker">Üye Kontrol Merkezi</span>
+            <h3>Hoş geldin, ${firstName} ${lastName}</h3>
+            <p><b>${packageName}</b> • Premium başlangıç: ${pStart} • Premium bitiş: ${pEnd}</p>
+          </div>
+          <div class="memberHeroActions">
+            <span class="accountStatus ${premiumActive ? "active" : "passive"}">${premiumActive ? "Premium Aktif" : "Premium Pasif"}</span>
+            <button onclick="page('packages')">${premiumActive && d.user.packageId === 5 ? "Paketi Yenile" : "Paketi Yükselt / Yenile"}</button>
+          </div>
         </div>
-        <button onclick="page('packages')">${d.user.premiumActive && d.user.packageId === 5 ? "Paketi Yenile" : "Paketi Yükselt / Yenile"}</button>
-      </div>
 
-      <div class="panelGrid">
-        <div class="box clickable" onclick="toggleList('pendingList')">
-          <span>Bekleyen Bakiye</span>
-          <b>${pendingSum} TL</b>
-          <small>15 gün sonra çekilebilir bakiyeye aktarılır. Detay için tıkla.</small>
+        <div class="memberQuickGrid">
+          <div class="metricCard clickable" onclick="toggleList('pendingList')">
+            <i>⏳</i>
+            <span>Bekleyen Bakiye</span>
+            <strong>${pendingSum} TL</strong>
+            <small>15 gün sonra çekilebilir bakiyeye aktarılır.</small>
+          </div>
+          <div class="metricCard clickable success" onclick="toggleList('releasedList')">
+            <i>💳</i>
+            <span>Çekilebilir Bakiye</span>
+            <strong>${balanceSum} TL</strong>
+            <small>Detaylı işlem geçmişi için tıkla.</small>
+          </div>
+          <div class="metricCard ${premiumActive ? "success" : "warning"}">
+            <i>⭐</i>
+            <span>Premium Bitiş</span>
+            <strong>${pEnd}</strong>
+            <small>${d.user.premiumDaysLeft || 0} gün kaldı.</small>
+          </div>
+          <div class="metricCard blue">
+            <i>👥</i>
+            <span>Alt Üye</span>
+            <strong>${children.length}</strong>
+            <small>Referans ağındaki doğrudan üyeler.</small>
+          </div>
         </div>
-        <div class="box clickable" onclick="toggleList('releasedList')">
-          <span>Çekilebilir Bakiye</span>
-          <b>${d.user.balance} TL</b>
-          <small>Detaylı işlem geçmişi için tıkla.</small>
+
+        <div id="pendingList" class="card detailList dashboardWide hidden">
+          <div class="panelSectionHead"><div><span>Bekleyen işlemler</span><h3>Bekleyen Bakiye Detayı</h3></div></div>
+          ${pendingList.map((e) => `<div class="listItem"><b>+${e.amount} TL</b><span>${e.desc}</span><small>${new Date(e.createdAt).toLocaleString("tr-TR")} • Çekilebilir tarih: ${new Date(e.availableAt).toLocaleDateString("tr-TR")}</small></div>`).join("") || `<div class="emptyState">Bekleyen kazanç yok.</div>`}
         </div>
-        <div class="box">
-          <span>Premium Bitiş</span>
-          <b>${pEnd}</b>
-          <small>${d.user.premiumDaysLeft || 0} gün kaldı</small>
+
+        <div id="releasedList" class="card detailList dashboardWide hidden">
+          <div class="panelSectionHead"><div><span>İşlem geçmişi</span><h3>Çekilebilir Bakiye Detayı</h3></div></div>
+          ${releasedList.map((t) => `<div class="listItem"><b>${Number(t.amount) > 0 ? "+" : ""}${t.amount} TL</b><span>${t.desc}</span><small>${new Date(t.createdAt).toLocaleString("tr-TR")} • ${t.type}</small></div>`).join("") || `<div class="emptyState">İşlem yok.</div>`}
         </div>
-        <div class="box">
-          <span>Alt Üye</span>
-          <b>${d.children.length}</b>
-          <small>Referans ağındaki doğrudan üyeler</small>
+
+        <div class="card dashboardWide notificationPanel">
+          <div class="panelSectionHead">
+            <div><span>Son durum</span><h3>Bildirimlerim</h3></div>
+            <b class="miniBadge">${notifications.length} Bildirim</b>
+          </div>
+          <div class="notificationList">
+            ${notifications.map((n) => `<div class="notificationItem ${n.type}"><i>${n.type === "error" ? "!" : "✓"}</i><div><b>${n.title}</b><p>${n.message}</p><small>${new Date(n.createdAt).toLocaleString("tr-TR")}</small></div></div>`).join("") || `<div class="emptyState"><b>Bildirim yok</b><span>Yeni ödeme, çekim ve destek cevapları burada görünür.</span></div>`}
+          </div>
         </div>
-      </div>
 
-      <div id="pendingList" class="card detailList hidden">
-        <h3>Bekleyen Bakiye Detayı</h3>
-        ${pendingList.map((e) => `<div class="listItem"><b>+${e.amount} TL</b><span>${e.desc}</span><small>${new Date(e.createdAt).toLocaleString("tr-TR")} • Çekilebilir tarih: ${new Date(e.availableAt).toLocaleDateString("tr-TR")}</small></div>`).join("") || "Bekleyen kazanç yok"}
-      </div>
-
-      <div id="releasedList" class="card detailList hidden">
-        <h3>Çekilebilir Bakiye / İşlem Geçmişi</h3>
-        ${releasedList.map((t) => `<div class="listItem"><b>${Number(t.amount) > 0 ? "+" : ""}${t.amount} TL</b><span>${t.desc}</span><small>${new Date(t.createdAt).toLocaleString("tr-TR")} • ${t.type}</small></div>`).join("") || "İşlem yok"}
-      </div>
-
-      <div class="card">
-        <h3>Bildirimlerim</h3>
-        ${d.notifications.map((n) => `<p class="notification ${n.type}">${n.type === "error" ? "❌" : "✅"} <b>${n.title}</b><br>${n.message}<br><small>${new Date(n.createdAt).toLocaleString("tr-TR")}</small></p>`).join("") || "Bildirim yok"}
-      </div>
-
-      <div class="card">
-        <h3>Alt Üyelerim</h3>
-        <p class="privacyNote">Kullanıcı gizliliği için ad görünür; soyadın yalnızca ilk harfi ve telefonun ilk 5 hanesi gösterilir.</p>
-        <div class="tableWrap">
-          <table>
-            <thead><tr><th>Ad Soyad</th><th>Telefon</th><th>Paket</th><th>Premium Başlangıç</th><th>Premium Bitiş</th><th>Durum</th></tr></thead>
-            <tbody>
-              ${d.children.map((c) => `<tr><td>${c.maskedName || (c.firstName + " " + c.lastName)}</td><td>${c.maskedPhone || c.phone}</td><td>${c.packageName}</td><td>${c.premiumStartedAt ? new Date(c.premiumStartedAt).toLocaleDateString("tr-TR") : "-"}</td><td>${c.premiumUntil ? new Date(c.premiumUntil).toLocaleDateString("tr-TR") : "-"}</td><td>${c.premiumActive ? "Premium" : "Pasif"}</td></tr>`).join("") || `<tr><td colspan="6">Alt üye yok</td></tr>`}
-            </tbody>
-          </table>
+        <div class="card dashboardWide">
+          <div class="panelSectionHead">
+            <div><span>Referans ağı</span><h3>Alt Üyelerim</h3></div>
+            <b class="miniBadge">${children.length} Üye</b>
+          </div>
+          <p class="privacyNote">Kullanıcı gizliliği için ad görünür; soyadın yalnızca ilk harfi ve telefonun ilk 5 hanesi gösterilir.</p>
+          <div class="tableWrap professionalTable">
+            <table>
+              <thead><tr><th>Ad Soyad</th><th>Telefon</th><th>Paket</th><th>Premium Başlangıç</th><th>Premium Bitiş</th><th>Durum</th></tr></thead>
+              <tbody>
+                ${children.map((c) => `<tr><td>${c.maskedName || (c.firstName + " " + c.lastName)}</td><td>${c.maskedPhone || c.phone}</td><td>${c.packageName}</td><td>${c.premiumStartedAt ? new Date(c.premiumStartedAt).toLocaleDateString("tr-TR") : "-"}</td><td>${c.premiumUntil ? new Date(c.premiumUntil).toLocaleDateString("tr-TR") : "-"}</td><td><span class="statusPill ${c.premiumActive ? "success" : "warning"}">${c.premiumActive ? "Premium" : "Pasif"}</span></td></tr>`).join("") || `<tr><td colspan="6">Alt üye yok</td></tr>`}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
 
-      <div class="card">
-        <h3>Üyelik Bilgilerim / Şifre Değiştir</h3>
-        <input id="pf" value="${d.user.firstName}" placeholder="Ad">
-        <input id="pl" value="${d.user.lastName}" placeholder="Soyad">
-        <input id="pe" value="${d.user.email}" placeholder="Email">
-        <input id="pp" inputmode="tel" autocomplete="tel" value="${d.user.phone}" placeholder="Telefon 05XXXXXXXXX">
-        <input id="pcp" type="password" placeholder="Mevcut şifre">
-        <input id="pnp" type="password" placeholder="Yeni şifre">
-        <button onclick="saveProfile()">Bilgileri Güncelle</button>
-      </div>
+        <div class="panelActionGrid">
+          <div class="card panelFormCard">
+            <div class="panelSectionHead"><div><span>Hesap</span><h3>Üyelik Bilgilerim</h3></div></div>
+            <div class="formGrid">
+              <label>Ad<input id="pf" value="${d.user.firstName}" placeholder="Ad"></label>
+              <label>Soyad<input id="pl" value="${d.user.lastName}" placeholder="Soyad"></label>
+              <label>E-posta<input id="pe" value="${d.user.email}" placeholder="Email"></label>
+              <label>Telefon<input id="pp" inputmode="tel" autocomplete="tel" value="${d.user.phone}" placeholder="Telefon 05XXXXXXXXX"></label>
+              <label>Mevcut şifre<input id="pcp" type="password" placeholder="Mevcut şifre"></label>
+              <label>Yeni şifre<input id="pnp" type="password" placeholder="Yeni şifre"></label>
+            </div>
+            <button onclick="saveProfile()">Bilgileri Güncelle</button>
+          </div>
 
-      <div class="card">
-        <h3>Referans Sistemi</h3>
-        ${d.user.premiumActive ? `<div class="refBox"><span class="refCode" id="refCode">${d.user.referralCode}</span><button onclick="copyRef()">Kopyala</button><button onclick="shareRef()">Paylaş</button></div>` : "Referans kodunuz paket satın alındıktan sonra görünür."}
-      </div>
+          <div class="card panelFormCard referralCard">
+            <div class="panelSectionHead"><div><span>Davet</span><h3>Referans Sistemi</h3></div></div>
+            ${premiumActive ? `<p class="muted">Referans kodunu paylaşarak doğrudan üye ağını büyütebilirsin.</p><div class="refBox professionalRef"><span class="refCode" id="refCode">${d.user.referralCode}</span><button onclick="copyRef()">Kopyala</button><button class="ghost" onclick="shareRef()">Paylaş</button></div>` : `<div class="emptyState compact"><b>Referans kodu kapalı</b><span>Referans kodunuz paket satın alındıktan sonra görünür.</span></div>`}
+          </div>
 
-      <div class="card">
-        <h3>IBAN Ödeme Bildir</h3>
-        <p><b>IBAN:</b> TR78 0015 7000 0000 0037 7980 62<br><b>Alıcı:</b> YILMAZ ORAL<br><b>Açıklama:</b> Telefon numaranızı yazınız</p>
-        <select id="packSel">${packs.map((p) => {
-          const currentId = d.user.premiumActive ? Number(d.user.packageId || 0) : 0;
-          const disabled = currentId && p.id < currentId;
-          const label = disabled ? " - Seçilemez" : currentId === p.id ? " - Yenile" : currentId ? " - Yükselt" : "";
-          return `<option value="${p.id}" data-price="${p.price}" ${disabled ? "disabled" : ""}>${p.name} - ${p.price} TL / Yıl${label}</option>`;
-        }).join("")}</select>
-        <input id="payAmount" placeholder="Tutar">
-        <input id="payPhone" inputmode="tel" autocomplete="tel" value="${d.user.phone}" placeholder="Telefon 05XXXXXXXXX">
-        <button onclick="payment()">Ödeme Bildir</button>
-      </div>
+          <div class="card panelFormCard paymentCard">
+            <div class="panelSectionHead"><div><span>Ödeme</span><h3>IBAN Ödeme Bildir</h3></div></div>
+            <div class="bankInfo"><b>IBAN</b><span>TR78 0015 7000 0000 0037 7980 62</span><small>Alıcı: YILMAZ ORAL • Açıklama: Telefon numaranızı yazınız</small></div>
+            <label>Paket seçimi<select id="packSel">${packs.map((p) => {
+              const currentId = d.user.premiumActive ? Number(d.user.packageId || 0) : 0;
+              const disabled = currentId && p.id < currentId;
+              const label = disabled ? " - Seçilemez" : currentId === p.id ? " - Yenile" : currentId ? " - Yükselt" : "";
+              return `<option value="${p.id}" data-price="${p.price}" ${disabled ? "disabled" : ""}>${p.name} - ${p.price} TL / Yıl${label}</option>`;
+            }).join("")}</select></label>
+            <label>Tutar<input id="payAmount" placeholder="Tutar"></label>
+            <label>Telefon<input id="payPhone" inputmode="tel" autocomplete="tel" value="${d.user.phone}" placeholder="Telefon 05XXXXXXXXX"></label>
+            <button onclick="payment()">Ödeme Bildir</button>
+          </div>
 
-      <div class="card">
-        <h3>Çekim Talebi</h3>
-        <input id="wName" value="${d.user.firstName} ${d.user.lastName}" placeholder="Ad Soyad">
-        <input id="wIban" placeholder="IBAN">
-        <input id="wAmount" placeholder="50 TL ve katları">
-        <button onclick="withdraw()">Çekim Talebi Gönder</button>
-      </div>
+          <div class="card panelFormCard withdrawCard">
+            <div class="panelSectionHead"><div><span>Bakiye</span><h3>Çekim Talebi</h3></div></div>
+            <label>Ad Soyad<input id="wName" value="${d.user.firstName} ${d.user.lastName}" placeholder="Ad Soyad"></label>
+            <label>IBAN<input id="wIban" placeholder="IBAN"></label>
+            <label>Tutar<input id="wAmount" placeholder="50 TL ve katları"></label>
+            <button onclick="withdraw()">Çekim Talebi Gönder</button>
+          </div>
 
-      <div class="card">
-        <h3>Destek Merkezi</h3>
-        <input id="supSub" placeholder="Konu">
-        <textarea id="supMsg" placeholder="Mesajınız"></textarea>
-        <button onclick="support()">Destek Kaydı Gönder</button>
-        <h4>Destek Kayıtlarım</h4>
-        ${d.tickets.map((t) => `<p><b>${t.subject}</b> - ${t.status}<br>${t.message}<br>${t.replies.map((r) => `↳ Admin: ${r.message}`).join("<br>")}</p>`).join("") || "Kayıt yok"}
+          <div class="card panelFormCard supportCard dashboardWide">
+            <div class="panelSectionHead"><div><span>Yardım</span><h3>Destek Merkezi</h3></div></div>
+            <div class="supportGrid">
+              <div>
+                <label>Konu<input id="supSub" placeholder="Konu"></label>
+                <label>Mesaj<textarea id="supMsg" placeholder="Mesajınız"></textarea></label>
+                <button onclick="support()">Destek Kaydı Gönder</button>
+              </div>
+              <div class="ticketList">
+                <h4>Destek Kayıtlarım</h4>
+                ${tickets.map((t) => `<div class="ticketItem"><b>${t.subject}</b><span>${t.status}</span><p>${t.message}</p>${t.replies.map((r) => `<small>↳ Admin: ${r.message}</small>`).join("")}</div>`).join("") || `<div class="emptyState compact">Kayıt yok.</div>`}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>`;
 
     const firstEnabledOption = Array.from($("packSel").options).find((opt) => !opt.disabled);
