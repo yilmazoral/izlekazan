@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <meta name="description" content="İzleKazan; premium film erişimini referans, katkı ve şeffaf kazanç takibiyle birleştiren yeni nesil üyelik platformudur.">
   <title>İzleKazan | Film İzle, Ek Gelir Fırsatına Katıl</title>
-  <meta name="app-version" content="v2026.05.17-001">
-  <link rel="stylesheet" href="style.css?v=v20260517006">
+  <meta name="app-version" content="v2026.05.17-007">
+  <link rel="stylesheet" href="style.css?v=v20260517007">
 </head>
 <body>
   <header class="hero" id="hero">
@@ -239,9 +239,9 @@
 
     <section id="watch" class="page watchPage">
       <div class="watchShell">
-        <div class="watchTop"><div><b>İzleKazan Film İzleme Ekranı</b><small>Film adresi tarayıcı adres çubuğunda görünmez. Tam ekran için butonu kullanın.</small></div><div class="watchActions"><button onclick="fullscreenMovie()">Tam Ekran</button><button class="ghost" onclick="closeFilmModal()">Kapat</button></div></div>
+        <div class="watchTop"><div><b>İzleKazan Film İzleme Ekranı</b><small>Film adresi tarayıcı adres çubuğunda görünmez. Player tam ekranı için film üzerindeki tam ekran butonunu kullanabilirsiniz.</small></div><div class="watchActions"><button onclick="fullscreenMovie()">Tam Ekran</button><button class="ghost" onclick="closeFilmModal()">Kapat</button></div></div>
         <div class="watchFrameBox">
-          <iframe id="filmFrame" src="" title="İzleKazan Film Oynatıcı" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"></iframe>
+          <iframe id="filmFrame" src="" title="İzleKazan Film Oynatıcı" allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>
           <div id="filmLockOverlay" class="filmLockOverlay hidden" onclick="lockedFilmClick(event)" onkeydown="if(event.key==='Enter'||event.key===' '){lockedFilmClick(event)}" role="button" tabindex="0" aria-label="Premium üyelik uyarısı"><div class="filmScrollSpacer" aria-hidden="true"></div></div>
         </div>
         
@@ -274,7 +274,7 @@
 
   <footer class="siteVersionFooter" aria-label="Site sürüm bilgisi">
     <span>İzleKazan</span>
-    <strong>v2026.05.17-006</strong>
+    <strong>v2026.05.17-007</strong>
     <small>Canlı sürüm takip sistemi aktif</small>
   </footer>
 
@@ -291,7 +291,7 @@
   </nav>
 
   <div id="toast"></div>
-  <script src="app.js?v=v20260517006"></script>
-  <script src="site-update.js?v=v20260517006"></script>
+  <script src="app.js?v=v20260517007"></script>
+  <script src="site-update.js?v=v20260517007"></script>
 </body>
 </html>

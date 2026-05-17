@@ -1094,7 +1094,8 @@ function openFilmModal(url, locked = false) {
   const shell = document.querySelector(".watchShell");
   if (shell) {
     shell.classList.toggle("lockedWatch", filmIsLocked);
-    shell.classList.add("croppedWatch");
+    // v2026.05.17-007: Premium üyelerde film sitesi kırpılmadan tam görünür.
+    // Üst bölüm gizleme/crop kaldırıldı; sadece adres çubuğunda gerçek adres gizli kalır.
   }
 
   const box = document.querySelector(".watchFrameBox");

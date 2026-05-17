@@ -1,17 +1,15 @@
 {
-  "currentVersion": "v2026.05.17-006",
+  "currentVersion": "v2026.05.17-007",
   "releaseDate": "2026-05-17",
   "project": "İzleKazan",
-  "releaseName": "referans_davet_linki",
-  "summary": "Referans paylaşımı tam davet linkine çevrildi; linkten gelen kullanıcıda referans kodu üye ol formuna otomatik yazılır ve korunur.",
+  "releaseName": "film_ekrani_tam_gorunum_fullscreen_fix",
+  "summary": "Premium üyeler için film izleme ekranında dış sitenin üst bölümü tekrar görünür yapıldı; iframe tam ekran izinleri güçlendirildi.",
   "changes": [
-    "Referans Sistemi bölümündeki Kopyala/Paylaş butonları artık sadece kod değil, sitenin tam davet linkini üretir.",
-    "Davet linki ?ref=REFERANSKODU formatında paylaşılır.",
-    "Davet linkine tıklayan ziyaretçi otomatik olarak Üye Ol paneline yönlendirilir.",
-    "Referans kodu Üye Ol formundaki Referans Kodu alanına otomatik yazılır.",
-    "Linkten gelen referans kodu localStorage içinde korunur; kullanıcı sitede gezinirken veya Üye Ol bölümüne tekrar geldiğinde alan boşsa tekrar yazılır.",
-    "Kayıt başarıyla tamamlanınca bekleyen referans kodu temizlenir.",
-    "Footer sürümü ve /api/version varsayılanı v2026.05.17-006 yapıldı."
+    "Film izleme ekranında premium üyeler için uygulanan kırpma/crop davranışı kaldırıldı.",
+    "Film sitesi üst bölümünün görünmesi sağlandı; gerçek film sitesi adresi yine tarayıcı adres çubuğunda görünmez.",
+    "iframe allowfullscreen/webkitallowfullscreen/mozallowfullscreen izinleri index.html ve app.js tarafında güçlendirildi.",
+    "Önbellek sürümü v20260517007 olarak güncellendi.",
+    "Footer sürüm etiketi v2026.05.17-007 yapıldı."
   ],
   "protectedFeatures": [
     "Profesyonel kullanıcı paneli ve admin paneli tasarımı korunmalı.",
@@ -24,17 +22,13 @@
     "Sitenin alt kısmında görünür sürüm etiketi bulunmalı."
   ],
   "files": {
-    "SURUM-GECMISI.md": "e128cd55d87f98a7",
-    "VERSION.json": "898a4dc56695e7cb",
-    "YUKLEME-TALIMATI.txt": "aade3be6972cfd61",
-    "app.js": "9f413066170e8a74",
-    "assets/film-afisleri-vitrin.png": "c49d835eb1295ea6",
-    "assets/hero-bg.svg": "0e61c7e3c6176cea",
-    "assets/movie-poster.svg": "7244f8f164cca133",
-    "assets/vizyon-filmleri.png": "ed332a01a998776a",
-    "index.html": "f22a0142cf42327e",
-    "server.js": "15608ea643486bd2",
+    "index.html": "972fa8fad408a3b3",
+    "style.css": "b13139da2ad7b53c",
+    "app.js": "0ac72bda1b94e1c7",
+    "server.js": "824ba4fb1e7d2f22",
     "site-update.js": "9f8d8bcd1c0a5944",
-    "style.css": "4f2e137e07826ea0"
+    "SURUM-GECMISI.md": "9004fee5992bd206",
+    "YUKLEME-TALIMATI.txt": "b1e178c946a0aeee",
+    "assets/film-afisleri-vitrin.png": "c49d835eb1295ea6"
   }
 }

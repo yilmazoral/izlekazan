@@ -1,1 +1,6 @@
-Bu paket v2026.05.17-005 sürümüdür. ZIP içindeki dosyaları GitHub ana dizinine komple yükleyin. Footer sürüm etiketi, /api/version ve VERSION.json aynı sürüme çekilmiştir.
+İzleKazan v2026.05.17-007 yükleme talimatı
+
+1) ZIP içindeki dosyaları GitHub ana dizinine yükleyin.
+2) Özellikle index.html, style.css, app.js, server.js, VERSION.json ve SURUM-GECMISI.md dosyalarını değiştirin.
+3) Render deploy tamamlandıktan sonra /api/version ve site footer sürümünü kontrol edin.
+4) Film izleme ekranında premium kullanıcıyla test edin.

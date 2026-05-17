@@ -691,3 +691,21 @@ body.watchMode .watchShell{
   box-shadow: 0 0 0 3px rgba(246,181,30,.14) !important;
   background-image: linear-gradient(90deg, rgba(246,181,30,.08), transparent) !important;
 }
+
+
+/* v2026.05.17-007: Premium film izleme ekranında dış site artık kırpılmaz. */
+.watchShell:not(.lockedWatch) .watchFrameBox{
+  transform:none !important;
+  height:100% !important;
+  max-height:none !important;
+  overflow:hidden !important;
+}
+.watchShell:not(.lockedWatch) #filmFrame{
+  transform:none !important;
+  width:100% !important;
+  height:100% !important;
+}
+.watchShell:not(.lockedWatch).croppedWatch .watchFrameBox,
+.watchShell:not(.lockedWatch).croppedWatch #filmFrame{
+  transform:none !important;
+}

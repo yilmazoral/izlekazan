@@ -1,3 +1,27 @@
+# İzleKazan Sürüm Geçmişi
+
+## v2026.05.17-007 — 2026-05-17
+
+**Özet:** Premium film izleme ekranında kırpma kaldırıldı ve player tam ekran izinleri güçlendirildi.
+
+### Yapılanlar
+- Premium üyeler film izlerken dış sitenin üst kısmı artık gizlenmez; site tam görünür.
+- Film sitesi adresi tarayıcı adres çubuğunda açık görünmeden `/api/film-gateway` üzerinden açılmaya devam eder.
+- `iframe` için `allowfullscreen`, `webkitallowfullscreen`, `mozallowfullscreen` ve `fullscreen` izinleri eklendi/güçlendirildi.
+- Eski cache veya eski class kalsa bile premium izleme ekranında crop davranışını kapatan CSS güvenlik kuralı eklendi.
+- Footer sürüm etiketi ve `/api/version` varsayılanı `v2026.05.17-007` olarak güncellendi.
+
+### Not
+- Tarayıcının sol alt durum çubuğunda iframe içindeki dış sitenin kendi bağlantılarını göstermesi, tarayıcının güvenlik/arayüz davranışıdır. Bunu tamamen gizlemek için dış siteyi doğrudan iframe olarak değil, sunucu taraflı tam proxy ile yeniden yazmak gerekir; bu yöntem film/player çalışmasını bozabileceği için bu sürümde uygulanmamıştır.
+
+### Korunan kritik özellikler
+- Üye paneli akordeon yapısı korunmuştur.
+- Referans davet linki otomatik doldurma sistemi korunmuştur.
+- Supabase kalıcı veritabanı korunmuştur.
+- Gizli film gateway ve premium erişim kontrolü korunmuştur.
+- Mükerrer ödeme bildirimi/onayı engeli korunmuştur.
+- Açık listelerde ad/soyad/telefon gizlilik formatı korunmuştur.
+
 # SÜRÜM GEÇMİŞİ
 
 ## v2026.05.17-006 — 2026-05-17
