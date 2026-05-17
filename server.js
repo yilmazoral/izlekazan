@@ -20,6 +20,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "izlekazan_development_secret_chang
 const ADMIN_EMAIL = String(process.env.ADMIN_EMAIL || "yilmazoral@hotmail.com").toLowerCase();
 const ADMIN_PASS = process.env.ADMIN_PASS || "059221";
 const PUBLIC_URL = process.env.PUBLIC_URL || `http://localhost:${PORT}`;
+const MOVIE_SITE_URL = process.env.MOVIE_SITE_URL || "https://sinemaizle.org/";
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_KEY || "";
@@ -58,8 +59,8 @@ function defaultMovie() {
     category: "Film Arşivi",
     poster: "/assets/movie-poster.svg",
     description: "Premium üyeler için reklamsız film platformu.",
-    link: "https://lovefilmizle.net",
-    embedLink: "https://lovefilmizle.net",
+    link: "/api/film-gateway",
+    embedLink: "/api/film-gateway",
     status: "published",
     addedBy: "system",
     ceoApprovedBy: "system",
@@ -319,6 +320,11 @@ function sendResetMail(email, link) {
 }
 
 app.get("/api/health", (req, res) => res.json({ ok: true, storage: supabase ? "supabase" : "db.json", time: now() }));
+app.get("/api/film-gateway", (req, res) => {
+  res.setHeader("X-Robots-Tag", "noindex, nofollow");
+  res.setHeader("Referrer-Policy", "no-referrer");
+  res.redirect(302, MOVIE_SITE_URL);
+});
 app.get("/api/packages", (req, res) => res.json(PACKAGES));
 
 app.post("/api/register", async (req, res) => {
@@ -446,7 +452,19 @@ app.get("/api/movies", authOptional, (req, res) => {
   const d = readDb(); processDb(d);
   const u = req.auth ? d.users.find(x => x.id === req.auth.id) : null;
   const canWatch = !!(u && isPremium(u));
-  const movies = d.movies.filter(m => m.status === "published").map(m => ({ ...m, watchLink: canWatch ? (m.embedLink || m.link) : "", locked: !canWatch }));
+  const movies = d.movies.filter(m => m.status === "published").map(m => ({
+    id: m.id,
+    title: m.title,
+    year: m.year,
+    category: m.category,
+    poster: m.poster || "/assets/movie-poster.svg",
+    description: m.description || "",
+    status: m.status,
+    watchLink: canWatch ? "/api/film-gateway" : "",
+    link: "",
+    embedLink: "",
+    locked: !canWatch
+  }));
   res.json(movies);
 });
 function authOptional(req, res, next) {

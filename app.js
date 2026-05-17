@@ -867,8 +867,8 @@ function openFilmModal(url) {
   }
 
   const cleanUrl = String(url).trim();
-  if (!/^https?:\/\//i.test(cleanUrl)) {
-    toast("Film linki http veya https ile başlamalıdır");
+  if (!/^https?:\/\//i.test(cleanUrl) && !cleanUrl.startsWith("/")) {
+    toast("Film linki geçersiz");
     return;
   }
 
