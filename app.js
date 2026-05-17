@@ -52,6 +52,76 @@ function requireZeroPhoneInput(id) {
   return digits;
 }
 
+function normalizeReferralCode(value) {
+  return String(value || "").trim().replace(/[^A-Za-z0-9_-]/g, "").toUpperCase();
+}
+
+function getReferralCodeFromUrl() {
+  const params = new URLSearchParams(window.location.search || "");
+  return normalizeReferralCode(params.get("ref") || params.get("referans") || params.get("r"));
+}
+
+function setPendingReferralCode(code, source = "link") {
+  const clean = normalizeReferralCode(code);
+  if (!clean) return "";
+  localStorage.setItem("pendingReferralCode", clean);
+  localStorage.setItem("pendingReferralSource", source);
+  return clean;
+}
+
+function getPendingReferralCode() {
+  return normalizeReferralCode(localStorage.getItem("pendingReferralCode") || "");
+}
+
+function applyPendingReferralCode(force = false) {
+  const el = $("rr");
+  if (!el) return;
+  const pending = getPendingReferralCode();
+  if (!pending) return;
+  if (force || !String(el.value || "").trim()) {
+    el.value = pending;
+    el.dataset.autoReferral = pending;
+    el.classList.add("lockedReferralInput");
+  }
+}
+
+function buildReferralLink(code) {
+  const clean = normalizeReferralCode(code);
+  const base = `${window.location.origin}${window.location.pathname || "/"}`.replace(/\/$/, "/");
+  return `${base}?ref=${encodeURIComponent(clean)}`;
+}
+
+function handleReferralLanding() {
+  const codeFromUrl = getReferralCodeFromUrl();
+  if (!codeFromUrl) {
+    applyPendingReferralCode(false);
+    return;
+  }
+  setPendingReferralCode(codeFromUrl, "url");
+  applyPendingReferralCode(true);
+  if (!isLoggedIn()) {
+    page("auth");
+    setTimeout(() => {
+      toggleAuthPanel("register");
+      applyPendingReferralCode(true);
+      const rr = $("rr");
+      if (rr) rr.focus();
+    }, 120);
+  }
+}
+
+function bindReferralInputPersistence() {
+  const el = $("rr");
+  if (!el || el.dataset.refBound === "1") return;
+  el.dataset.refBound = "1";
+  el.addEventListener("input", () => {
+    const clean = normalizeReferralCode(el.value);
+    if (clean) {
+      localStorage.setItem("pendingReferralCode", clean);
+    }
+  });
+}
+
 function refreshMenu() {
   const loginTop = $("loginTop");
   const logoutBtn = $("logoutBtn");
@@ -128,6 +198,7 @@ function toggleAuthPanel(type) {
   const loginActive = type === "login";
   loginPanel.classList.toggle("active", loginActive);
   registerPanel.classList.toggle("active", !loginActive);
+  if (!loginActive) applyPendingReferralCode(false);
 
   // Mobilde seçilen formu ekranın üstüne al.
   // Böylece Üye Ol açıldığında üstteki Giriş Yap kartı ekranda kalmaz;
@@ -189,8 +260,11 @@ async function init() {
 
   refreshMenu();
   startRotatingSlogans();
+  bindReferralInputPersistence();
+  applyPendingReferralCode(false);
   await loadPackages().catch(() => {});
   checkResetLink();
+  if (!new URLSearchParams(location.search).get("reset")) handleReferralLanding();
 }
 
 function getCurrentPackageId() {
@@ -302,9 +376,11 @@ async function register() {
         phone: phoneNorm,
         password: $("rs").value,
         password2: $("rs2").value,
-        referralCode: $("rr").value
+        referralCode: normalizeReferralCode($("rr").value)
       })
     });
+    localStorage.removeItem("pendingReferralCode");
+    localStorage.removeItem("pendingReferralSource");
     toast("Kayıt başarılı, giriş yapın");
     toggleAuthPanel("login");
     page("auth");
@@ -461,7 +537,7 @@ async function dash() {
               <em>${premiumActive ? "Aktif" : "Kapalı"}</em>
             </button>
             <div id="memberReferral" class="memberAccordionBody hidden">
-              ${premiumActive ? `<p class="muted">Referans kodunu paylaşarak doğrudan üye ağını büyütebilirsin.</p><div class="refBox professionalRef"><span class="refCode" id="refCode">${d.user.referralCode}</span><button onclick="copyRef()">Kopyala</button><button class="ghost" onclick="shareRef()">Paylaş</button></div>` : `<div class="emptyState compact"><b>Referans kodu kapalı</b><span>Referans kodunuz paket satın alındıktan sonra görünür.</span></div>`}
+              ${premiumActive ? `<p class="muted">Paylaş butonu artık tam davet linki gönderir. Linkten gelen kişinin referans kodu üye ol formuna otomatik yazılır.</p><div class="refBox professionalRef"><span class="refCode" id="refCode">${d.user.referralCode}</span><button onclick="copyRef()">Linki Kopyala</button><button class="ghost" onclick="shareRef()">Paylaş</button></div>` : `<div class="emptyState compact"><b>Referans kodu kapalı</b><span>Referans kodunuz paket satın alındıktan sonra görünür.</span></div>`}
             </div>
           </div>
 
@@ -570,16 +646,19 @@ async function saveProfile() {
 }
 
 function copyRef() {
-  navigator.clipboard.writeText($("refCode").innerText);
-  toast("Referans kodu kopyalandı");
+  const link = buildReferralLink($("refCode").innerText);
+  navigator.clipboard.writeText(link);
+  toast("Referans davet linki kopyalandı");
 }
 
 function shareRef() {
-  const text = `İzleKazan referans kodum: ${$("refCode").innerText}`;
-  if (navigator.share) navigator.share({ text });
+  const code = $("refCode").innerText;
+  const link = buildReferralLink(code);
+  const text = `İzleKazan davet linkim: ${link}`;
+  if (navigator.share) navigator.share({ title: "İzleKazan Davet Linki", text, url: link });
   else {
     navigator.clipboard.writeText(text);
-    toast("Paylaşım metni kopyalandı");
+    toast("Davet linki kopyalandı");
   }
 }
 

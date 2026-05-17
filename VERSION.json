@@ -1,19 +1,21 @@
 {
-  "currentVersion": "v2026.05.17-005",
+  "currentVersion": "v2026.05.17-006",
   "releaseDate": "2026-05-17",
   "project": "İzleKazan",
-  "summary": "Üye panelindeki işlem bölümleri akordeon düzene çevrildi; tüm bölümler kapalı başlar, kullanıcı tıkladığı bölümü açarak işlem yapar.",
+  "releaseName": "referans_davet_linki",
+  "summary": "Referans paylaşımı tam davet linkine çevrildi; linkten gelen kullanıcıda referans kodu üye ol formuna otomatik yazılır ve korunur.",
   "changes": [
-    "Üye panelinde Bildirimlerim, Alt Üyelerim, Üyelik Bilgilerim, Referans Sistemi, IBAN Ödeme Bildir, Çekim Talebi ve Destek Merkezi akordeon kartlara dönüştürüldü.",
-    "Panel bölümleri varsayılan olarak kapalı başlar.",
-    "Bir bölüm açıldığında diğer açık üye paneli bölümleri otomatik kapanır.",
-    "Mobil uyumlu akordeon CSS tasarımı eklendi.",
-    "index.html cache parametreleri v20260517004 olarak güncellendi.",
-    "server.js varsayılan APP_VERSION değeri v2026.05.17-004 olarak güncellendi.",
-    "Önceki kritik özellikler korunmuştur: Supabase, gizli film gateway, premium kontrolü, mükerrer ödeme engeli, profesyonel panel tasarımı."
+    "Referans Sistemi bölümündeki Kopyala/Paylaş butonları artık sadece kod değil, sitenin tam davet linkini üretir.",
+    "Davet linki ?ref=REFERANSKODU formatında paylaşılır.",
+    "Davet linkine tıklayan ziyaretçi otomatik olarak Üye Ol paneline yönlendirilir.",
+    "Referans kodu Üye Ol formundaki Referans Kodu alanına otomatik yazılır.",
+    "Linkten gelen referans kodu localStorage içinde korunur; kullanıcı sitede gezinirken veya Üye Ol bölümüne tekrar geldiğinde alan boşsa tekrar yazılır.",
+    "Kayıt başarıyla tamamlanınca bekleyen referans kodu temizlenir.",
+    "Footer sürümü ve /api/version varsayılanı v2026.05.17-006 yapıldı."
   ],
   "protectedFeatures": [
     "Profesyonel kullanıcı paneli ve admin paneli tasarımı korunmalı.",
+    "Üye paneli akordeon yapısı korunmalı.",
     "Supabase kalıcı veritabanı aktif kalmalı.",
     "Film adresi kaynak kodda açık görünmemeli.",
     "Premium olmayan kullanıcı gerçek film sitesine tam erişememeli.",
@@ -22,35 +24,17 @@
     "Sitenin alt kısmında görünür sürüm etiketi bulunmalı."
   ],
   "files": {
-    ".gitignore": "7c7298baae9efd8d",
-    "README.md": "2b354fe0cc83cc58",
-    "SURUM-GECMISI.md": "787ce4931476d378",
-    "YUKLEME-TALIMATI.txt": "41ad2f13152f1bfb",
-    "app.js": "01003fb4ab888150",
+    "SURUM-GECMISI.md": "e128cd55d87f98a7",
+    "VERSION.json": "898a4dc56695e7cb",
+    "YUKLEME-TALIMATI.txt": "aade3be6972cfd61",
+    "app.js": "9f413066170e8a74",
     "assets/film-afisleri-vitrin.png": "c49d835eb1295ea6",
     "assets/hero-bg.svg": "0e61c7e3c6176cea",
     "assets/movie-poster.svg": "7244f8f164cca133",
     "assets/vizyon-filmleri.png": "ed332a01a998776a",
-    "index.html": "917f03a44951f57e",
-    "package.json": "784613a58589ee84",
-    "server.js": "6a8a31c7d11b173e",
+    "index.html": "f22a0142cf42327e",
+    "server.js": "15608ea643486bd2",
     "site-update.js": "9f8d8bcd1c0a5944",
-    "style.css": "75edad7526b2c89a",
-    "supabase-setup.sql": "440628a41865ef15"
-  },
-  "releaseName": "surum_etiketi_senkron_fix",
-  "notes": [
-    "Footer altında görünen sürüm etiketi canlı işlevsel sürümle senkronize edildi.",
-    "Üye paneli akordeon özelliği korunarak görünür sürüm v2026.05.17-005 yapıldı.",
-    "server.js varsayılan APP_VERSION değeri v2026.05.17-005 olarak güncellendi.",
-    "VERSION.json ve SURUM-GECMISI.md dosyaları aynı sürüme çekildi."
-  ],
-  "history": [
-    {
-      "version": "v2026.05.17-005",
-      "name": "surum_etiketi_senkron_fix",
-      "date": "2026-05-17",
-      "summary": "Görünür footer sürüm etiketi ile aktif kod sürümü senkronize edildi."
-    }
-  ]
+    "style.css": "4f2e137e07826ea0"
+  }
 }

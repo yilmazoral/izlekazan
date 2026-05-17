@@ -1,3 +1,26 @@
+# SÜRÜM GEÇMİŞİ
+
+## v2026.05.17-006 — 2026-05-17
+
+**Özet:** Referans paylaşımı tam davet linkine çevrildi ve linkten gelen kullanıcıda referans kodunun otomatik dolması sağlandı.
+
+### Yapılanlar
+- Referans Sistemi bölümünde **Linki Kopyala** ve **Paylaş** butonları tam site davet linki üretir.
+- Paylaşılan bağlantı `?ref=REFERANSKODU` formatındadır.
+- Davet linkine tıklayan ziyaretçi otomatik olarak **Üye Ol** paneline yönlendirilir.
+- Referans kodu üye ol formundaki referans alanına otomatik yazılır.
+- Kullanıcı sitede gezinirse veya Üye Ol bölümünü tekrar açarsa referans alanı boşsa kod yeniden yazılır.
+- Başarılı kayıt sonrası bekleyen referans kodu temizlenir.
+- Footer sürümü, `VERSION.json` ve `/api/version` varsayılanı v2026.05.17-006 olarak güncellendi.
+
+### Korunan kritik özellikler
+- Profesyonel admin ve kullanıcı paneli tasarımı.
+- Üye paneli akordeon sistemi.
+- Supabase kalıcı veritabanı.
+- Gizli film gateway ve premium kontrolü.
+- Mükerrer ödeme bildirimi/onayı engeli.
+- Açık veri tabanı gizlilik formatı.
+
 # Sürüm Geçmişi
 
 ## v2026.05.17-005 — 2026-05-17
