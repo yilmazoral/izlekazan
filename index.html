@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <meta name="description" content="İzleKazan; premium film erişimini referans, katkı ve şeffaf kazanç takibiyle birleştiren yeni nesil üyelik platformudur.">
   <title>İzleKazan | Film İzle, Ek Gelir Fırsatına Katıl</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20260517-panelui1">
 </head>
 <body>
   <header class="hero" id="hero">
@@ -59,7 +59,7 @@
         <div class="visualMetric"><b>Premium Film Erişimi</b><small>Reklamsız film kataloğuna paketle eriş.</small></div>
         <div class="visualMetric"><b>Referans Geliri</b><small>Davet ettiğin üyeleri panelden takip et.</small></div>
         <div class="visualMetric"><b>Film Ekle Kazan</b><small>Onaylanan film katkılarınla ekstra gelir oluştur.</small></div>
-        <div class="visualMetric"><b>Şeffaf Veri Tabanı</b><small>Çekim ve katılım kayıtlarını maskeli olarak gör.</small></div>
+        <div class="visualMetric"><b>Şeffaf Veri Tabanı</b><small>Çekim ve katılım kayıtlarını gizlilik kurallarıyla gör.</small></div>
       </aside>
     </div>
   </header>
@@ -102,7 +102,7 @@
         <div>
           <span>Herkese Açık Şeffaflık Alanı</span>
           <h3>Veri Tabanı</h3>
-          <p>Kullanıcı gizliliği korunarak çekim talepleri ve platforma katılan yeni üyeler maskeli şekilde paylaşılır.</p>
+          <p>Kullanıcı gizliliği korunarak ad görünür, soyadın yalnızca ilk harfi ve telefonun ilk 5 hanesi gösterilir.</p>
         </div>
         <div class="teaserActions">
           <button onclick="page('database'); setTimeout(()=>scrollToDb('publicWithdrawalsBox'),350)">Çekim Taleplerini Gör</button>
@@ -175,8 +175,8 @@
         <details><summary>Şifremi unuttum ne yapmalıyım?</summary><p>Şifremi Unuttum bölümünden e-posta ile yeni şifre oluşturabilirsiniz.</p></details>
         <details><summary>Film neden reddedilir?</summary><p>Kırık link, düşük kalite veya uygun olmayan içerik nedeniyle reddedilebilir.</p></details>
         <details><summary>Platform mobil uyumlu mu?</summary><p>Evet. Telefon, tablet ve bilgisayarda kullanılabilir.</p></details>
-        <details><summary>Veri Tabanı bölümünde kişisel bilgiler görünür mü?</summary><p>Hayır. Herkese açık alanda ad, soyad ve telefon bilgileri maskeli gösterilir.</p></details>
-        <details><summary>Admin panelinde bilgiler tam görünür mü?</summary><p>Evet. Admin yetkisi olan kullanıcılar yönetim panelinde kayıtları eksiksiz görebilir.</p></details>
+        <details><summary>Veri Tabanı bölümünde kişisel bilgiler görünür mü?</summary><p>Herkese açık alanda ad görünür; soyadın yalnızca ilk harfi, telefon numarasının ise ilk 5 hanesi gösterilir.</p></details>
+        <details><summary>Üye olmak ve gelir elde etmek için yaş sınırı var mıdır?</summary><p>Üye olmak için yaş sınırı yoktur fakat ödeme almanız için banka hesabı ya da Papara, İninal, Tosla hesabınız olmalı ya da destek bölümüne ileterek kripto cüzdanınıza USDT (Tether) olarak da çekim yapabilirsiniz.</p></details>
       </div>
     </section>
 
@@ -189,8 +189,11 @@
             <span><b>Giriş Yap</b><small>Hesabına gir ve kaldığın yerden devam et.</small></span>
           </button>
           <div class="authPanelContent">
-            <input id="le" type="email" autocomplete="email" placeholder="E-posta adresin">
-            <input id="ls" type="password" autocomplete="current-password" placeholder="Şifren">
+            <input id="le" type="text" inputmode="text" autocomplete="username" placeholder="E-posta veya telefon numarası">
+            <div class="passwordWrap">
+              <input id="ls" type="password" autocomplete="current-password" placeholder="Şifren">
+              <button type="button" class="passwordToggle" onclick="togglePassword('ls', this)" aria-label="Şifreyi göster">Göster</button>
+            </div>
             <button onclick="login()">Giriş Yap</button>
             <button class="linkBtn" onclick="page('forgot')">Şifremi Unuttum</button>
           </div>
@@ -204,8 +207,17 @@
           <div class="authPanelContent">
             <div class="twoCols"><input id="rf" autocomplete="given-name" placeholder="Ad"><input id="rl" autocomplete="family-name" placeholder="Soyad"></div>
             <input id="re" type="email" autocomplete="email" placeholder="E-posta">
-            <input id="rp" inputmode="tel" autocomplete="tel" placeholder="Telefon 05XXXXXXXXX">
-            <div class="twoCols"><input id="rs" type="password" autocomplete="new-password" placeholder="Şifre"><input id="rs2" type="password" autocomplete="new-password" placeholder="Şifre Tekrar"></div>
+            <input id="rp" inputmode="tel" autocomplete="tel" placeholder="Telefon 05XXXXXXXXX (0 ile başlamalı)">
+            <div class="twoCols">
+              <div class="passwordWrap">
+                <input id="rs" type="password" autocomplete="new-password" placeholder="Şifre">
+                <button type="button" class="passwordToggle" onclick="togglePassword('rs', this)" aria-label="Şifreyi göster">Göster</button>
+              </div>
+              <div class="passwordWrap">
+                <input id="rs2" type="password" autocomplete="new-password" placeholder="Şifre Tekrar">
+                <button type="button" class="passwordToggle" onclick="togglePassword('rs2', this)" aria-label="Şifre tekrarını göster">Göster</button>
+              </div>
+            </div>
             <input id="rr" placeholder="Referans Kodu (Zorunlu)">
             <button onclick="register()">Üye Ol</button>
           </div>
@@ -227,12 +239,15 @@
     <section id="watch" class="page watchPage">
       <div class="watchShell">
         <div class="watchTop"><div><b>İzleKazan Film İzleme Ekranı</b><small>Film adresi tarayıcı adres çubuğunda görünmez. Tam ekran için butonu kullanın.</small></div><div class="watchActions"><button onclick="fullscreenMovie()">Tam Ekran</button><button class="ghost" onclick="closeFilmModal()">Kapat</button></div></div>
-        <iframe id="filmFrame" src="" title="İzleKazan Film Oynatıcı" allowfullscreen webkitallowfullscreen mozallowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share"></iframe>
-        <p class="movieHint watchHint">Tam ekran için önce bu sayfadaki “Tam Ekran” butonunu, ardından filmin kendi oynatıcısındaki tam ekran butonunu deneyin. En iyi sonuç için film eklerken embed/player linki kullanın.</p>
+        <div class="watchFrameBox">
+          <iframe id="filmFrame" src="" title="İzleKazan Film Oynatıcı" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"></iframe>
+          <div id="filmLockOverlay" class="filmLockOverlay hidden" onclick="lockedFilmClick(event)" onkeydown="if(event.key==='Enter'||event.key===' '){lockedFilmClick(event)}" role="button" tabindex="0" aria-label="Premium üyelik uyarısı"><div class="filmScrollSpacer" aria-hidden="true"></div></div>
+        </div>
+        
       </div>
     </section>
 
-    <section id="panel" class="page"><h2>Üye Paneli</h2><div id="dash"></div></section>
+    <section id="panel" class="page memberPanelPage"><div class="sectionIntro panelPageIntro"><span>Üye Paneli</span><h2>Kontrol Merkezi</h2><p>Bakiye, paket, referans ağı, ödeme bildirimi, çekim talebi ve destek işlemlerini tek ekrandan yönetin.</p></div><div id="dash"></div></section>
 
     <section id="movies" class="page">
       <div class="sectionIntro"><span>Film Kataloğu</span><h2>Film Kataloğu</h2><p>Filmlerin adı, afişi ve açıklaması herkese görünür. İzleme erişimi yalnızca aktif premium üyeler için açılır.</p></div>
@@ -244,10 +259,10 @@
     </section>
 
     <section id="database" class="page">
-      <div class="sectionIntro"><span>Şeffaf Kayıtlar</span><h2>Veri Tabanı</h2><p>Kullanıcı gizliliğini korumak amacıyla ad, soyad ve telefon bilgileri maskelenmiş olarak gösterilmektedir.</p></div>
+      <div class="sectionIntro"><span>Şeffaf Kayıtlar</span><h2>Veri Tabanı</h2><p>Kullanıcı gizliliği için ad görünür; soyadın yalnızca ilk harfi ve telefonun ilk 5 hanesi gösterilir.</p></div>
       <div class="databaseGrid">
-        <div class="card"><h3>Kazanç Çekim Talepleri</h3><p>Platform üzerindeki çekim talepleri maskeli olarak listelenir.</p><button onclick="scrollToDb('publicWithdrawalsBox')">Çekim Taleplerini Gör</button></div>
-        <div class="card"><h3>Aramıza Katılanlar</h3><p>Platforma katılan yeni üyeler ve davet eden kişiler maskeli olarak listelenir.</p><button onclick="scrollToDb('publicMembersBox')">Yeni Üyeleri Gör</button></div>
+        <div class="card"><h3>Kazanç Çekim Talepleri</h3><p>Platform üzerindeki çekim talepleri gizlilik kurallarıyla listelenir.</p><button onclick="scrollToDb('publicWithdrawalsBox')">Çekim Taleplerini Gör</button></div>
+        <div class="card"><h3>Aramıza Katılanlar</h3><p>Platforma katılan yeni üyeler ve davet eden kişiler gizlilik kurallarıyla listelenir.</p><button onclick="scrollToDb('publicMembersBox')">Yeni Üyeleri Gör</button></div>
       </div>
       <div id="publicWithdrawalsBox"></div>
       <div id="publicMembersBox"></div>
@@ -269,7 +284,7 @@
   </nav>
 
   <div id="toast"></div>
-  <script src="app.js"></script>
-  <script src="site-update.js"></script>
+  <script src="app.js?v=20260517-panelui1"></script>
+  <script src="site-update.js?v=20260517-panelui1"></script>
 </body>
 </html>

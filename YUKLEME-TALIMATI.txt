@@ -1,13 +1,19 @@
-İzleKazan ana sayfa profesyonel tasarım güncellemesi
+Bu paket dün geceki profesyonel tasarım sürümü baz alınarak hazırlandı.
+İçinde şu son değişiklikler korunur:
+- Profesyonel ana sayfa ve üye paneli
+- Mobil menü ve üye ol formu düzeltmeleri
+- Şifre göster/gizle
+- E-posta veya telefonla giriş
+- 0 ile başlayan telefon zorunluluğu
+- Supabase kalıcı veritabanı desteği
+- Mükerrer ödeme bildirimi/onayı engeli
+- Film linkinin kaynak kodda görünmemesi için /api/film-gateway
+- Film sitesi kilit/uyarı/tam ekran düzeltmeleri
+- Premium içerik bölümünde film afiş vitrini
+- İsim açık, soyisim ilk harf + ****, telefon ilk 5 hane görünür gizlilik formatı
 
-Bu paketteki dosyalar:
-- index.html
-- style.css
-- site-update.js
-
-GitHub'da izlekazan deposuna girin ve bu 3 dosyayı ana dizine yükleyin.
-Var olan index.html ve style.css dosyalarını değiştirin.
-site-update.js dosyasını yeni dosya olarak ekleyin.
-
-app.js ve server.js dosyalarına dokunmayın.
-Render otomatik deploy ederse birkaç dakika içinde yayına geçer.
+Yükleme:
+1) GitHub ana dizindeki dosyaları bu pakettekilerle değiştir.
+2) assets klasörünü olduğu gibi yükle.
+3) Render otomatik deploy etmezse Manual Deploy > Deploy latest commit yap.
+4) /api/health içinde storage: supabase göründüğünü kontrol et.
