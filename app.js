@@ -1367,3 +1367,51 @@ if (document.readyState === "loading") {
 } else {
   syncSiteVersionLabel();
 }
+
+
+// v2026.05.17-011: PWA / Ana ekrana ekleme ve adres çubuğu olmadan kullanım desteği.
+let izleKazanDeferredInstallPrompt = null;
+function isStandalonePwaMode() {
+  return window.matchMedia && window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+}
+function showPwaInstallUi() {
+  if (isStandalonePwaMode()) return;
+  const btn = document.getElementById("installPwaBtn");
+  const banner = document.getElementById("pwaInstallBanner");
+  const dismissed = localStorage.getItem("izlekazan_pwa_banner_dismissed") === "1";
+  if (btn) btn.classList.toggle("hidden", !izleKazanDeferredInstallPrompt);
+  if (banner) banner.classList.toggle("hidden", dismissed || !izleKazanDeferredInstallPrompt);
+}
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  izleKazanDeferredInstallPrompt = event;
+  showPwaInstallUi();
+});
+window.addEventListener("appinstalled", () => {
+  izleKazanDeferredInstallPrompt = null;
+  localStorage.setItem("izlekazan_pwa_installed", "1");
+  showPwaInstallUi();
+  toast("İzleKazan uygulama olarak kuruldu.");
+});
+async function installIzleKazanApp() {
+  if (!izleKazanDeferredInstallPrompt) {
+    toast("Telefonda tarayıcı menüsünden 'Ana ekrana ekle' seçeneğini kullanın.");
+    return;
+  }
+  izleKazanDeferredInstallPrompt.prompt();
+  await izleKazanDeferredInstallPrompt.userChoice.catch(() => null);
+  izleKazanDeferredInstallPrompt = null;
+  showPwaInstallUi();
+}
+function dismissPwaInstallBanner() {
+  localStorage.setItem("izlekazan_pwa_banner_dismissed", "1");
+  showPwaInstallUi();
+}
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js?v=v20260517011").catch(() => {});
+    showPwaInstallUi();
+  });
+} else {
+  document.addEventListener("DOMContentLoaded", showPwaInstallUi);
+}

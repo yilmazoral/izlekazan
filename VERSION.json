@@ -1,15 +1,16 @@
 {
-  "currentVersion": "v2026.05.17-010",
+  "currentVersion": "v2026.05.17-011",
   "releaseDate": "2026-05-17",
   "project": "İzleKazan",
-  "releaseName": "surum_senkron_merkezi_fix",
-  "summary": "Sürüm numarası tutarsızlığı giderildi; görünür footer, /api/version, /api/health ve VERSION.json aynı kaynaktan senkronize edildi.",
+  "releaseName": "pwa_ana_ekran_adres_cubuksuz_mod",
+  "summary": "PWA desteği eklendi; kullanıcılar siteyi telefonda ana ekrana ekleyerek adres çubuğu olmadan uygulama gibi açabilir.",
   "changes": [
-    "index.html meta sürümü, cache sürümleri ve görünür footer etiketi v2026.05.17-010 olarak güncellendi.",
-    "server.js içinde /api/version ve /api/health artık VERSION.json içindeki currentVersion değerini okur.",
-    "app.js içinde footer sürüm etiketi /api/version üzerinden otomatik güncellenir.",
-    "Önceki v2026.05.17-009 zorunlu ekranı kapla film modu korunmuştur.",
-    "Bundan sonra sürüm etiketi elle unutulsa bile canlı sitede VERSION.json değeri gösterilir."
+    "manifest.json eklendi ve display: standalone ayarlandı.",
+    "sw.js service worker eklendi; temel dosyalar önbelleğe alınır.",
+    "Android/Chrome için Uygulama Olarak Kur butonu ve kurulum bannerı eklendi.",
+    "iPhone/Safari için ana ekrana ekleme meta etiketleri eklendi.",
+    "192x192 ve 512x512 uygulama ikonları oluşturuldu.",
+    "Sürüm merkezi v2026.05.17-011 olarak güncellendi."
   ],
   "protectedFeatures": [
     "Profesyonel kullanıcı paneli ve admin paneli tasarımı korunmalı.",
@@ -23,14 +24,18 @@
     "Sitenin alt kısmında görünür sürüm etiketi bulunmalı ve /api/version ile aynı olmalı."
   ],
   "files": {
-    "index.html": "8a1549a1a2410bae",
-    "style.css": "5a28046402d33024",
-    "app.js": "8a0dbecb93516228",
+    "index.html": "9f0220cb4138fce4",
+    "style.css": "f81e0ec40ed47ee1",
+    "app.js": "55df44d0ed4d1ccd",
     "server.js": "9e8769585e0dfa87",
     "site-update.js": "9f8d8bcd1c0a5944",
-    "SURUM-GECMISI.md": "6ab50bfee97754e9",
-    "YUKLEME-TALIMATI.txt": "247e8a71140b3729",
-    "assets/film-afisleri-vitrin.png": "c49d835eb1295ea6",
-    "VERSION.json": "a6e02bfbf815e2bd"
+    "SURUM-GECMISI.md": "6290230e30a0b50a",
+    "YUKLEME-TALIMATI.txt": "19c48804cbc1673f",
+    "VERSION.json": "a089d03c27f81e9b",
+    "manifest.json": "594d9d3b8d1b8a60",
+    "sw.js": "6e4305b34d3a0d31",
+    "assets/icon-192.png": "bf8c9fc5ce443056",
+    "assets/icon-512.png": "22ee57a96cc45a9b",
+    "assets/film-afisleri-vitrin.png": "c49d835eb1295ea6"
   }
 }

@@ -827,3 +827,11 @@ body.cinemaBodyLocked{
     font-size:11px;
   }
 }
+
+
+/* v2026.05.17-011: PWA / Ana ekrana ekleme görünümü */
+.installPwaBtn{border:1px solid rgba(255,214,102,.42);background:linear-gradient(135deg,rgba(255,214,102,.20),rgba(255,255,255,.06));color:#ffe28a;border-radius:999px;padding:10px 14px;font-weight:800;box-shadow:0 10px 24px rgba(255,214,102,.10)}
+.pwaInstallBanner{position:fixed;left:18px;right:18px;bottom:92px;z-index:9997;display:flex;align-items:center;gap:12px;justify-content:space-between;padding:14px 16px;border:1px solid rgba(255,214,102,.30);border-radius:18px;background:rgba(6,10,24,.96);backdrop-filter:blur(16px);box-shadow:0 18px 50px rgba(0,0,0,.45);color:#fff}
+.pwaInstallBanner div{display:flex;flex-direction:column;gap:3px}.pwaInstallBanner b{color:#ffe28a}.pwaInstallBanner span{color:rgba(255,255,255,.74);font-size:13px}.pwaInstallBanner button{width:auto;white-space:nowrap;padding:10px 14px}.pwaInstallBanner .ghost{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.14);color:#fff}
+@media(max-width:720px){.installPwaBtn{display:none!important}.pwaInstallBanner{left:10px;right:10px;bottom:78px;align-items:stretch;display:grid;grid-template-columns:1fr auto auto;padding:12px}.pwaInstallBanner span{font-size:12px}.pwaInstallBanner button{padding:9px 10px;font-size:12px}}
+@media(display-mode:standalone){.pwaInstallBanner,.installPwaBtn{display:none!important}}

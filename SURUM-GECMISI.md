@@ -188,3 +188,13 @@ Her sürümde şu bilgiler yazılacak:
 - Mobil ve PC’de gövde kaydırması kilitlenerek film alanının ekranı kaplaması güçlendirildi.
 - Bu çözüm iframe içindeki yabancı player’ın kendi tam ekran butonunu garanti etmez; İzleKazan içi film alanını tam ekran benzeri kaplatır.
 - Önceki premium kontrolü, gizli film linki, referans davet linki ve panel akordeon özellikleri korundu.
+
+
+## v2026.05.17-011 — PWA / Ana Ekran Adres Çubuğusuz Mod
+
+- `manifest.json` ve `sw.js` eklendi.
+- Site telefonda ana ekrana eklendiğinde uygulama gibi açılır ve adres çubuğu görünmez.
+- Android/Chrome tarafında `Uygulama Olarak Kur` butonu ve kurulum bannerı eklendi.
+- iPhone/Safari için `apple-mobile-web-app-*` meta etiketleri eklendi.
+- Uygulama ikonları `assets/icon-192.png` ve `assets/icon-512.png` olarak eklendi.
+- Önceki korumalı özellikler korunmuştur: Supabase, referans linki, üye paneli akordeon, premium kontrolü, gizli film linki, mükerrer ödeme engeli.

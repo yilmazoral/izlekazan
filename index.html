@@ -5,8 +5,15 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <meta name="description" content="İzleKazan; premium film erişimini referans, katkı ve şeffaf kazanç takibiyle birleştiren yeni nesil üyelik platformudur.">
   <title>İzleKazan | Film İzle, Ek Gelir Fırsatına Katıl</title>
-  <meta name="app-version" content="v2026.05.17-010">
-  <link rel="stylesheet" href="style.css?v=v20260517010">
+  <meta name="app-version" content="v2026.05.17-011">
+  <meta name="theme-color" content="#050816">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="İzleKazan">
+  <link rel="manifest" href="/manifest.json?v=v20260517011">
+  <link rel="apple-touch-icon" href="/assets/icon-192.png?v=v20260517011">
+  <link rel="stylesheet" href="style.css?v=v20260517011">
 </head>
 <body>
   <header class="hero" id="hero">
@@ -21,6 +28,7 @@
         <button onclick="page('faq')">S.S.S</button>
         <button id="panelTop" class="hidden" onclick="page('panel')">Panelim</button>
         <button id="adminTop" class="hidden" onclick="page('admin')">Admin Panel</button>
+        <button id="installPwaBtn" class="installPwaBtn hidden" onclick="installIzleKazanApp()">Uygulama Olarak Kur</button>
         <button id="loginTop" class="navCta" onclick="page('auth')">Giriş Yap / Üye Ol</button>
         <button id="logoutBtn" class="hidden" onclick="logout()">Çıkış</button>
       </div>
@@ -276,9 +284,15 @@
     <section id="admin" class="page"><h2>Admin Paneli</h2><div id="adminBox" class="card">Admin girişi gerekli.</div></section>
   </main>
 
+  <div id="pwaInstallBanner" class="pwaInstallBanner hidden" role="region" aria-label="Uygulama kurulumu">
+    <div><b>İzleKazan uygulama modu</b><span>Telefonda ana ekrana ekleyerek adres çubuğu olmadan kullanabilirsiniz.</span></div>
+    <button onclick="installIzleKazanApp()">Kur</button>
+    <button class="ghost" onclick="dismissPwaInstallBanner()">Kapat</button>
+  </div>
+
   <footer class="siteVersionFooter" aria-label="Site sürüm bilgisi">
     <span>İzleKazan</span>
-    <strong id="siteVersionLabel">v2026.05.17-010</strong>
+    <strong id="siteVersionLabel">v2026.05.17-011</strong>
     <small>Canlı sürüm takip sistemi aktif</small>
   </footer>
 
@@ -295,7 +309,7 @@
   </nav>
 
   <div id="toast"></div>
-  <script src="app.js?v=v20260517010"></script>
-  <script src="site-update.js?v=v20260517010"></script>
+  <script src="app.js?v=v20260517011"></script>
+  <script src="site-update.js?v=v20260517011"></script>
 </body>
 </html>
