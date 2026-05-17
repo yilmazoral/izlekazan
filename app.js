@@ -627,7 +627,9 @@ async function openFirstMovie() {
     }
 
     const first = m[0];
-    const url = first.watchLink || first.previewLink || first.embedLink || first.link || "";
+    // Film adresi kaynak kodda görünmesin diye gerçek adres sunucuda tutulur.
+    // API herhangi bir nedenle boş link döndürürse güvenli gizli geçit kullanılır.
+    const url = first.watchLink || first.previewLink || first.embedLink || first.link || "/api/film-gateway";
     openFilmModal(url, !!first.locked);
   } catch (e) {
     toast(e.message || "Film açılamadı");
@@ -639,7 +641,7 @@ async function handleVizyonClick() {
 }
 
 function openLockedMovie(url) {
-  openFilmModal(url, true);
+  openFilmModal(url || "/api/film-gateway", true);
 }
 
 async function movies() {
@@ -665,7 +667,7 @@ async function movies() {
           <div class="movieMeta">${x.category || "Film"}${x.year ? " • " + x.year : ""}</div>
           <p>${x.description || ""}</p>
           ${x.locked
-            ? `<button onclick='openLockedMovie(${JSON.stringify(x.watchLink || x.previewLink || x.embedLink || x.link || "")})'>Film Sitesini Aç</button><small class="movieHint">Film sitesi görüntülenir; izlemek için üye olup premium paket almanız gerekir.</small>`
+            ? `<button onclick='openLockedMovie(${JSON.stringify(x.watchLink || x.previewLink || x.embedLink || x.link || "/api/film-gateway")})'>Film Sitesini Aç</button><small class="movieHint">Film sitesi görüntülenir; izlemek için üye olup premium paket almanız gerekir.</small>`
             : `<button onclick='openFilmModal(${JSON.stringify(x.watchLink || x.previewLink || x.embedLink || x.link || "")}, false)'>Filmi İzle</button>`}
         </div>`;
       })

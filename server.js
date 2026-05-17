@@ -465,7 +465,9 @@ app.get("/api/movies", authOptional, (req, res) => {
     poster: m.poster || "/assets/movie-poster.svg",
     description: m.description || "",
     status: m.status,
-    watchLink: canWatch ? "/api/film-gateway" : "",
+    // Gerçek film sitesi adresi istemciye verilmez. Üye olmayanlarda da gizli geçit açılır,
+    // tıklama/izleme kilidi istemci katmanında korunur.
+    watchLink: "/api/film-gateway",
     link: "",
     embedLink: "",
     locked: !canWatch
