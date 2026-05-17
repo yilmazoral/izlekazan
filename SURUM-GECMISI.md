@@ -1,3 +1,24 @@
+# Sürüm Geçmişi
+
+## v2026.05.17-004 — 2026-05-17
+
+**Özet:** Üye paneli bölümleri akordeon düzenine alındı.
+
+### Yapılanlar
+- Üye panelindeki işlem bölümleri tıklayınca aşağı doğru açılan akordeon kartlara çevrildi.
+- Bildirimlerim, Alt Üyelerim, Üyelik Bilgilerim, Referans Sistemi, IBAN Ödeme Bildir, Çekim Talebi ve Destek Merkezi varsayılan olarak kapalı başlar.
+- Kullanıcı hangi bölümle işlem yapacaksa sadece o bölümü açar.
+- Bir bölüm açılınca diğer açık bölüm kapanır; panel daha temiz ve profesyonel görünür.
+- Mobil uyumlu akordeon tasarım CSS’i eklendi.
+- Cache sürümü `v20260517004`, görünür sürüm etiketi `v2026.05.17-004` yapıldı.
+
+### Korunan kritik özellikler
+- Profesyonel admin/kullanıcı panel tasarımı.
+- Supabase kalıcı veritabanı.
+- Gizli film gateway ve premium erişim kontrolü.
+- Mükerrer ödeme bildirimi/onayı engeli.
+- Açık listelerde ad/soyad/telefon gizlilik formatı.
+
 # İzleKazan Sürüm Geçmişi
 
 ## v2026.05.17-003 — 2026-05-17
