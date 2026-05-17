@@ -1,5 +1,21 @@
 # Sürüm Geçmişi
 
+## v2026.05.17-005 — 2026-05-17
+
+### Düzeltme
+- Sitenin en altındaki görünür sürüm etiketi eski `v2026.05.17-003` değerinden `v2026.05.17-005` değerine güncellendi.
+- Üye panelindeki akordeon davranışı korunmuştur.
+- `/api/version`, `VERSION.json`, `SURUM-GECMISI.md` ve footer etiketi aynı sürüme senkronize edilmiştir.
+
+### Korunan özellikler
+- Profesyonel kullanıcı/admin paneli tasarımı.
+- Üye paneli bölümlerinin kapalı başlayıp tıklayınca açılması.
+- Supabase kalıcı veritabanı bağlantısı.
+- Mükerrer ödeme onayı engeli.
+- Premium kontrolü ve gizli film linki.
+- Gizlilik formatı: isim görünür, soyisim ilk harf + yıldız, telefon ilk 5 hane.
+
+
 ## v2026.05.17-004 — 2026-05-17
 
 **Özet:** Üye paneli bölümleri akordeon düzenine alındı.

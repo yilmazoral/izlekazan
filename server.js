@@ -21,7 +21,7 @@ const ADMIN_EMAIL = String(process.env.ADMIN_EMAIL || "yilmazoral@hotmail.com").
 const ADMIN_PASS = process.env.ADMIN_PASS || "059221";
 const PUBLIC_URL = process.env.PUBLIC_URL || `http://localhost:${PORT}`;
 const MOVIE_SITE_URL = process.env.MOVIE_SITE_URL || "https://sinemaizle.org/";
-const APP_VERSION = process.env.APP_VERSION || "v2026.05.17-004";
+const APP_VERSION = process.env.APP_VERSION || "v2026.05.17-005";
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_KEY || "";

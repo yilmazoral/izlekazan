@@ -1,5 +1,5 @@
 {
-  "currentVersion": "v2026.05.17-004",
+  "currentVersion": "v2026.05.17-005",
   "releaseDate": "2026-05-17",
   "project": "İzleKazan",
   "summary": "Üye panelindeki işlem bölümleri akordeon düzene çevrildi; tüm bölümler kapalı başlar, kullanıcı tıkladığı bölümü açarak işlem yapar.",
@@ -37,5 +37,20 @@
     "site-update.js": "9f8d8bcd1c0a5944",
     "style.css": "75edad7526b2c89a",
     "supabase-setup.sql": "440628a41865ef15"
-  }
+  },
+  "releaseName": "surum_etiketi_senkron_fix",
+  "notes": [
+    "Footer altında görünen sürüm etiketi canlı işlevsel sürümle senkronize edildi.",
+    "Üye paneli akordeon özelliği korunarak görünür sürüm v2026.05.17-005 yapıldı.",
+    "server.js varsayılan APP_VERSION değeri v2026.05.17-005 olarak güncellendi.",
+    "VERSION.json ve SURUM-GECMISI.md dosyaları aynı sürüme çekildi."
+  ],
+  "history": [
+    {
+      "version": "v2026.05.17-005",
+      "name": "surum_etiketi_senkron_fix",
+      "date": "2026-05-17",
+      "summary": "Görünür footer sürüm etiketi ile aktif kod sürümü senkronize edildi."
+    }
+  ]
 }
