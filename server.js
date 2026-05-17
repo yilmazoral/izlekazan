@@ -144,21 +144,26 @@ function publicUser(u) {
   const { passwordHash, ...safe } = u;
   return { ...safe, premiumActive: isPremium(u), premiumDaysLeft: daysLeft(u.premiumUntil) };
 }
-function maskPart(v) {
+function maskFirstName(v) {
   const text = String(v || "").trim();
-  if (!text) return "-***";
-  return text.charAt(0).toLocaleUpperCase("tr-TR") + "***";
+  if (!text) return "-";
+  return text;
 }
-function maskName(first, last) { return `${maskPart(first)} ${maskPart(last)}`; }
+function maskLastName(v) {
+  const text = String(v || "").trim();
+  if (!text) return "-****";
+  return text.charAt(0).toLocaleUpperCase("tr-TR") + "****";
+}
+function maskName(first, last) { return `${maskFirstName(first)} ${maskLastName(last)}`; }
 function maskFullName(full) {
   const parts = String(full || "").trim().split(/\s+/).filter(Boolean);
-  if (!parts.length) return "-*** -***";
+  if (!parts.length) return "- -****";
   return maskName(parts[0], parts.slice(1).join(" "));
 }
 function maskPhone(phone) {
-  const raw = String(phone || "").replace(/\D/g, "");
-  if (!raw) return "0*** *********";
-  return raw.slice(0, 4) + "*********";
+  const raw = normalizePhone(phone);
+  if (!raw) return "0**** ******";
+  return raw.slice(0, 5) + "******";
 }
 function normalizePhone(phone) {
   let raw = String(phone || "").replace(/\D/g, "");

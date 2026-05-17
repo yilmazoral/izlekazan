@@ -357,7 +357,7 @@ async function dash() {
 
       <div class="card">
         <h3>Alt Üyelerim</h3>
-        <p class="privacyNote">Kullanıcı gizliliğini korumak amacıyla ad, soyad ve telefon bilgileri maskelenmiş olarak gösterilmektedir.</p>
+        <p class="privacyNote">Kullanıcı gizliliğini korumak amacıyla ad görünür, soyadın ilk harfi ve telefonun ilk 5 hanesi dışında kalan bilgiler gizlenmiş olarak gösterilmektedir.</p>
         <div class="tableWrap">
           <table>
             <thead><tr><th>Ad Soyad</th><th>Telefon</th><th>Paket</th><th>Premium Başlangıç</th><th>Premium Bitiş</th><th>Durum</th></tr></thead>
