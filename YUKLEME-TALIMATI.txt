@@ -1,10 +1,11 @@
-İzleKazan v2026.05.17-001 yükleme talimatı
+İzleKazan v2026.05.17-003 Yükleme Talimatı
 
-1) ZIP içindeki klasörün İÇİNDEKİ tüm dosyaları GitHub ana dizinine yükle.
-2) assets klasörünü olduğu gibi yükle.
-3) Render yeniden deploy olduktan sonra kontrol et:
-   https://izlekazan.onrender.com/api/health
-   https://izlekazan.onrender.com/api/version
-4) /api/health içinde storage=supabase ve version=v2026.05.17-001 görünmeli.
+1. ZIP içindeki dosya ve klasörleri GitHub deposunun ana dizinine yükleyin.
+2. Özellikle index.html, style.css, server.js, VERSION.json ve SURUM-GECMISI.md dosyalarını değiştirin.
+3. Render otomatik deploy etmezse manuel Deploy / Redeploy yapın.
+4. Deploy sonrası şu adresleri kontrol edin:
+   - https://izlekazan.onrender.com/api/health
+   - https://izlekazan.onrender.com/api/version
+5. Sitenin en alt bölümünde İzleKazan v2026.05.17-003 etiketi görünmelidir.
 
-Bundan sonraki değişikliklerde SURUM-GECMISI.md ve VERSION.json dosyaları mutlaka güncellenecek.
+Not: Bu sürüm yalnızca görünür sürüm etiketi ve sürüm kayıtlarını günceller; panel tasarımları ve mevcut kritik özellikler korunur.

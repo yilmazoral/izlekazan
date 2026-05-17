@@ -1,5 +1,22 @@
 # İzleKazan Sürüm Geçmişi
 
+## v2026.05.17-003 — 2026-05-17
+
+**Özet:** Canlı sitede görünür sürüm bilgisi eklendi ve cache sürümü güncellendi.
+
+### Yapılanlar
+- Sayfanın alt bölümüne görünür `İzleKazan v2026.05.17-003` sürüm etiketi eklendi.
+- `VERSION.json` güncellendi.
+- `/api/version` için varsayılan sunucu sürümü `v2026.05.17-003` olarak ayarlandı.
+- `index.html` içindeki CSS/JS cache sürümleri `v20260517003` olarak güncellendi.
+
+### Korunan kritik özellikler
+- Profesyonel kullanıcı paneli ve admin paneli tasarımı korunmuştur.
+- Supabase kalıcı veritabanı korunmuştur.
+- Gizli film gateway ve premium erişim kontrolü korunmuştur.
+- Mükerrer ödeme bildirimi/onayı engeli korunmuştur.
+- Açık listelerde ad/soyad/telefon gizlilik formatı korunmuştur.
+
 ## v2026.05.17-002 — 2026-05-17
 
 **Özet:** Admin ve kullanıcı paneli profesyonel dashboard tasarımı yeniden sabitlendi.

@@ -1,16 +1,17 @@
 {
-  "currentVersion": "v2026.05.17-002",
+  "currentVersion": "v2026.05.17-003",
   "releaseDate": "2026-05-17",
   "project": "İzleKazan",
-  "summary": "Admin ve kullanıcı paneli profesyonel dashboard tasarımı yeniden sabitlendi; eksik CSS geri yüklendi.",
+  "summary": "Canlı sitede görünür sürüm bilgisi eklendi; /api/version varsayılan sürümü ve cache sürümleri güncellendi.",
   "changes": [
-    "style.css dosyasındaki eksik profesyonel panel tasarım blokları geri yüklendi.",
-    "Üye paneli: Üye Kontrol Merkezi, metrik kartları, bildirim kartları ve form kartları profesyonel dashboard görünümüne sabitlendi.",
-    "Admin paneli: Operasyon Merkezi üst kartı, KPI kutuları, ödeme/çekim/destek/kullanıcı bölümleri modern kart düzenine alındı.",
-    "Mobil uyumluluk için üye paneli ve admin paneli tek sütun düzeni güçlendirildi.",
-    "Önceki sürümdeki Supabase, gizli film gateway, premium koruma, mükerrer ödeme engeli ve gizlilik formatı korunmuştur."
+    "Sayfa alt bölümüne görünür İzleKazan v2026.05.17-003 sürüm etiketi eklendi.",
+    "index.html içindeki style.css, app.js ve site-update.js cache parametreleri v20260517003 yapıldı.",
+    "server.js içindeki varsayılan APP_VERSION v2026.05.17-003 olarak güncellendi.",
+    "SURUM-GECMISI.md dosyasına bu sürümün notları eklendi.",
+    "Önceki sürümdeki profesyonel panel tasarımları ve kritik işlevler korunmuştur."
   ],
   "protectedFeatures": [
+    "Profesyonel kullanıcı paneli ve admin paneli tasarımı korunmalı.",
     "Supabase kalıcı veritabanı aktif kalmalı.",
     "Film adresi kaynak kodda açık görünmemeli.",
     "Premium olmayan kullanıcı gerçek film sitesine tam erişememeli.",
@@ -20,18 +21,19 @@
   "files": {
     ".gitignore": "7c7298baae9efd8d",
     "README.md": "2b354fe0cc83cc58",
-    "SURUM-GECMISI.md": "d105e7a29d6b0063",
+    "SURUM-GECMISI.md": "787ce4931476d378",
+    "VERSION.json": "37b3c2ca6a14004f",
     "YUKLEME-TALIMATI.txt": "8287be5426a9e5e2",
     "app.js": "86ad893f8a7032be",
     "assets/film-afisleri-vitrin.png": "c49d835eb1295ea6",
     "assets/hero-bg.svg": "0e61c7e3c6176cea",
     "assets/movie-poster.svg": "7244f8f164cca133",
     "assets/vizyon-filmleri.png": "ed332a01a998776a",
-    "index.html": "bec5677cc8c77506",
+    "index.html": "b1abfe40f7f8175a",
     "package.json": "784613a58589ee84",
-    "server.js": "8f1f72917e7e3592",
+    "server.js": "129964dce8e6e513",
     "site-update.js": "9f8d8bcd1c0a5944",
-    "style.css": "5a61975ce7dd516a",
+    "style.css": "083e8171115423d9",
     "supabase-setup.sql": "440628a41865ef15"
   }
 }
