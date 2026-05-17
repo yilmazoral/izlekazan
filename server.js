@@ -328,7 +328,29 @@ app.get("/api/health", (req, res) => res.json({ ok: true, storage: supabase ? "s
 app.get("/api/film-gateway", (req, res) => {
   res.setHeader("X-Robots-Tag", "noindex, nofollow");
   res.setHeader("Referrer-Policy", "no-referrer");
-  res.redirect(302, MOVIE_SITE_URL);
+
+  const rawToken = String(req.query.access || req.query.token || "").trim();
+  if (!rawToken) {
+    return res.status(403).send(`<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;background:#080b14;color:#fff;font-family:Arial,sans-serif;display:grid;place-items:center;height:100vh;text-align:center;padding:24px} .box{max-width:520px;border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:24px;background:rgba(255,255,255,.06)} h1{font-size:22px} p{color:#cbd5e1}</style></head><body><div class="box"><h1>Premium erişim gerekli</h1><p>Filmleri izlemek için üye girişi yapmanız ve aktif premium paketiniz olması gerekmektedir.</p></div></body></html>`);
+  }
+
+  try {
+    const decoded = jwt.verify(rawToken, JWT_SECRET);
+    const d = readDb(); processDb(d);
+    const u = d.users.find(x => x.id === decoded.id);
+    if (!u || !isPremium(u)) {
+      return res.status(403).send(`<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;background:#080b14;color:#fff;font-family:Arial,sans-serif;display:grid;place-items:center;height:100vh;text-align:center;padding:24px} .box{max-width:520px;border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:24px;background:rgba(255,255,255,.06)} h1{font-size:22px} p{color:#cbd5e1}</style></head><body><div class="box"><h1>Premium erişim gerekli</h1><p>Filmleri izlemek için üye girişi yapmanız ve aktif premium paketiniz olması gerekmektedir.</p></div></body></html>`);
+    }
+    res.redirect(302, MOVIE_SITE_URL);
+  } catch (e) {
+    return res.status(403).send(`<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;background:#080b14;color:#fff;font-family:Arial,sans-serif;display:grid;place-items:center;height:100vh;text-align:center;padding:24px} .box{max-width:520px;border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:24px;background:rgba(255,255,255,.06)} h1{font-size:22px} p{color:#cbd5e1}</style></head><body><div class="box"><h1>Oturum doğrulanamadı</h1><p>Lütfen tekrar giriş yapıp premium paket durumunuzu kontrol edin.</p></div></body></html>`);
+  }
+});
+
+app.get("/api/film-preview", (req, res) => {
+  res.setHeader("X-Robots-Tag", "noindex, nofollow");
+  res.setHeader("Referrer-Policy", "no-referrer");
+  res.send(`<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;background:#080b14;color:#fff;font-family:Arial,sans-serif;min-height:100vh;overflow:hidden}.stage{min-height:100vh;display:grid;place-items:center;padding:18px;background:radial-gradient(circle at 20% 20%,rgba(246,181,30,.18),transparent 36%),linear-gradient(135deg,#070a13,#111827)}img{width:min(980px,96vw);max-height:82vh;object-fit:cover;border-radius:22px;box-shadow:0 28px 80px rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.12)}.badge{position:fixed;left:18px;top:18px;background:rgba(0,0,0,.64);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:10px 14px;font-size:13px;color:#f6b51e}</style></head><body><div class="badge">Premium içerik ön izlemesi</div><div class="stage"><img src="/assets/film-afisleri-vitrin.png" alt="Film afişleri"></div></body></html>`);
 });
 app.get("/api/packages", (req, res) => res.json(PACKAGES));
 

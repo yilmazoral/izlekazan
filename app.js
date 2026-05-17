@@ -942,15 +942,26 @@ async function wdNo(id) {
   admin();
 }
 
+function filmGatewayUrlForAccess(url, locked) {
+  const cleanUrl = String(url || "").trim() || "/api/film-gateway";
+  if (locked) return "/api/film-preview";
+  if ((cleanUrl === "/api/film-gateway" || cleanUrl.startsWith("/api/film-gateway?")) && token) {
+    const sep = cleanUrl.includes("?") ? "&" : "?";
+    return cleanUrl + sep + "access=" + encodeURIComponent(token);
+  }
+  return cleanUrl;
+}
+
 function openFilmModal(url, locked = false) {
   if (!url) {
     toast("Film bağlantısı bulunamadı");
     return;
   }
 
-  const cleanUrl = String(url).trim();
+  const cleanUrl = filmGatewayUrlForAccess(url, !!locked);
   const isSafeRelativeFilmGateway = cleanUrl === "/api/film-gateway" || cleanUrl.startsWith("/api/film-gateway?");
-  if (!isSafeRelativeFilmGateway && !/^https?:\/\//i.test(cleanUrl)) {
+  const isSafeRelativeFilmPreview = cleanUrl === "/api/film-preview" || cleanUrl.startsWith("/api/film-preview?");
+  if (!isSafeRelativeFilmGateway && !isSafeRelativeFilmPreview && !/^https?:\/\//i.test(cleanUrl)) {
     toast("Film bağlantısı hatalı. Lütfen yöneticiye bildirin.");
     return;
   }
