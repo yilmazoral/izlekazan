@@ -134,9 +134,16 @@ function saveDb(d) {
   try { fs.writeFileSync(DB_FILE, JSON.stringify(dbCache, null, 2)); } catch (e) { console.error("db.json yazılamadı:", e.message); }
   if (supabase) {
     const snapshot = JSON.parse(JSON.stringify(dbCache));
-    dbSaveQueue = dbSaveQueue.catch(() => {}).then(() => persistDb(snapshot)).catch(e => console.error("Supabase kaydetme hatası:", e.message));
+    dbSaveQueue = dbSaveQueue
+      .catch(() => {})
+      .then(() => persistDb(snapshot))
+      .catch(e => {
+        console.error("Supabase kaydetme hatası:", e.message);
+        throw e;
+      });
+    return dbSaveQueue;
   }
-  return dbSaveQueue;
+  return Promise.resolve();
 }
 function publicUser(u) {
   if (!u) return null;

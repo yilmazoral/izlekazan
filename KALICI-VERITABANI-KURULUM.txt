@@ -1,0 +1,56 @@
+İZLEKAZAN KALICI VERİTABANI KURULUMU
+
+Sorunun nedeni:
+Render üzerinde Supabase bağlantısı yapılmazsa üyeler, bakiyeler, ödemeler ve çekimler geçici db.json dosyasına kaydedilir. Render yeniden başlatıldığında, yeniden deploy olduğunda veya uyku modundan döndüğünde bu dosya sıfırlanabilir. Bu yüzden kayıtlar kaybolur.
+
+Kalıcı çözüm:
+Supabase kullanılmalıdır. Bu paketteki server.js Supabase'e kalıcı kayıt yapacak şekilde hazırlanmıştır.
+
+1) Supabase'de tabloyu oluştur
+- Supabase paneline gir.
+- Projeni aç.
+- SQL Editor bölümüne gir.
+- Bu paketteki supabase-setup.sql dosyasının içeriğini çalıştır.
+
+2) Supabase bilgilerini al
+Supabase > Project Settings > API bölümünden şunları kopyala:
+- Project URL
+- service_role key
+
+DİKKAT:
+service_role key kesinlikle index.html, app.js veya frontend dosyalarına yazılmamalıdır. Sadece Render Environment kısmına yazılmalıdır.
+
+3) Render Environment Variables bölümüne ekle
+Render > izlekazan servisi > Environment bölümüne şu değişkenleri ekle:
+
+SUPABASE_URL=https://PROJE_ID.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_ROLE_KEY_BURAYA
+SUPABASE_STATE_TABLE=izlekazan_state
+SUPABASE_STATE_ID=main
+JWT_SECRET=uzun-ve-tahmin-edilemez-bir-gizli-yazi
+ADMIN_EMAIL=yilmazoral@hotmail.com
+ADMIN_PASS=059221
+PUBLIC_URL=https://izlekazan.onrender.com
+
+4) GitHub'a yükle
+Bu paketteki dosyaları GitHub ana dizinine yükle:
+- index.html
+- style.css
+- app.js
+- site-update.js
+- server.js
+- package.json
+- supabase-setup.sql
+- assets klasörü
+
+5) Render'da yeniden deploy et
+Manual Deploy > Deploy latest commit yap.
+
+6) Kontrol
+Site açıldıktan sonra tarayıcıda şu adresi kontrol et:
+https://izlekazan.onrender.com/api/health
+
+Doğru kurulumda şuna benzer görünmeli:
+{"ok":true,"storage":"supabase",...}
+
+Eğer storage: "db.json" yazıyorsa Supabase bağlantısı aktif değildir ve kayıtlar yine silinebilir.

@@ -1,40 +1,29 @@
-# İzleKazan
+# İzleKazan - Kalıcı Veritabanı Sürümü
 
-Bu paket İzleKazan sitesinin güncel dosyalarını içerir.
+Bu paket, üyelerin, bakiyelerin, ödemelerin, çekim taleplerinin ve bildirimlerin Render yeniden başlasa bile silinmemesi için Supabase kalıcı veritabanı desteğiyle hazırlanmıştır.
+
+## Önemli
+
+Sadece dosyaları yüklemek tek başına yeterli değildir. Render Environment bölümüne Supabase değişkenleri eklenmelidir.
+
+Kurulum için `KALICI-VERITABANI-KURULUM.txt` dosyasını takip edin.
 
 ## Dosyalar
 
-- `index.html`: Ana sayfa ve tüm ekranların HTML yapısı
-- `style.css`: Profesyonel yeni tasarım
-- `app.js`: Frontend işlem kodları
-- `site-update.js`: Son istenen küçük yamalar
-- `server.js`: Node.js / Express backend
-- `assets/`: Görseller
-- `supabase-setup.sql`: Supabase kalıcı veri tabanı kurulumu
-- `package.json`: Render / Node.js bağımlılıkları
+- `index.html`
+- `style.css`
+- `app.js`
+- `site-update.js`
+- `server.js`
+- `package.json`
+- `supabase-setup.sql`
+- `assets/`
+- `.env.example`
 
-## Render ortam değişkenleri
+## Kontrol
 
-Render > Environment bölümüne şunları ekleyin:
+Kurulumdan sonra:
 
-```env
-SUPABASE_URL=https://PROJE_ID.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_ROLE_KEY_BURAYA
-JWT_SECRET=çok_uzun_gizli_bir_yazi
-ADMIN_EMAIL=yilmazoral@hotmail.com
-ADMIN_PASS=059221
-PUBLIC_URL=https://izlekazan.onrender.com
-```
+`https://izlekazan.onrender.com/api/health`
 
-`SUPABASE_SERVICE_ROLE_KEY` kesinlikle frontend dosyalarına yazılmamalıdır.
-
-## Çalıştırma
-
-```bash
-npm install
-npm start
-```
-
-## Admin
-
-Varsayılan admin e-postası ve şifresi Render Environment üzerinden yönetilir. Yayına aldıktan sonra admin şifresini değiştirmeniz önerilir.
+çıktısında `storage: "supabase"` görünmelidir.
