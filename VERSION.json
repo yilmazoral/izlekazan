@@ -1,43 +1,37 @@
 {
-  "currentVersion": "v2026.05.17-001",
+  "currentVersion": "v2026.05.17-002",
   "releaseDate": "2026-05-17",
   "project": "İzleKazan",
-  "summary": "Sürüm takip sistemi başlangıcı ve mevcut kararlı sürümün kayıt altına alınması",
-  "rules": [
-    "Her değişiklikte VERSION.json içindeki currentVersion artırılacak.",
-    "Her değişiklik SURUM-GECMISI.md dosyasına madde madde yazılacak.",
-    "Paket hazırlanırken index.html içindeki CSS/JS cache sürüm parametreleri aynı sürümle güncellenecek.",
-    "Güncelleme yapılırken önce mevcut sürüm okunacak, sonra sadece ilgili dosyalara kontrollü değişiklik yapılacak.",
-    "Büyük değişikliklerde ZIP adı sürüm numarasını içerecek."
-  ],
+  "summary": "Admin ve kullanıcı paneli profesyonel dashboard tasarımı yeniden sabitlendi; eksik CSS geri yüklendi.",
   "changes": [
-    "Her güncelleme için zorunlu sürüm numarası sistemi eklendi.",
-    "Site içine VERSION.json ve SURUM-GECMISI.md dosyaları eklendi.",
-    "Sunucuya /api/version kontrol endpoint’i eklendi.",
-    "Kaybolan değişiklikleri takip etmek için dosya manifesti ve değişiklik notları eklendi.",
-    "Mevcut son durum baz alındı: Supabase kalıcı veritabanı, premium film erişim kontrolü, gizli film gateway, mükerrer ödeme engeli, gizlilik formatı ve profesyonel arayüz korunur."
+    "style.css dosyasındaki eksik profesyonel panel tasarım blokları geri yüklendi.",
+    "Üye paneli: Üye Kontrol Merkezi, metrik kartları, bildirim kartları ve form kartları profesyonel dashboard görünümüne sabitlendi.",
+    "Admin paneli: Operasyon Merkezi üst kartı, KPI kutuları, ödeme/çekim/destek/kullanıcı bölümleri modern kart düzenine alındı.",
+    "Mobil uyumluluk için üye paneli ve admin paneli tek sütun düzeni güçlendirildi.",
+    "Önceki sürümdeki Supabase, gizli film gateway, premium koruma, mükerrer ödeme engeli ve gizlilik formatı korunmuştur."
   ],
-  "importantActiveFeatures": [
-    "Supabase kalıcı veritabanı aktif: /api/health içinde storage=supabase görünmeli.",
-    "Film sitesi gerçek adresi istemci kaynak kodunda görünmez; sunucu tarafındaki MOVIE_SITE_URL veya Render MOVIE_SITE_URL değişkeninden yönetilir.",
-    "Premium olmayan kullanıcı gerçek film sitesine erişemez; yalnızca ön izleme/afiş alanı gösterilir.",
-    "Bekleyen ödeme varken ikinci ödeme bildirimi engellenir; mükerrer onay referans kazancını tekrar yazmaz.",
-    "Açık veri tabanında isim görünür, soyad sadece ilk harf + yıldız, telefon ilk 5 hane + yıldız formatındadır."
+  "protectedFeatures": [
+    "Supabase kalıcı veritabanı aktif kalmalı.",
+    "Film adresi kaynak kodda açık görünmemeli.",
+    "Premium olmayan kullanıcı gerçek film sitesine tam erişememeli.",
+    "Mükerrer ödeme bildirimi ve mükerrer ödeme onayı engelli kalmalı.",
+    "Açık veri tabanında ad açık, soyad ilk harf + yıldız, telefon ilk 5 hane + yıldız görünmeli."
   ],
   "files": {
-    "index.html": "e73d2610a036b2df",
-    "style.css": "576ba8a25868fe4a",
-    "app.js": "86ad893f8a7032be",
-    "server.js": "8f1f72917e7e3592",
-    "site-update.js": "9f8d8bcd1c0a5944",
-    "package.json": "784613a58589ee84",
-    "README.md": "2b354fe0cc83cc58",
-    "supabase-setup.sql": "440628a41865ef15",
     ".gitignore": "7c7298baae9efd8d",
+    "README.md": "2b354fe0cc83cc58",
     "SURUM-GECMISI.md": "d105e7a29d6b0063",
+    "YUKLEME-TALIMATI.txt": "8287be5426a9e5e2",
+    "app.js": "86ad893f8a7032be",
     "assets/film-afisleri-vitrin.png": "c49d835eb1295ea6",
     "assets/hero-bg.svg": "0e61c7e3c6176cea",
     "assets/movie-poster.svg": "7244f8f164cca133",
-    "assets/vizyon-filmleri.png": "ed332a01a998776a"
+    "assets/vizyon-filmleri.png": "ed332a01a998776a",
+    "index.html": "bec5677cc8c77506",
+    "package.json": "784613a58589ee84",
+    "server.js": "8f1f72917e7e3592",
+    "site-update.js": "9f8d8bcd1c0a5944",
+    "style.css": "5a61975ce7dd516a",
+    "supabase-setup.sql": "440628a41865ef15"
   }
 }

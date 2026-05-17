@@ -1,5 +1,22 @@
 # İzleKazan Sürüm Geçmişi
 
+## v2026.05.17-002 — 2026-05-17
+
+**Özet:** Admin ve kullanıcı paneli profesyonel dashboard tasarımı yeniden sabitlendi.
+
+### Yapılanlar
+- Eksik kalan profesyonel panel CSS blokları geri yüklendi.
+- Kullanıcı panelindeki Üye Kontrol Merkezi, bakiye kartları, bildirimler, üyelik bilgileri, referans, ödeme, çekim ve destek alanları yeniden profesyonel kart düzenine alındı.
+- Admin panelindeki Operasyon Merkezi, KPI kutuları, ödeme bildirimleri, film onayları, çekim talepleri, destek mesajları, ödeme arşivi ve kullanıcı tablosu profesyonel dashboard düzenine alındı.
+- Mobilde admin ve kullanıcı paneli tek sütun, okunabilir ve butonları erişilebilir hale getirildi.
+- Cache sürümü `v20260517002` olarak güncellendi.
+
+### Korunan kritik özellikler
+- Supabase kalıcı veritabanı.
+- Gizli film gateway ve premium erişim kontrolü.
+- Mükerrer ödeme bildirimi/onayı engeli.
+- Açık listelerde ad/soyad/telefon gizlilik formatı.
+
 ## v2026.05.17-001 — 2026-05-17
 
 **Özet:** Sürüm takip sistemi başlangıcı ve mevcut kararlı sürümün kayıt altına alınması
