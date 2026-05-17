@@ -190,7 +190,7 @@ Her sürümde şu bilgiler yazılacak:
 - Önceki premium kontrolü, gizli film linki, referans davet linki ve panel akordeon özellikleri korundu.
 
 
-## v2026.05.17-011 — PWA / Ana Ekran Adres Çubuğusuz Mod
+## v2026.05.17-012 — PWA / Ana Ekran Adres Çubuğusuz Mod
 
 - `manifest.json` ve `sw.js` eklendi.
 - Site telefonda ana ekrana eklendiğinde uygulama gibi açılır ve adres çubuğu görünmez.

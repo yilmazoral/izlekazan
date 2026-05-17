@@ -1088,6 +1088,14 @@ function openFilmModal(url, locked = false) {
     return;
   }
 
+  // v2026.05.17-012:
+  // Premium üyede iframe kullanılmaz; gizli sunucu geçidi üzerinden film sitesi doğrudan açılır.
+  // Mobil kullanıcılar uygulama moduna zorlandığı için adres çubuğu görünmeden kullanım hedeflenir.
+  if (!locked && isSafeRelativeFilmGateway) {
+    window.location.assign(cleanUrl);
+    return;
+  }
+
   filmIsLocked = !!locked;
   lastPageBeforeWatch = (document.querySelector(".page.active") || {}).id || "movies";
 
@@ -1369,7 +1377,7 @@ if (document.readyState === "loading") {
 }
 
 
-// v2026.05.17-011: PWA / Ana ekrana ekleme ve adres çubuğu olmadan kullanım desteği.
+// v2026.05.17-012: PWA / Ana ekrana ekleme ve adres çubuğu olmadan kullanım desteği.
 let izleKazanDeferredInstallPrompt = null;
 function isStandalonePwaMode() {
   return window.matchMedia && window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
@@ -1409,9 +1417,37 @@ function dismissPwaInstallBanner() {
 }
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js?v=v20260517011").catch(() => {});
+    navigator.serviceWorker.register("/sw.js?v=v20260517012").catch(() => {});
     showPwaInstallUi();
   });
 } else {
   document.addEventListener("DOMContentLoaded", showPwaInstallUi);
+}
+
+
+// v2026.05.17-012: Mobilde uygulama yüklü değilse site içeriğini kilitle.
+function isMobileLikeDevice() {
+  return window.matchMedia && (window.matchMedia("(max-width: 820px)").matches || window.matchMedia("(hover: none) and (pointer: coarse)").matches);
+}
+function enforceMobilePwaOnlyMode() {
+  const gate = document.getElementById("mobileInstallGate");
+  const isMobile = isMobileLikeDevice();
+  const isStandalone = isStandalonePwaMode();
+  if (!gate) return;
+  if (isMobile && !isStandalone) {
+    gate.classList.remove("hidden");
+    document.documentElement.classList.add("mobileInstallLocked");
+    document.body.classList.add("mobileInstallLocked");
+  } else {
+    gate.classList.add("hidden");
+    document.documentElement.classList.remove("mobileInstallLocked");
+    document.body.classList.remove("mobileInstallLocked");
+  }
+}
+window.addEventListener("resize", enforceMobilePwaOnlyMode);
+window.addEventListener("orientationchange", enforceMobilePwaOnlyMode);
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", enforceMobilePwaOnlyMode);
+} else {
+  enforceMobilePwaOnlyMode();
 }

@@ -1,27 +1,17 @@
-İzleKazan v2026.05.17-010 yükleme talimatı
+İzleKazan v2026.05.17-012 Yükleme Talimatı
 
-Bu sürüm sürüm etiketi karışıklığını düzeltir.
-
-GitHub ana dizinine ZIP içindeki TÜM dosyaları yükleyin:
-- index.html
-- style.css
-- app.js
-- server.js
-- site-update.js
-- VERSION.json
-- SURUM-GECMISI.md
-- YUKLEME-TALIMATI.txt
-- assets klasörü
-
-Yükledikten sonra Render > Manual Deploy > Deploy latest commit yapın.
-
-Kontrol:
-1) Site footerında v2026.05.17-010 görünmeli.
-2) https://izlekazan.onrender.com/api/version içinde currentVersion: v2026.05.17-010 görünmeli.
-3) https://izlekazan.onrender.com/api/health içinde version: v2026.05.17-010 görünmeli.
-
-
-PWA NOTU v2026.05.17-011:
-- ZIP içindeki manifest.json, sw.js ve assets/icon-192.png, assets/icon-512.png dosyalarını da mutlaka yükleyin.
-- Render deploy sonrası telefonda siteyi açıp tarayıcı menüsünden Ana ekrana ekle seçeneğini kullanın.
-- Ana ekrandan açıldığında adres çubuğu görünmez.
+1) ZIP içindeki tüm dosyaları GitHub ana dizinine yükleyin.
+2) Özellikle şu dosyalar eksik kalmasın:
+   - index.html
+   - style.css
+   - app.js
+   - server.js
+   - VERSION.json
+   - SURUM-GECMISI.md
+   - manifest.json
+   - sw.js
+   - assets klasörü
+3) Render üzerinde Manual Deploy > Deploy latest commit yapın.
+4) Deploy bittikten sonra https://izlekazan.onrender.com/api/version adresinden sürümü kontrol edin.
+5) Mobilde normal tarayıcıdan açıldığında yalnızca Uygulamayı Yükle ekranı görünmelidir.
+6) Ana ekrana eklenen uygulama ikonundan açıldığında site normal çalışmalıdır.

@@ -835,3 +835,18 @@ body.cinemaBodyLocked{
 .pwaInstallBanner div{display:flex;flex-direction:column;gap:3px}.pwaInstallBanner b{color:#ffe28a}.pwaInstallBanner span{color:rgba(255,255,255,.74);font-size:13px}.pwaInstallBanner button{width:auto;white-space:nowrap;padding:10px 14px}.pwaInstallBanner .ghost{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.14);color:#fff}
 @media(max-width:720px){.installPwaBtn{display:none!important}.pwaInstallBanner{left:10px;right:10px;bottom:78px;align-items:stretch;display:grid;grid-template-columns:1fr auto auto;padding:12px}.pwaInstallBanner span{font-size:12px}.pwaInstallBanner button{padding:9px 10px;font-size:12px}}
 @media(display-mode:standalone){.pwaInstallBanner,.installPwaBtn{display:none!important}}
+
+
+/* v2026.05.17-012: Mobilde sadece uygulama yükleme ekranı */
+.mobileInstallGate{position:fixed;inset:0;z-index:999999;background:radial-gradient(circle at top left,rgba(246,181,30,.20),transparent 35%),linear-gradient(135deg,#050816,#111827);display:grid;place-items:center;padding:22px;color:#fff} 
+.mobileInstallGate.hidden{display:none!important}
+.mobileInstallGateCard{width:min(430px,100%);background:rgba(15,23,42,.92);border:1px solid rgba(255,255,255,.14);border-radius:28px;padding:28px 22px;text-align:center;box-shadow:0 30px 90px rgba(0,0,0,.55);backdrop-filter:blur(18px)}
+.mobileInstallGateCard .installLogo{width:72px;height:72px;margin:0 auto 16px;border-radius:22px;background:linear-gradient(135deg,#f6b51e,#f97316);display:grid;place-items:center;color:#111827;font-weight:900;font-size:26px;box-shadow:0 16px 34px rgba(246,181,30,.26)}
+.mobileInstallGateCard h1{margin:0 0 10px;font-size:25px;line-height:1.15}
+.mobileInstallGateCard p{margin:0 auto 18px;color:#d8e0ef;line-height:1.55}
+.mobileInstallGateCard button{width:100%;min-height:52px;border-radius:16px;font-size:16px;font-weight:900}
+.mobileInstallGateCard .iosInstallHint{margin:16px 0 12px;padding:14px;border-radius:18px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#e5e7eb;line-height:1.5;text-align:left}
+.mobileInstallGateCard small{display:block;color:#9ca3af;line-height:1.45}
+html.mobileInstallLocked,body.mobileInstallLocked{overflow:hidden!important;height:100%!important}
+body.mobileInstallLocked>header,body.mobileInstallLocked>main,body.mobileInstallLocked>footer,body.mobileInstallLocked>nav,body.mobileInstallLocked>#pwaInstallBanner{display:none!important}
+body.mobileInstallLocked #mobileInstallGate{display:grid!important}

@@ -1,4 +1,4 @@
-const IZLEKAZAN_CACHE = "izlekazan-pwa-v20260517011";
+const IZLEKAZAN_CACHE = "izlekazan-pwa-v20260517012";
 const CORE_ASSETS = ["/", "/index.html", "/style.css", "/app.js", "/site-update.js", "/manifest.json", "/assets/icon-192.png", "/assets/icon-512.png", "/assets/film-afisleri-vitrin.png"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(IZLEKAZAN_CACHE).then(cache => cache.addAll(CORE_ASSETS).catch(() => null)));
