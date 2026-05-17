@@ -1,19 +1,20 @@
 {
-  "currentVersion": "v2026.05.17-007",
+  "currentVersion": "v2026.05.17-008",
   "releaseDate": "2026-05-17",
   "project": "İzleKazan",
-  "releaseName": "film_ekrani_tam_gorunum_fullscreen_fix",
-  "summary": "Premium üyeler için film izleme ekranında dış sitenin üst bölümü tekrar görünür yapıldı; iframe tam ekran izinleri güçlendirildi.",
+  "releaseName": "izlekazan_tam_ekran_film_alani",
+  "summary": "İzleKazan Tam Ekran butonu premium üyede doğrudan film iframe alanını ekranın tamamına alacak şekilde güncellendi.",
   "changes": [
-    "Film izleme ekranında premium üyeler için uygulanan kırpma/crop davranışı kaldırıldı.",
-    "Film sitesi üst bölümünün görünmesi sağlandı; gerçek film sitesi adresi yine tarayıcı adres çubuğunda görünmez.",
-    "iframe allowfullscreen/webkitallowfullscreen/mozallowfullscreen izinleri index.html ve app.js tarafında güçlendirildi.",
-    "Önbellek sürümü v20260517007 olarak güncellendi.",
-    "Footer sürüm etiketi v2026.05.17-007 yapıldı."
+    "Tam Ekran butonu premium üyelerde artık üst kontrol barı yerine doğrudan film alanını tam ekran yapar.",
+    "Tam ekran modunda film iframe'i 100vw/100vh ölçüsünde ekranı kaplar.",
+    "Tam ekran API çalışmayan mobil tarayıcılar için tam ekran görünüm fallback'i eklendi.",
+    "Kapat işleminde tam ekran/fallback sınıfları temizlenir; sayfa kilitlenmesi engellenir.",
+    "Footer sürüm etiketi v2026.05.17-008 yapıldı."
   ],
   "protectedFeatures": [
     "Profesyonel kullanıcı paneli ve admin paneli tasarımı korunmalı.",
     "Üye paneli akordeon yapısı korunmalı.",
+    "Referans davet linki otomatik form doldurma özelliği korunmalı.",
     "Supabase kalıcı veritabanı aktif kalmalı.",
     "Film adresi kaynak kodda açık görünmemeli.",
     "Premium olmayan kullanıcı gerçek film sitesine tam erişememeli.",
@@ -23,8 +24,8 @@
   ],
   "files": {
     "index.html": "972fa8fad408a3b3",
-    "style.css": "b13139da2ad7b53c",
-    "app.js": "0ac72bda1b94e1c7",
+    "style.css": "2f94af87d1f54599",
+    "app.js": "52debaf89b9e8ee8",
     "server.js": "824ba4fb1e7d2f22",
     "site-update.js": "9f8d8bcd1c0a5944",
     "SURUM-GECMISI.md": "9004fee5992bd206",

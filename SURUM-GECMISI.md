@@ -150,3 +150,11 @@ Her sürümde şu bilgiler yazılacak:
 2. Hangi özellik eklendi/düzeltildi.
 3. Önceki sürümden korunması gereken özellikler.
 4. Geri dönüş gerekirse hangi ZIP/dosya kullanılacak.
+
+## v2026.05.17-008 — İzleKazan Tam Ekran Film Alanı
+
+- Tam Ekran butonu premium üyelerde doğrudan film iframe alanını tam ekran yapacak şekilde güncellendi.
+- Tam ekran modunda film alanı 100vw/100vh ölçüsünde ekranı komple kaplar.
+- Üst kontrol barı tam ekran hedefinin dışında bırakıldı; film daha geniş görünür.
+- Tam ekran API desteklemeyen mobil tarayıcılar için tam ekran görünüm fallback'i eklendi.
+- Kapat/çıkış işlemlerinde tam ekran sınıfları temizlenerek sayfa kilitlenmesi engellendi.

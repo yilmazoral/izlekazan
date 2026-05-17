@@ -1200,7 +1200,7 @@ function resetFilmWatchState() {
 
   const shell = document.querySelector(".watchShell");
   if (shell) {
-    shell.classList.remove("lockedWatch", "croppedWatch");
+    shell.classList.remove("lockedWatch", "croppedWatch", "cinemaFsActive", "cinemaFullscreenFallback");
     shell.style.pointerEvents = "";
   }
 
@@ -1253,29 +1253,48 @@ function closeFilmModal() {
 
 function fullscreenMovie() {
   const shell = document.querySelector(".watchShell");
+  const box = document.querySelector(".watchFrameBox");
   const frame = $("filmFrame");
-  if (!shell && !frame) return;
+  if (!shell && !box && !frame) return;
 
-  // Kilitli filmde iframe tam ekran yapılmaz; kapsayıcı tam ekran yapılır.
-  // Böylece premium uyarı katmanı tam ekranda da tıklamaları yakalamaya devam eder.
-  const target = shell || frame;
+  // v2026.05.17-008:
+  // Premium üyede tam ekran hedefi doğrudan film iframe kapsayıcısıdır.
+  // Böylece İzleKazan üst barı/kapat alanı görünmez ve film alanı tüm ekranı kaplar.
+  // Kilitli ön izlemede ise uyarı katmanı kaybolmaması için dış kapsayıcı tam ekran yapılır.
+  const target = filmIsLocked ? (shell || box || frame) : (box || shell || frame);
   const overlay = $("filmLockOverlay");
   if (filmIsLocked && overlay) {
     overlay.classList.remove("hidden");
     overlay.setAttribute("aria-hidden", "false");
   }
+  if (shell) shell.classList.add("cinemaFsActive");
 
-  if (target.requestFullscreen) {
-    target.requestFullscreen().catch(() => toast("Tam ekran açılamadı."));
-  } else if (target.webkitRequestFullscreen) {
-    target.webkitRequestFullscreen();
-  } else {
-    toast("Bu tarayıcı tam ekran özelliğini desteklemiyor.");
+  const fallbackFullscreen = () => {
+    if (shell) shell.classList.add("cinemaFullscreenFallback");
+    toast("Film alanı tam ekran görünümüne alındı. Çıkmak için Kapat veya geri tuşunu kullanın.");
+  };
+
+  try {
+    if (target.requestFullscreen) {
+      target.requestFullscreen().catch(fallbackFullscreen);
+    } else if (target.webkitRequestFullscreen) {
+      target.webkitRequestFullscreen();
+    } else if (target.webkitEnterFullscreen && target === frame) {
+      target.webkitEnterFullscreen();
+    } else {
+      fallbackFullscreen();
+    }
+  } catch (e) {
+    fallbackFullscreen();
   }
 }
 
 function handleFullscreenGuard() {
   const watchActive = !!document.querySelector("#watch.page.active");
+  const shell = document.querySelector(".watchShell");
+  if (!getFullscreenElement() && shell) {
+    shell.classList.remove("cinemaFsActive");
+  }
 
   if (!watchActive) {
     resetFilmWatchState();
@@ -1290,7 +1309,6 @@ function handleFullscreenGuard() {
     overlay.classList.remove("hidden");
     overlay.setAttribute("aria-hidden", "false");
   }
-  const shell = document.querySelector(".watchShell");
   if (shell) shell.classList.add("lockedWatch");
   const frame = $("filmFrame");
   const fsElement = getFullscreenElement();

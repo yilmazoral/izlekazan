@@ -709,3 +709,42 @@ body.watchMode .watchShell{
 .watchShell:not(.lockedWatch).croppedWatch #filmFrame{
   transform:none !important;
 }
+
+/* v2026.05.17-008: İzleKazan Tam Ekran butonu film alanını komple kaplar. */
+.watchFrameBox:fullscreen,
+.watchFrameBox:-webkit-full-screen{
+  width:100vw !important;
+  height:100vh !important;
+  max-width:none !important;
+  max-height:none !important;
+  background:#000 !important;
+  overflow:hidden !important;
+}
+.watchFrameBox:fullscreen #filmFrame,
+.watchFrameBox:-webkit-full-screen #filmFrame{
+  width:100vw !important;
+  height:100vh !important;
+  display:block !important;
+  border:0 !important;
+}
+.watchShell.cinemaFullscreenFallback{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:99999 !important;
+  background:#000 !important;
+}
+.watchShell.cinemaFullscreenFallback .watchTop,
+.watchShell.cinemaFullscreenFallback .watchHint{
+  display:none !important;
+}
+.watchShell.cinemaFullscreenFallback .watchFrameBox{
+  position:fixed !important;
+  inset:0 !important;
+  width:100vw !important;
+  height:100vh !important;
+  background:#000 !important;
+}
+.watchShell.cinemaFullscreenFallback #filmFrame{
+  width:100vw !important;
+  height:100vh !important;
+}
