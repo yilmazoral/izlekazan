@@ -4,9 +4,6 @@ let me = null;
 let selectedPackageId = null;
 let selectedPackagePrice = 0;
 let lastPageBeforeWatch = "movies";
-let filmIsLocked = false;
-let filmLockPointerStart = null;
-const LOCKED_FILM_MESSAGE = "Filmleri izlemek için üye olmanız ve premium paket olmanız gerekmektedir.";
 
 const $ = (id) => document.getElementById(id);
 
@@ -34,22 +31,6 @@ function toast(message) {
 
 function isLoggedIn() {
   return !!token;
-}
-
-function requireZeroPhoneInput(id) {
-  const el = $(id);
-  const value = el ? String(el.value || "").trim() : "";
-  const digits = value.replace(/\D/g, "");
-  if (!digits || !digits.startsWith("0")) {
-    toast("Telefon numarası 0 ile başlamalıdır. Lütfen başına 0 koyarak 05XXXXXXXXX formatında yazın.");
-    if (el) {
-      el.focus();
-      el.classList.add("inputError");
-      setTimeout(() => el.classList.remove("inputError"), 1800);
-    }
-    return null;
-  }
-  return digits;
 }
 
 function refreshMenu() {
@@ -128,21 +109,6 @@ function toggleAuthPanel(type) {
   const loginActive = type === "login";
   loginPanel.classList.toggle("active", loginActive);
   registerPanel.classList.toggle("active", !loginActive);
-
-  // Mobilde seçilen formu ekranın üstüne al.
-  // Böylece Üye Ol açıldığında üstteki Giriş Yap kartı ekranda kalmaz;
-  // kullanıcı Giriş Yap'a dönmek isterse sayfayı yukarı kaydırır.
-  if (window.matchMedia && window.matchMedia("(max-width: 820px)").matches) {
-    const target = loginActive ? loginPanel : registerPanel;
-    const moveToTarget = () => {
-      const y = target.getBoundingClientRect().top + window.pageYOffset - 8;
-      window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
-    };
-    window.requestAnimationFrame(() => {
-      setTimeout(moveToTarget, 70);
-      setTimeout(moveToTarget, 360);
-    });
-  }
 }
 
 
@@ -279,9 +245,9 @@ function showPaymentGuide(id, price) {
       <b>IBAN:</b> TR78 0015 7000 0000 0037 7980 62<br>
       <b>Alıcı:</b> YILMAZ ORAL<br>
       <b>Tutar:</b> ${price} TL<br>
-      <b>Açıklama:</b> Kayıtlı telefon numaranız 05XXXXXXXXX
+      <b>Açıklama:</b> Kayıtlı telefon numaranız
     </div>
-    <input id="payGuidePhone" inputmode="tel" autocomplete="tel" placeholder="Kayıtlı telefon numaranız 05XXXXXXXXX">
+    <input id="payGuidePhone" placeholder="Kayıtlı telefon numaranız">
     <div class="actionRow">
       <button onclick="paymentFromGuide()">Ödeme Yaptım</button>
       <button class="ghost" onclick="page('packages')">Paket Değiştir</button>
@@ -291,15 +257,13 @@ function showPaymentGuide(id, price) {
 
 async function register() {
   try {
-    const phoneNorm = requireZeroPhoneInput("rp");
-    if (!phoneNorm) return;
     await api("/api/register", {
       method: "POST",
       body: JSON.stringify({
         firstName: $("rf").value,
         lastName: $("rl").value,
         email: $("re").value,
-        phone: phoneNorm,
+        phone: $("rp").value,
         password: $("rs").value,
         password2: $("rs2").value,
         referralCode: $("rr").value
@@ -343,151 +307,112 @@ async function dash() {
     const pendingList = d.pendingEarnings.filter((x) => x.status === "pending").sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     const releasedList = d.tx.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     const pendingSum = pendingList.reduce((a, b) => a + Number(b.amount), 0).toFixed(2);
-    const firstName = d.user.firstName || "";
-    const lastName = d.user.lastName || "";
-    const userInitials = ((firstName[0] || "Ü") + (lastName[0] || "")).toUpperCase();
-    const packageName = d.package ? d.package.name : "Paket aktif değil";
-    const balanceSum = Number(d.user.balance || 0).toFixed(2);
-    const notifications = d.notifications || [];
-    const children = d.children || [];
-    const tickets = d.tickets || [];
-    const premiumActive = !!d.user.premiumActive;
-
 
     $("dash").innerHTML = `
-      <div class="memberDashboard">
-        <div class="memberHero">
-          <div class="memberAvatar">${userInitials}</div>
-          <div class="memberHeroText">
-            <span class="panelKicker">Üye Kontrol Merkezi</span>
-            <h3>Hoş geldin, ${firstName} ${lastName}</h3>
-            <p><b>${packageName}</b> • Premium başlangıç: ${pStart} • Premium bitiş: ${pEnd}</p>
-          </div>
-          <div class="memberHeroActions">
-            <span class="accountStatus ${premiumActive ? "active" : "passive"}">${premiumActive ? "Premium Aktif" : "Premium Pasif"}</span>
-            <button onclick="page('packages')">${premiumActive && d.user.packageId === 5 ? "Paketi Yenile" : "Paketi Yükselt / Yenile"}</button>
-          </div>
+      <div class="panelHero">
+        <div>
+          <h3>Hoş geldin, ${d.user.firstName} ${d.user.lastName}</h3>
+          <p>${d.package ? d.package.name : "Paket aktif değil"} • Premium başlangıç: ${pStart} • Premium bitiş: ${pEnd}</p>
         </div>
+        <button onclick="page('packages')">${d.user.premiumActive && d.user.packageId === 5 ? "Paketi Yenile" : "Paketi Yükselt / Yenile"}</button>
+      </div>
 
-        <div class="memberQuickGrid">
-          <div class="metricCard clickable" onclick="toggleList('pendingList')">
-            <i>⏳</i>
-            <span>Bekleyen Bakiye</span>
-            <strong>${pendingSum} TL</strong>
-            <small>15 gün sonra çekilebilir bakiyeye aktarılır.</small>
-          </div>
-          <div class="metricCard clickable success" onclick="toggleList('releasedList')">
-            <i>💳</i>
-            <span>Çekilebilir Bakiye</span>
-            <strong>${balanceSum} TL</strong>
-            <small>Detaylı işlem geçmişi için tıkla.</small>
-          </div>
-          <div class="metricCard ${premiumActive ? "success" : "warning"}">
-            <i>⭐</i>
-            <span>Premium Bitiş</span>
-            <strong>${pEnd}</strong>
-            <small>${d.user.premiumDaysLeft || 0} gün kaldı.</small>
-          </div>
-          <div class="metricCard blue">
-            <i>👥</i>
-            <span>Alt Üye</span>
-            <strong>${children.length}</strong>
-            <small>Referans ağındaki doğrudan üyeler.</small>
-          </div>
+      <div class="panelGrid">
+        <div class="box clickable" onclick="toggleList('pendingList')">
+          <span>Bekleyen Bakiye</span>
+          <b>${pendingSum} TL</b>
+          <small>15 gün sonra çekilebilir bakiyeye aktarılır. Detay için tıkla.</small>
         </div>
-
-        <div id="pendingList" class="card detailList dashboardWide hidden">
-          <div class="panelSectionHead"><div><span>Bekleyen işlemler</span><h3>Bekleyen Bakiye Detayı</h3></div></div>
-          ${pendingList.map((e) => `<div class="listItem"><b>+${e.amount} TL</b><span>${e.desc}</span><small>${new Date(e.createdAt).toLocaleString("tr-TR")} • Çekilebilir tarih: ${new Date(e.availableAt).toLocaleDateString("tr-TR")}</small></div>`).join("") || `<div class="emptyState">Bekleyen kazanç yok.</div>`}
+        <div class="box clickable" onclick="toggleList('releasedList')">
+          <span>Çekilebilir Bakiye</span>
+          <b>${d.user.balance} TL</b>
+          <small>Detaylı işlem geçmişi için tıkla.</small>
         </div>
-
-        <div id="releasedList" class="card detailList dashboardWide hidden">
-          <div class="panelSectionHead"><div><span>İşlem geçmişi</span><h3>Çekilebilir Bakiye Detayı</h3></div></div>
-          ${releasedList.map((t) => `<div class="listItem"><b>${Number(t.amount) > 0 ? "+" : ""}${t.amount} TL</b><span>${t.desc}</span><small>${new Date(t.createdAt).toLocaleString("tr-TR")} • ${t.type}</small></div>`).join("") || `<div class="emptyState">İşlem yok.</div>`}
+        <div class="box">
+          <span>Premium Bitiş</span>
+          <b>${pEnd}</b>
+          <small>${d.user.premiumDaysLeft || 0} gün kaldı</small>
         </div>
-
-        <div class="card dashboardWide notificationPanel">
-          <div class="panelSectionHead">
-            <div><span>Son durum</span><h3>Bildirimlerim</h3></div>
-            <b class="miniBadge">${notifications.length} Bildirim</b>
-          </div>
-          <div class="notificationList">
-            ${notifications.map((n) => `<div class="notificationItem ${n.type}"><i>${n.type === "error" ? "!" : "✓"}</i><div><b>${n.title}</b><p>${n.message}</p><small>${new Date(n.createdAt).toLocaleString("tr-TR")}</small></div></div>`).join("") || `<div class="emptyState"><b>Bildirim yok</b><span>Yeni ödeme, çekim ve destek cevapları burada görünür.</span></div>`}
-          </div>
+        <div class="box">
+          <span>Alt Üye</span>
+          <b>${d.children.length}</b>
+          <small>Referans ağındaki doğrudan üyeler</small>
         </div>
+      </div>
 
-        <div class="card dashboardWide">
-          <div class="panelSectionHead">
-            <div><span>Referans ağı</span><h3>Alt Üyelerim</h3></div>
-            <b class="miniBadge">${children.length} Üye</b>
-          </div>
-          <p class="privacyNote">Kullanıcı gizliliği için ad görünür; soyadın yalnızca ilk harfi ve telefonun ilk 5 hanesi gösterilir.</p>
-          <div class="tableWrap professionalTable">
-            <table>
-              <thead><tr><th>Ad Soyad</th><th>Telefon</th><th>Paket</th><th>Premium Başlangıç</th><th>Premium Bitiş</th><th>Durum</th></tr></thead>
-              <tbody>
-                ${children.map((c) => `<tr><td>${c.maskedName || (c.firstName + " " + c.lastName)}</td><td>${c.maskedPhone || c.phone}</td><td>${c.packageName}</td><td>${c.premiumStartedAt ? new Date(c.premiumStartedAt).toLocaleDateString("tr-TR") : "-"}</td><td>${c.premiumUntil ? new Date(c.premiumUntil).toLocaleDateString("tr-TR") : "-"}</td><td><span class="statusPill ${c.premiumActive ? "success" : "warning"}">${c.premiumActive ? "Premium" : "Pasif"}</span></td></tr>`).join("") || `<tr><td colspan="6">Alt üye yok</td></tr>`}
-              </tbody>
-            </table>
-          </div>
+      <div id="pendingList" class="card detailList hidden">
+        <h3>Bekleyen Bakiye Detayı</h3>
+        ${pendingList.map((e) => `<div class="listItem"><b>+${e.amount} TL</b><span>${e.desc}</span><small>${new Date(e.createdAt).toLocaleString("tr-TR")} • Çekilebilir tarih: ${new Date(e.availableAt).toLocaleDateString("tr-TR")}</small></div>`).join("") || "Bekleyen kazanç yok"}
+      </div>
+
+      <div id="releasedList" class="card detailList hidden">
+        <h3>Çekilebilir Bakiye / İşlem Geçmişi</h3>
+        ${releasedList.map((t) => `<div class="listItem"><b>${Number(t.amount) > 0 ? "+" : ""}${t.amount} TL</b><span>${t.desc}</span><small>${new Date(t.createdAt).toLocaleString("tr-TR")} • ${t.type}</small></div>`).join("") || "İşlem yok"}
+      </div>
+
+      <div class="card">
+        <h3>Bildirimlerim</h3>
+        ${d.notifications.map((n) => `<p class="notification ${n.type}">${n.type === "error" ? "❌" : "✅"} <b>${n.title}</b><br>${n.message}<br><small>${new Date(n.createdAt).toLocaleString("tr-TR")}</small></p>`).join("") || "Bildirim yok"}
+      </div>
+
+      <div class="card">
+        <h3>Alt Üyelerim</h3>
+        <p class="privacyNote">Kullanıcı gizliliğini korumak amacıyla ad, soyad ve telefon bilgileri maskelenmiş olarak gösterilmektedir.</p>
+        <div class="tableWrap">
+          <table>
+            <thead><tr><th>Ad Soyad</th><th>Telefon</th><th>Paket</th><th>Premium Başlangıç</th><th>Premium Bitiş</th><th>Durum</th></tr></thead>
+            <tbody>
+              ${d.children.map((c) => `<tr><td>${c.maskedName || (c.firstName + " " + c.lastName)}</td><td>${c.maskedPhone || c.phone}</td><td>${c.packageName}</td><td>${c.premiumStartedAt ? new Date(c.premiumStartedAt).toLocaleDateString("tr-TR") : "-"}</td><td>${c.premiumUntil ? new Date(c.premiumUntil).toLocaleDateString("tr-TR") : "-"}</td><td>${c.premiumActive ? "Premium" : "Pasif"}</td></tr>`).join("") || `<tr><td colspan="6">Alt üye yok</td></tr>`}
+            </tbody>
+          </table>
         </div>
+      </div>
 
-        <div class="panelActionGrid">
-          <div class="card panelFormCard">
-            <div class="panelSectionHead"><div><span>Hesap</span><h3>Üyelik Bilgilerim</h3></div></div>
-            <div class="formGrid">
-              <label>Ad<input id="pf" value="${d.user.firstName}" placeholder="Ad"></label>
-              <label>Soyad<input id="pl" value="${d.user.lastName}" placeholder="Soyad"></label>
-              <label>E-posta<input id="pe" value="${d.user.email}" placeholder="Email"></label>
-              <label>Telefon<input id="pp" inputmode="tel" autocomplete="tel" value="${d.user.phone}" placeholder="Telefon 05XXXXXXXXX"></label>
-              <label>Mevcut şifre<input id="pcp" type="password" placeholder="Mevcut şifre"></label>
-              <label>Yeni şifre<input id="pnp" type="password" placeholder="Yeni şifre"></label>
-            </div>
-            <button onclick="saveProfile()">Bilgileri Güncelle</button>
-          </div>
+      <div class="card">
+        <h3>Üyelik Bilgilerim / Şifre Değiştir</h3>
+        <input id="pf" value="${d.user.firstName}" placeholder="Ad">
+        <input id="pl" value="${d.user.lastName}" placeholder="Soyad">
+        <input id="pe" value="${d.user.email}" placeholder="Email">
+        <input id="pp" value="${d.user.phone}" placeholder="Telefon">
+        <input id="pcp" type="password" placeholder="Mevcut şifre">
+        <input id="pnp" type="password" placeholder="Yeni şifre">
+        <button onclick="saveProfile()">Bilgileri Güncelle</button>
+      </div>
 
-          <div class="card panelFormCard referralCard">
-            <div class="panelSectionHead"><div><span>Davet</span><h3>Referans Sistemi</h3></div></div>
-            ${premiumActive ? `<p class="muted">Referans kodunu paylaşarak doğrudan üye ağını büyütebilirsin.</p><div class="refBox professionalRef"><span class="refCode" id="refCode">${d.user.referralCode}</span><button onclick="copyRef()">Kopyala</button><button class="ghost" onclick="shareRef()">Paylaş</button></div>` : `<div class="emptyState compact"><b>Referans kodu kapalı</b><span>Referans kodunuz paket satın alındıktan sonra görünür.</span></div>`}
-          </div>
+      <div class="card">
+        <h3>Referans Sistemi</h3>
+        ${d.user.premiumActive ? `<div class="refBox"><span class="refCode" id="refCode">${d.user.referralCode}</span><button onclick="copyRef()">Kopyala</button><button onclick="shareRef()">Paylaş</button></div>` : "Referans kodunuz paket satın alındıktan sonra görünür."}
+      </div>
 
-          <div class="card panelFormCard paymentCard">
-            <div class="panelSectionHead"><div><span>Ödeme</span><h3>IBAN Ödeme Bildir</h3></div></div>
-            <div class="bankInfo"><b>IBAN</b><span>TR78 0015 7000 0000 0037 7980 62</span><small>Alıcı: YILMAZ ORAL • Açıklama: Telefon numaranızı yazınız</small></div>
-            <label>Paket seçimi<select id="packSel">${packs.map((p) => {
-              const currentId = d.user.premiumActive ? Number(d.user.packageId || 0) : 0;
-              const disabled = currentId && p.id < currentId;
-              const label = disabled ? " - Seçilemez" : currentId === p.id ? " - Yenile" : currentId ? " - Yükselt" : "";
-              return `<option value="${p.id}" data-price="${p.price}" ${disabled ? "disabled" : ""}>${p.name} - ${p.price} TL / Yıl${label}</option>`;
-            }).join("")}</select></label>
-            <label>Tutar<input id="payAmount" placeholder="Tutar"></label>
-            <label>Telefon<input id="payPhone" inputmode="tel" autocomplete="tel" value="${d.user.phone}" placeholder="Telefon 05XXXXXXXXX"></label>
-            <button onclick="payment()">Ödeme Bildir</button>
-          </div>
+      <div class="card">
+        <h3>IBAN Ödeme Bildir</h3>
+        <p><b>IBAN:</b> TR78 0015 7000 0000 0037 7980 62<br><b>Alıcı:</b> YILMAZ ORAL<br><b>Açıklama:</b> Telefon numaranızı yazınız</p>
+        <select id="packSel">${packs.map((p) => {
+          const currentId = d.user.premiumActive ? Number(d.user.packageId || 0) : 0;
+          const disabled = currentId && p.id < currentId;
+          const label = disabled ? " - Seçilemez" : currentId === p.id ? " - Yenile" : currentId ? " - Yükselt" : "";
+          return `<option value="${p.id}" data-price="${p.price}" ${disabled ? "disabled" : ""}>${p.name} - ${p.price} TL / Yıl${label}</option>`;
+        }).join("")}</select>
+        <input id="payAmount" placeholder="Tutar">
+        <input id="payPhone" value="${d.user.phone}" placeholder="Telefon">
+        <button onclick="payment()">Ödeme Bildir</button>
+      </div>
 
-          <div class="card panelFormCard withdrawCard">
-            <div class="panelSectionHead"><div><span>Bakiye</span><h3>Çekim Talebi</h3></div></div>
-            <label>Ad Soyad<input id="wName" value="${d.user.firstName} ${d.user.lastName}" placeholder="Ad Soyad"></label>
-            <label>IBAN<input id="wIban" placeholder="IBAN"></label>
-            <label>Tutar<input id="wAmount" placeholder="50 TL ve katları"></label>
-            <button onclick="withdraw()">Çekim Talebi Gönder</button>
-          </div>
+      <div class="card">
+        <h3>Çekim Talebi</h3>
+        <input id="wName" value="${d.user.firstName} ${d.user.lastName}" placeholder="Ad Soyad">
+        <input id="wIban" placeholder="IBAN">
+        <input id="wAmount" placeholder="50 TL ve katları">
+        <button onclick="withdraw()">Çekim Talebi Gönder</button>
+      </div>
 
-          <div class="card panelFormCard supportCard dashboardWide">
-            <div class="panelSectionHead"><div><span>Yardım</span><h3>Destek Merkezi</h3></div></div>
-            <div class="supportGrid">
-              <div>
-                <label>Konu<input id="supSub" placeholder="Konu"></label>
-                <label>Mesaj<textarea id="supMsg" placeholder="Mesajınız"></textarea></label>
-                <button onclick="support()">Destek Kaydı Gönder</button>
-              </div>
-              <div class="ticketList">
-                <h4>Destek Kayıtlarım</h4>
-                ${tickets.map((t) => `<div class="ticketItem"><b>${t.subject}</b><span>${t.status}</span><p>${t.message}</p>${t.replies.map((r) => `<small>↳ Admin: ${r.message}</small>`).join("")}</div>`).join("") || `<div class="emptyState compact">Kayıt yok.</div>`}
-              </div>
-            </div>
-          </div>
-        </div>
+      <div class="card">
+        <h3>Destek Merkezi</h3>
+        <input id="supSub" placeholder="Konu">
+        <textarea id="supMsg" placeholder="Mesajınız"></textarea>
+        <button onclick="support()">Destek Kaydı Gönder</button>
+        <h4>Destek Kayıtlarım</h4>
+        ${d.tickets.map((t) => `<p><b>${t.subject}</b> - ${t.status}<br>${t.message}<br>${t.replies.map((r) => `↳ Admin: ${r.message}`).join("<br>")}</p>`).join("") || "Kayıt yok"}
       </div>`;
 
     const firstEnabledOption = Array.from($("packSel").options).find((opt) => !opt.disabled);
@@ -506,15 +431,13 @@ function toggleList(id) {
 
 async function saveProfile() {
   try {
-    const phoneNorm = requireZeroPhoneInput("pp");
-    if (!phoneNorm) return;
     await api("/api/profile", {
       method: "POST",
       body: JSON.stringify({
         firstName: $("pf").value,
         lastName: $("pl").value,
         email: $("pe").value,
-        phone: phoneNorm,
+        phone: $("pp").value,
         currentPassword: $("pcp").value,
         newPassword: $("pnp").value
       })
@@ -542,15 +465,13 @@ function shareRef() {
 
 async function payment() {
   try {
-    const phoneNorm = requireZeroPhoneInput("payPhone");
-    if (!phoneNorm) return;
     await api("/api/payment", {
       method: "POST",
       body: JSON.stringify({
         packageId: $("packSel").value,
         amount: $("payAmount").value,
-        phone: phoneNorm,
-        note: phoneNorm
+        phone: $("payPhone").value,
+        note: $("payPhone").value
       })
     });
     toast("Ödeme bildirimi gönderildi");
@@ -566,15 +487,13 @@ async function paymentFromGuide() {
       page("auth");
       return;
     }
-    const phoneNorm = requireZeroPhoneInput("payGuidePhone");
-    if (!phoneNorm) return;
     await api("/api/payment", {
       method: "POST",
       body: JSON.stringify({
         packageId: selectedPackageId,
         amount: selectedPackagePrice,
-        phone: phoneNorm,
-        note: phoneNorm
+        phone: $("payGuidePhone").value,
+        note: $("payGuidePhone").value
       })
     });
     toast("Ödeme bildirimi admine gönderildi");
@@ -619,27 +538,35 @@ function showAddMovie() {
 }
 
 async function openFirstMovie() {
+  const box = $("filmGateway");
+  if (box) {
+    box.classList.remove("hidden");
+    box.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+}
+
+async function handleVizyonClick() {
+  if (!isLoggedIn()) {
+    alert("Film izlemek için üye olmalısınız.");
+    page("auth");
+    return;
+  }
+
   try {
     const m = await api("/api/movies");
     if (!m.length) {
       toast("Yayında film bulunmuyor");
       return;
     }
-
     const first = m[0];
-    const url = first.watchLink || first.previewLink || first.embedLink || first.link || "";
-    openFilmModal(url, !!first.locked);
+    if (first.locked) {
+      premiumRequiredForMovie();
+      return;
+    }
+    openFilmModal(first.watchLink || first.embedLink || first.link || "");
   } catch (e) {
     toast(e.message || "Film açılamadı");
   }
-}
-
-async function handleVizyonClick() {
-  await openFirstMovie();
-}
-
-function openLockedMovie(url) {
-  openFilmModal(url, true);
 }
 
 async function movies() {
@@ -647,28 +574,21 @@ async function movies() {
     const m = await api("/api/movies");
     const logged = isLoggedIn();
 
-    const showcasePoster = "/assets/film-afisleri-vitrin.png";
-
     $("movieList").innerHTML = m
-      .map((x) => {
-        const isDefaultFilmPlatform = /reklamsız film platformu/i.test(x.title || "");
-        const posterSrc = (!x.poster || String(x.poster).includes("movie-poster.svg") || isDefaultFilmPlatform)
-          ? showcasePoster
-          : x.poster;
-
-        return `<div class="card movie ${x.locked ? "locked" : ""}">
-          <div class="moviePosterWrap" aria-label="Film afişleri vitrini">
-            <img src="${posterSrc}" alt="Film afişleri vitrini" onerror="this.src='/assets/film-afisleri-vitrin.png'">
+      .map(
+        (x) => `<div class="card movie ${x.locked ? "locked" : ""}">
+          <div class="moviePosterWrap">
+            <img src="${x.poster || "/assets/movie-poster.svg"}" onerror="this.src='/assets/movie-poster.svg'">
             ${x.locked ? '<span class="premiumBadge">Premium İçerik</span>' : '<span class="premiumBadge open">Erişim Açık</span>'}
           </div>
           <h3>${x.title}</h3>
           <div class="movieMeta">${x.category || "Film"}${x.year ? " • " + x.year : ""}</div>
           <p>${x.description || ""}</p>
           ${x.locked
-            ? `<button onclick='openLockedMovie(${JSON.stringify(x.watchLink || x.previewLink || x.embedLink || x.link || "")})'>Film Sitesini Aç</button><small class="movieHint">Film sitesi görüntülenir; izlemek için üye olup premium paket almanız gerekir.</small>`
-            : `<button onclick='openFilmModal(${JSON.stringify(x.watchLink || x.previewLink || x.embedLink || x.link || "")}, false)'>Filmi İzle</button>`}
-        </div>`;
-      })
+            ? `<button onclick="premiumRequiredForMovie()">${logged ? "Premium Ol ve İzle" : "Üye Ol, Premium Al ve İzle"}</button><small class="movieHint">Film kataloğu herkese açıktır; izleme erişimi premium üyelere özeldir.</small>`
+            : `<button onclick='openFilmModal(${JSON.stringify(x.watchLink || x.embedLink || x.link || "")})'>Filmi İzle</button>`}
+        </div>`
+      )
       .join("") || '<div class="card">Yayında film bulunmuyor.</div>';
   } catch (e) {
     $("movieList").innerHTML = '<div class="card">Film kataloğu şu anda yüklenemedi. Lütfen tekrar deneyin.</div>';
@@ -763,9 +683,9 @@ async function publicMembers() {
       <h3 class="dbTitle">Aramıza Katılanlar</h3>
       <div class="tableWrap publicWithdrawTable publicMembersTable">
         <table>
-          <thead><tr><th>Üye</th><th>Telefon</th><th>Paket</th><th>Davet Eden</th><th>Katılım Tarihi</th></tr></thead>
+          <thead><tr><th>Üye</th><th>Telefon</th><th>Paket</th><th>Davet Eden</th><th>Davet Eden Telefon</th><th>Katılım Tarihi</th></tr></thead>
           <tbody>
-            ${list.map((m) => `<tr><td>${m.maskedName}</td><td>${m.maskedPhone}</td><td>${m.packageName || "Paket Yok"}</td><td>${m.inviterMaskedName || "Sistem"}</td><td>${m.createdAt ? new Date(m.createdAt).toLocaleString("tr-TR") : "-"}</td></tr>`).join("") || `<tr><td colspan="5">Henüz üye kaydı yok</td></tr>`}
+            ${list.map((m) => `<tr><td>${m.maskedName}</td><td>${m.maskedPhone}</td><td>${m.packageName || "Paket Yok"}</td><td>${m.inviterMaskedName || "Sistem"}</td><td>${m.inviterMaskedPhone || "-"}</td><td>${m.createdAt ? new Date(m.createdAt).toLocaleString("tr-TR") : "-"}</td></tr>`).join("") || `<tr><td colspan="6">Henüz üye kaydı yok</td></tr>`}
           </tbody>
         </table>
       </div>`;
@@ -940,7 +860,7 @@ async function wdNo(id) {
   admin();
 }
 
-function openFilmModal(url, locked = false) {
+function openFilmModal(url) {
   if (!url) {
     toast("Film bağlantısı bulunamadı");
     return;
@@ -952,220 +872,40 @@ function openFilmModal(url, locked = false) {
     return;
   }
 
-  filmIsLocked = !!locked;
   lastPageBeforeWatch = (document.querySelector(".page.active") || {}).id || "movies";
-
-  const shell = document.querySelector(".watchShell");
-  if (shell) {
-    shell.classList.toggle("lockedWatch", filmIsLocked);
-    shell.classList.add("croppedWatch");
-  }
-
-  const box = document.querySelector(".watchFrameBox");
-  if (box) box.style.setProperty("--film-scroll-y", "0px");
-
   const frame = $("filmFrame");
   if (frame) {
-    if (filmIsLocked) {
-      // Kilitli kullanımda iframe tıklamaları ve iframe tam ekran yetkisi kapatılır.
-      // Tam ekran butonu sadece dış kapsayıcıyı tam ekran yapar; uyarı katmanı üstte kalır.
-      frame.removeAttribute("allowfullscreen");
-      frame.removeAttribute("webkitallowfullscreen");
-      frame.removeAttribute("mozallowfullscreen");
-      frame.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share");
-      frame.setAttribute("tabindex", "-1");
-    } else {
-      frame.setAttribute("allowfullscreen", "true");
-      frame.setAttribute("webkitallowfullscreen", "true");
-      frame.setAttribute("mozallowfullscreen", "true");
-      frame.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share");
-      frame.removeAttribute("tabindex");
-    }
+    frame.setAttribute("allowfullscreen", "true");
+    frame.setAttribute("webkitallowfullscreen", "true");
+    frame.setAttribute("mozallowfullscreen", "true");
+    frame.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share");
     frame.src = cleanUrl;
   }
-
-  const overlay = $("filmLockOverlay");
-  if (overlay) {
-    overlay.scrollTop = 0;
-    overlay.style.pointerEvents = filmIsLocked ? "auto" : "none";
-    overlay.classList.toggle("hidden", !filmIsLocked);
-    overlay.setAttribute("aria-hidden", filmIsLocked ? "false" : "true");
-  }
-
   page("watch");
 }
 
-function lockedFilmClick(event) {
-  if (event) {
-    event.preventDefault();
-    event.stopPropagation();
-  }
-
-  const overlay = $("filmLockOverlay");
-  const endX = event && typeof event.clientX === "number" ? event.clientX : (filmLockPointerStart ? filmLockPointerStart.x : 0);
-  const endY = event && typeof event.clientY === "number" ? event.clientY : (filmLockPointerStart ? filmLockPointerStart.y : 0);
-  const moved = filmLockPointerStart
-    ? Math.abs(endX - filmLockPointerStart.x) + Math.abs(endY - filmLockPointerStart.y)
-    : 0;
-  const scrolled = overlay && filmLockPointerStart
-    ? Math.abs(overlay.scrollTop - filmLockPointerStart.scrollTop)
-    : 0;
-
-  // Kullanıcı afişleri görmek için kaydırıyorsa uyarıyı tetikleme; gerçek tıklamada göster.
-  if (moved > 10 || scrolled > 10) return;
-
-  alert(LOCKED_FILM_MESSAGE);
-}
-
-function rememberFilmLockPointer(event) {
-  const overlay = $("filmLockOverlay");
-  const p = event && event.touches && event.touches[0] ? event.touches[0] : event;
-  filmLockPointerStart = {
-    x: p && typeof p.clientX === "number" ? p.clientX : 0,
-    y: p && typeof p.clientY === "number" ? p.clientY : 0,
-    scrollTop: overlay ? overlay.scrollTop : 0
-  };
-}
-
-function syncLockedFilmScroll() {
-  const overlay = $("filmLockOverlay");
-  const box = document.querySelector(".watchFrameBox");
-  if (!overlay || !box) return;
-  box.style.setProperty("--film-scroll-y", overlay.scrollTop + "px");
-}
-
-function bindFilmLockOverlayScroll() {
-  const overlay = $("filmLockOverlay");
-  if (!overlay || overlay.dataset.scrollBound === "1") return;
-  overlay.dataset.scrollBound = "1";
-  overlay.addEventListener("scroll", syncLockedFilmScroll, { passive: true });
-  overlay.addEventListener("pointerdown", rememberFilmLockPointer, { passive: true });
-  overlay.addEventListener("touchstart", rememberFilmLockPointer, { passive: true });
-}
-
-function resetFilmWatchState() {
-  filmIsLocked = false;
-  filmLockPointerStart = null;
-
-  const frame = $("filmFrame");
-  if (frame) {
-    frame.src = "about:blank";
-    frame.removeAttribute("tabindex");
-  }
-
-  const overlay = $("filmLockOverlay");
-  if (overlay) {
-    overlay.classList.add("hidden");
-    overlay.setAttribute("aria-hidden", "true");
-    overlay.scrollTop = 0;
-    overlay.style.pointerEvents = "none";
-  }
-
-  const shell = document.querySelector(".watchShell");
-  if (shell) {
-    shell.classList.remove("lockedWatch", "croppedWatch");
-    shell.style.pointerEvents = "";
-  }
-
-  const box = document.querySelector(".watchFrameBox");
-  if (box) {
-    box.style.setProperty("--film-scroll-y", "0px");
-  }
-}
-
-function getFullscreenElement() {
-  return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement || null;
-}
-
-function exitFullscreenIfNeeded() {
-  if (!getFullscreenElement()) return Promise.resolve();
-
-  try {
-    if (document.exitFullscreen) return document.exitFullscreen().catch(() => {});
-    if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen();
-      return Promise.resolve();
-    }
-    if (document.mozCancelFullScreen) {
-      document.mozCancelFullScreen();
-      return Promise.resolve();
-    }
-    if (document.msExitFullscreen) {
-      document.msExitFullscreen();
-      return Promise.resolve();
-    }
-  } catch (e) {}
-
-  return Promise.resolve();
-}
-
 function closeFilmModal() {
-  const targetPage = lastPageBeforeWatch || "movies";
-
-  // Önce kilidi kapatıyoruz. Böylece tam ekrandan çıkarken fullscreenchange olayı
-  // premium kilit katmanını tekrar açıp ekranı tıklanamaz halde bırakmaz.
-  resetFilmWatchState();
-
-  exitFullscreenIfNeeded().finally(() => {
-    page(targetPage);
-    // Bazı mobil tarayıcılar fullscreen çıkışını gecikmeli tamamlıyor; ikinci temizlik ekran kilitlenmesini önler.
-    setTimeout(resetFilmWatchState, 80);
-    setTimeout(() => document.body.classList.remove("watchMode"), 120);
-  });
+  const frame = $("filmFrame");
+  if (frame) frame.src = "";
+  page(lastPageBeforeWatch || "movies");
 }
 
 function fullscreenMovie() {
-  const shell = document.querySelector(".watchShell");
   const frame = $("filmFrame");
-  if (!shell && !frame) return;
+  const shell = document.querySelector(".watchShell");
+  const target = frame || shell;
+  if (!target) return;
 
-  // Kilitli filmde iframe tam ekran yapılmaz; kapsayıcı tam ekran yapılır.
-  // Böylece premium uyarı katmanı tam ekranda da tıklamaları yakalamaya devam eder.
-  const target = shell || frame;
-  const overlay = $("filmLockOverlay");
-  if (filmIsLocked && overlay) {
-    overlay.classList.remove("hidden");
-    overlay.setAttribute("aria-hidden", "false");
-  }
+  try { if (frame) frame.focus(); } catch (e) {}
 
   if (target.requestFullscreen) {
-    target.requestFullscreen().catch(() => toast("Tam ekran açılamadı."));
+    target.requestFullscreen().catch(() => toast("Tam ekran açılamadı. Filmin içindeki oynatıcıdan da tam ekran butonunu deneyin."));
   } else if (target.webkitRequestFullscreen) {
     target.webkitRequestFullscreen();
   } else {
     toast("Bu tarayıcı tam ekran özelliğini desteklemiyor.");
   }
 }
-
-function handleFullscreenGuard() {
-  const watchActive = !!document.querySelector("#watch.page.active");
-
-  if (!watchActive) {
-    resetFilmWatchState();
-    return;
-  }
-
-  if (!filmIsLocked) return;
-
-  const overlay = $("filmLockOverlay");
-  if (overlay) {
-    overlay.style.pointerEvents = "auto";
-    overlay.classList.remove("hidden");
-    overlay.setAttribute("aria-hidden", "false");
-  }
-  const shell = document.querySelector(".watchShell");
-  if (shell) shell.classList.add("lockedWatch");
-  const frame = $("filmFrame");
-  const fsElement = getFullscreenElement();
-  if (frame && fsElement === frame) {
-    exitFullscreenIfNeeded();
-  }
-}
-
-document.addEventListener("fullscreenchange", handleFullscreenGuard);
-document.addEventListener("webkitfullscreenchange", handleFullscreenGuard);
-document.addEventListener("DOMContentLoaded", bindFilmLockOverlayScroll);
-bindFilmLockOverlayScroll();
 
 async function forgotPassword() {
   try {

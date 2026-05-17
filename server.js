@@ -56,7 +56,7 @@ function defaultMovie() {
     title: "Reklamsız Film Platformu",
     year: "2026",
     category: "Film Arşivi",
-    poster: "/assets/film-afisleri-vitrin.png",
+    poster: "/assets/movie-poster.svg",
     description: "Premium üyeler için reklamsız film platformu.",
     link: "https://lovefilmizle.net",
     embedLink: "https://lovefilmizle.net",
@@ -134,40 +134,30 @@ function saveDb(d) {
   try { fs.writeFileSync(DB_FILE, JSON.stringify(dbCache, null, 2)); } catch (e) { console.error("db.json yazılamadı:", e.message); }
   if (supabase) {
     const snapshot = JSON.parse(JSON.stringify(dbCache));
-    dbSaveQueue = dbSaveQueue
-      .catch(() => {})
-      .then(() => persistDb(snapshot))
-      .catch(e => {
-        console.error("Supabase kaydetme hatası:", e.message);
-        throw e;
-      });
-    return dbSaveQueue;
+    dbSaveQueue = dbSaveQueue.catch(() => {}).then(() => persistDb(snapshot)).catch(e => console.error("Supabase kaydetme hatası:", e.message));
   }
-  return Promise.resolve();
+  return dbSaveQueue;
 }
 function publicUser(u) {
   if (!u) return null;
   const { passwordHash, ...safe } = u;
   return { ...safe, premiumActive: isPremium(u), premiumDaysLeft: daysLeft(u.premiumUntil) };
 }
-function maskSurname(last) {
-  const text = String(last || "").trim();
-  if (!text) return "-****";
-  return text.charAt(0).toLocaleUpperCase("tr-TR") + "****";
+function maskPart(v) {
+  const text = String(v || "").trim();
+  if (!text) return "-***";
+  return text.charAt(0).toLocaleUpperCase("tr-TR") + "***";
 }
-function maskName(first, last) {
-  const firstText = String(first || "").trim() || "İsim";
-  return `${firstText} ${maskSurname(last)}`;
-}
+function maskName(first, last) { return `${maskPart(first)} ${maskPart(last)}`; }
 function maskFullName(full) {
   const parts = String(full || "").trim().split(/\s+/).filter(Boolean);
-  if (!parts.length) return "İsim -****";
+  if (!parts.length) return "-*** -***";
   return maskName(parts[0], parts.slice(1).join(" "));
 }
 function maskPhone(phone) {
-  const raw = normalizePhone(phone) || String(phone || "").replace(/\D/g, "");
-  if (!raw) return "0**** ******";
-  return raw.slice(0, 5) + "*".repeat(Math.max(6, raw.length - 5));
+  const raw = String(phone || "").replace(/\D/g, "");
+  if (!raw) return "0*** *********";
+  return raw.slice(0, 4) + "*********";
 }
 function normalizePhone(phone) {
   let raw = String(phone || "").replace(/\D/g, "");
@@ -175,17 +165,6 @@ function normalizePhone(phone) {
   if (raw.startsWith("90") && raw.length === 12) raw = "0" + raw.slice(2);
   if (raw.startsWith("5") && raw.length === 10) raw = "0" + raw;
   return raw;
-}
-function zeroPrefixedPhone(phone) {
-  const raw = String(phone || "").replace(/\D/g, "");
-  return raw && raw.startsWith("0");
-}
-function requireZeroPrefixedPhone(phone, res) {
-  if (!zeroPrefixedPhone(phone)) {
-    res.status(400).json({ error: "Telefon numarası 0 ile başlamalıdır. Lütfen numaranızın başına 0 koyarak 05XXXXXXXXX formatında yazın." });
-    return null;
-  }
-  return normalizePhone(phone);
 }
 
 function makeRef() { return "IK" + Math.random().toString(36).slice(2, 8).toUpperCase() + Math.floor(10 + Math.random() * 89); }
@@ -283,6 +262,7 @@ function publicMember(d, u) {
     packageId: u.packageId || 0,
     packageName: pack ? pack.name : "Paket Yok",
     inviterMaskedName: inviter ? maskName(inviter.firstName, inviter.lastName) : "Sistem",
+    inviterMaskedPhone: inviter ? maskPhone(inviter.phone) : "-",
     createdAt: u.createdAt
   };
 }
@@ -291,8 +271,8 @@ function publicWithdrawal(d, w) {
   const pack = findPackage(w.packageId || (u && u.packageId));
   return {
     id: w.id,
-    maskedName: w.fullName ? maskFullName(w.fullName) : (u ? maskName(u.firstName, u.lastName) : "İsim -****"),
-    maskedPhone: u ? maskPhone(u.phone) : "0**** ******",
+    maskedName: w.fullName ? maskFullName(w.fullName) : (u ? maskName(u.firstName, u.lastName) : "-*** -***"),
+    maskedPhone: u ? maskPhone(u.phone) : "0*** *********",
     packageName: pack ? pack.name : "Paket Yok",
     packageId: pack ? pack.id : 0,
     amount: w.amount,
@@ -347,8 +327,7 @@ app.post("/api/register", async (req, res) => {
   if (!firstName || !lastName || !email || !phone || !password) return res.status(400).json({ error: "Tüm alanları doldurun" });
   if (password !== password2) return res.status(400).json({ error: "Şifreler eşleşmiyor" });
   const emailNorm = String(email).trim().toLowerCase();
-  const phoneNorm = requireZeroPrefixedPhone(phone, res);
-  if (!phoneNorm) return;
+  const phoneNorm = normalizePhone(phone) || String(phone).trim();
   if (d.users.some(u => String(u.email).toLowerCase() === emailNorm)) return res.status(400).json({ error: "Bu e-posta zaten kayıtlı" });
   if (d.users.some(u => normalizePhone(u.phone) === phoneNorm)) return res.status(400).json({ error: "Bu telefon zaten kayıtlı" });
   const sponsor = d.users.find(u => String(u.referralCode || "").toUpperCase() === String(referralCode || "").trim().toUpperCase());
@@ -404,11 +383,7 @@ app.post("/api/profile", auth, userRequired, async (req, res) => {
   if (firstName) u.firstName = String(firstName).trim();
   if (lastName) u.lastName = String(lastName).trim();
   if (email) u.email = String(email).trim().toLowerCase();
-  if (phone) {
-    const phoneNorm = requireZeroPrefixedPhone(phone, res);
-    if (!phoneNorm) return;
-    u.phone = phoneNorm;
-  }
+  if (phone) u.phone = String(phone).trim();
   if (newPassword) {
     if (!bcrypt.compareSync(String(currentPassword || ""), u.passwordHash || "")) return res.status(400).json({ error: "Mevcut şifre hatalı" });
     u.passwordHash = bcrypt.hashSync(String(newPassword), 10);
@@ -421,17 +396,25 @@ app.post("/api/payment", auth, userRequired, async (req, res) => {
   const { packageId, amount, phone, note } = req.body || {};
   const pack = findPackage(packageId);
   if (!pack) return res.status(400).json({ error: "Paket bulunamadı" });
+
+  const existingPending = req.db.payments.find(x => x.userId === req.user.id && x.status === "pending");
+  if (existingPending) {
+    return res.status(400).json({
+      error: "Zaten bekleyen bir ödeme bildiriminiz var. Yeni paket bildirimi yapmadan önce mevcut bildirimin admin tarafından onaylanmasını veya reddedilmesini bekleyin."
+    });
+  }
+
   const currentId = isPremium(req.user) ? Number(req.user.packageId || 0) : 0;
   if (currentId && Number(pack.id) < currentId) return res.status(400).json({ error: "Mevcut paketinizden düşük paket seçemezsiniz" });
-  const paymentPhone = phone ? requireZeroPrefixedPhone(phone, res) : req.user.phone;
-  if (!paymentPhone) return;
+
+  const value = Number(amount || pack.price);
   const payment = {
     id: id(), userId: req.user.id, userFullName: `${req.user.firstName} ${req.user.lastName}`,
-    packageId: pack.id, amount: Number(amount || pack.price), phone: paymentPhone, note: note || "",
+    packageId: pack.id, amount: value, phone: phone || req.user.phone, note: note || "",
     status: "pending", createdAt: now()
   };
   req.db.payments.push(payment);
-  notify(req.db, req.user.id, "Ödeme Bildirimi Alındı", "Ödeme bildiriminiz admin onayına gönderildi.", "success");
+  notify(req.db, req.user.id, "Ödeme Bildirimi Alındı", "Ödeme bildiriminiz admin onayına gönderildi. Aynı anda yalnızca 1 ödeme bildirimi oluşturabilirsiniz.", "success");
   await saveDb(req.db);
   res.json({ ok: true, payment });
 });
@@ -463,10 +446,7 @@ app.get("/api/movies", authOptional, (req, res) => {
   const d = readDb(); processDb(d);
   const u = req.auth ? d.users.find(x => x.id === req.auth.id) : null;
   const canWatch = !!(u && isPremium(u));
-  const movies = d.movies.filter(m => m.status === "published").map(m => {
-    const sourceLink = m.embedLink || m.link || "";
-    return { ...m, previewLink: sourceLink, watchLink: canWatch ? sourceLink : "", locked: !canWatch };
-  });
+  const movies = d.movies.filter(m => m.status === "published").map(m => ({ ...m, watchLink: canWatch ? (m.embedLink || m.link) : "", locked: !canWatch }));
   res.json(movies);
 });
 function authOptional(req, res, next) {
@@ -480,7 +460,7 @@ app.post("/api/movies", auth, userRequired, async (req, res) => {
   const { title, year, category, poster, link, embedLink, description } = req.body || {};
   if (!title || !link) return res.status(400).json({ error: "Film adı ve link zorunludur" });
   const isCeo = req.user.role === "admin" || (isPremium(req.user) && Number(req.user.packageId) === 5);
-  const movie = { id: id(), title, year, category, poster: poster || "/assets/film-afisleri-vitrin.png", link, embedLink: embedLink || link, description, status: isCeo ? "admin_pending" : "ceo_pending", addedBy: req.user.id, ceoApprovedBy: isCeo ? req.user.id : null, adminApprovedBy: null, createdAt: now() };
+  const movie = { id: id(), title, year, category, poster: poster || "/assets/movie-poster.svg", link, embedLink: embedLink || link, description, status: isCeo ? "admin_pending" : "ceo_pending", addedBy: req.user.id, ceoApprovedBy: isCeo ? req.user.id : null, adminApprovedBy: null, createdAt: now() };
   req.db.movies.push(movie);
   await saveDb(req.db);
   res.json({ ok: true, movie });
@@ -524,6 +504,25 @@ app.post("/api/admin/payments/:id/approve", auth, adminOnly, async (req, res) =>
   const u = req.db.users.find(x => x.id === p.userId);
   const pack = findPackage(p.packageId);
   if (!u || !pack) return res.status(404).json({ error: "Kullanıcı veya paket bulunamadı" });
+  const createdTime = new Date(p.createdAt || 0).getTime();
+  const duplicateApproved = req.db.payments.find(x =>
+    x.id !== p.id &&
+    x.userId === p.userId &&
+    x.status === "approved" &&
+    Number(x.packageId) === Number(p.packageId) &&
+    Number(x.amount || 0) === Number(p.amount || 0) &&
+    Math.abs(new Date(x.createdAt || 0).getTime() - createdTime) <= 24 * 60 * 60 * 1000
+  );
+  if (duplicateApproved) {
+    p.status = "rejected";
+    p.rejectReason = "Mükerrer ödeme bildirimi: Aynı kullanıcı için aynı paket ödemesi daha önce onaylandı.";
+    p.rejectedAt = now();
+    p.rejectedBy = req.user.id;
+    notify(req.db, u.id, "Mükerrer Ödeme Bildirimi", "Aynı paket için daha önce onaylanan ödeme bulunduğu için bu bildirim işleme alınmadı.", "error");
+    await saveDb(req.db);
+    return res.status(400).json({ error: "Bu ödeme bildirimi mükerrer görünüyor. Aynı kullanıcı için aynı paket ödemesi daha önce onaylanmış." });
+  }
+
   p.status = "approved"; p.approvedAt = now(); p.approvedBy = req.user.id;
   const startFrom = isPremium(u) && Number(u.packageId) === Number(pack.id) && u.premiumUntil ? u.premiumUntil : now();
   u.packageId = pack.id;
