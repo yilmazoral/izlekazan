@@ -947,8 +947,9 @@ function openFilmModal(url, locked = false) {
   }
 
   const cleanUrl = String(url).trim();
-  if (!/^https?:\/\//i.test(cleanUrl)) {
-    toast("Film linki http veya https ile başlamalıdır");
+  const isSafeRelativeFilmGateway = cleanUrl === "/api/film-gateway" || cleanUrl.startsWith("/api/film-gateway?");
+  if (!isSafeRelativeFilmGateway && !/^https?:\/\//i.test(cleanUrl)) {
+    toast("Film bağlantısı hatalı. Lütfen yöneticiye bildirin.");
     return;
   }
 
