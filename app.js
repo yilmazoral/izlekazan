@@ -1201,6 +1201,7 @@ function resetFilmWatchState() {
   const shell = document.querySelector(".watchShell");
   if (shell) {
     shell.classList.remove("lockedWatch", "croppedWatch", "cinemaFsActive", "cinemaFullscreenFallback");
+    document.body.classList.remove("cinemaBodyLocked");
     shell.style.pointerEvents = "";
   }
 
@@ -1253,40 +1254,29 @@ function closeFilmModal() {
 
 function fullscreenMovie() {
   const shell = document.querySelector(".watchShell");
-  const box = document.querySelector(".watchFrameBox");
-  const frame = $("filmFrame");
-  if (!shell && !box && !frame) return;
-
-  // v2026.05.17-008:
-  // Premium üyede tam ekran hedefi doğrudan film iframe kapsayıcısıdır.
-  // Böylece İzleKazan üst barı/kapat alanı görünmez ve film alanı tüm ekranı kaplar.
-  // Kilitli ön izlemede ise uyarı katmanı kaybolmaması için dış kapsayıcı tam ekran yapılır.
-  const target = filmIsLocked ? (shell || box || frame) : (box || shell || frame);
   const overlay = $("filmLockOverlay");
+  if (!shell) return;
+
+  // v2026.05.17-009:
+  // İframe içindeki yabancı player tam ekran API'si her tarayıcıda çalışmadığı için
+  // İzleKazan tarafında zorunlu ekranı kapla modu kullanılır. Bu mod tarayıcı
+  // fullscreen iznine bağlı kalmadan iframe alanını viewport'un tamamına yayar.
+  shell.classList.add("cinemaFsActive", "cinemaFullscreenFallback");
+
   if (filmIsLocked && overlay) {
     overlay.classList.remove("hidden");
     overlay.setAttribute("aria-hidden", "false");
+    overlay.style.pointerEvents = "auto";
   }
-  if (shell) shell.classList.add("cinemaFsActive");
 
-  const fallbackFullscreen = () => {
-    if (shell) shell.classList.add("cinemaFullscreenFallback");
-    toast("Film alanı tam ekran görünümüne alındı. Çıkmak için Kapat veya geri tuşunu kullanın.");
-  };
+  document.body.classList.add("cinemaBodyLocked");
+  toast("Film alanı ekranı kaplayacak şekilde açıldı. Çıkmak için sağ üstteki Kapat butonunu kullanın.");
+}
 
-  try {
-    if (target.requestFullscreen) {
-      target.requestFullscreen().catch(fallbackFullscreen);
-    } else if (target.webkitRequestFullscreen) {
-      target.webkitRequestFullscreen();
-    } else if (target.webkitEnterFullscreen && target === frame) {
-      target.webkitEnterFullscreen();
-    } else {
-      fallbackFullscreen();
-    }
-  } catch (e) {
-    fallbackFullscreen();
-  }
+function exitCinemaFullscreenMode() {
+  const shell = document.querySelector(".watchShell");
+  if (shell) shell.classList.remove("cinemaFsActive", "cinemaFullscreenFallback");
+  document.body.classList.remove("cinemaBodyLocked");
 }
 
 function handleFullscreenGuard() {

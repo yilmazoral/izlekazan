@@ -158,3 +158,12 @@ Her sürümde şu bilgiler yazılacak:
 - Üst kontrol barı tam ekran hedefinin dışında bırakıldı; film daha geniş görünür.
 - Tam ekran API desteklemeyen mobil tarayıcılar için tam ekran görünüm fallback'i eklendi.
 - Kapat/çıkış işlemlerinde tam ekran sınıfları temizlenerek sayfa kilitlenmesi engellendi.
+
+
+## v2026.05.17-009 — Zorunlu ekranı kapla film modu
+
+- Tam Ekran butonu requestFullscreen sonucuna bağlı kalmadan İzleKazan içinde film alanını viewport tamamına sabitler.
+- Sağ üstte Normal Görünüm ve Kapat kontrolleri eklendi.
+- Mobil ve PC’de gövde kaydırması kilitlenerek film alanının ekranı kaplaması güçlendirildi.
+- Bu çözüm iframe içindeki yabancı player’ın kendi tam ekran butonunu garanti etmez; İzleKazan içi film alanını tam ekran benzeri kaplatır.
+- Önceki premium kontrolü, gizli film linki, referans davet linki ve panel akordeon özellikleri korundu.

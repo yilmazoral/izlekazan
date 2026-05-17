@@ -1,15 +1,15 @@
 {
-  "currentVersion": "v2026.05.17-008",
+  "currentVersion": "v2026.05.17-009",
   "releaseDate": "2026-05-17",
   "project": "İzleKazan",
-  "releaseName": "izlekazan_tam_ekran_film_alani",
-  "summary": "İzleKazan Tam Ekran butonu premium üyede doğrudan film iframe alanını ekranın tamamına alacak şekilde güncellendi.",
+  "releaseName": "zorunlu_ekrani_kapla_film_modu",
+  "summary": "Film ekranında tarayıcı fullscreen API’sine bağlı kalmadan İzleKazan içi zorunlu ekranı kapla modu eklendi.",
   "changes": [
-    "Tam Ekran butonu premium üyelerde artık üst kontrol barı yerine doğrudan film alanını tam ekran yapar.",
-    "Tam ekran modunda film iframe'i 100vw/100vh ölçüsünde ekranı kaplar.",
-    "Tam ekran API çalışmayan mobil tarayıcılar için tam ekran görünüm fallback'i eklendi.",
-    "Kapat işleminde tam ekran/fallback sınıfları temizlenir; sayfa kilitlenmesi engellenir.",
-    "Footer sürüm etiketi v2026.05.17-008 yapıldı."
+    "Tam Ekran butonu artık requestFullscreen sonucuna bağımlı kalmadan film alanını viewport tamamına sabitler.",
+    "Film alanında sağ üstte Normal Görünüm ve Kapat kontrolleri eklendi.",
+    "Mobil ve PC’de gövde kaydırması kilitlenerek film alanının ekranı kaplaması güçlendirildi.",
+    "Önceki premium kontrolü, gizli film linki, referans davet linki ve panel akordeon özellikleri korundu.",
+    "Footer sürüm etiketi v2026.05.17-009 yapıldı."
   ],
   "protectedFeatures": [
     "Profesyonel kullanıcı paneli ve admin paneli tasarımı korunmalı.",
@@ -23,12 +23,12 @@
     "Sitenin alt kısmında görünür sürüm etiketi bulunmalı."
   ],
   "files": {
-    "index.html": "972fa8fad408a3b3",
-    "style.css": "2f94af87d1f54599",
-    "app.js": "52debaf89b9e8ee8",
-    "server.js": "824ba4fb1e7d2f22",
+    "index.html": "95d3f9c9bc38e839",
+    "style.css": "5a28046402d33024",
+    "app.js": "b3e1e463550e3621",
+    "server.js": "430d586207069f62",
     "site-update.js": "9f8d8bcd1c0a5944",
-    "SURUM-GECMISI.md": "9004fee5992bd206",
+    "SURUM-GECMISI.md": "0a30928c8629b756",
     "YUKLEME-TALIMATI.txt": "b1e178c946a0aeee",
     "assets/film-afisleri-vitrin.png": "c49d835eb1295ea6"
   }

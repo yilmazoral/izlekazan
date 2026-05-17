@@ -748,3 +748,82 @@ body.watchMode .watchShell{
   width:100vw !important;
   height:100vh !important;
 }
+
+
+/* v2026.05.17-009: Tarayıcı fullscreen API'sine bağlı kalmadan zorunlu ekranı kapla modu. */
+body.cinemaBodyLocked{
+  overflow:hidden !important;
+}
+.watchShell.cinemaFullscreenFallback{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:2147483000 !important;
+  width:100vw !important;
+  height:100vh !important;
+  background:#000 !important;
+  display:block !important;
+  padding:0 !important;
+  margin:0 !important;
+}
+.watchShell.cinemaFullscreenFallback .watchTop,
+.watchShell.cinemaFullscreenFallback .watchHint{
+  display:none !important;
+}
+.watchShell.cinemaFullscreenFallback .watchFrameBox{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:2147483001 !important;
+  width:100vw !important;
+  height:100vh !important;
+  min-height:100vh !important;
+  max-height:none !important;
+  border-radius:0 !important;
+  border:0 !important;
+  background:#000 !important;
+  overflow:hidden !important;
+}
+.watchShell.cinemaFullscreenFallback #filmFrame{
+  position:absolute !important;
+  inset:0 !important;
+  width:100vw !important;
+  height:100vh !important;
+  min-height:100vh !important;
+  border:0 !important;
+  display:block !important;
+  background:#000 !important;
+}
+.cinemaFloatingActions{
+  display:none;
+}
+.watchShell.cinemaFullscreenFallback .cinemaFloatingActions{
+  position:fixed;
+  right:12px;
+  top:12px;
+  z-index:2147483003;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  padding:7px;
+  border-radius:999px;
+  background:rgba(2,6,23,.74);
+  backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.16);
+}
+.watchShell.cinemaFullscreenFallback .cinemaFloatingActions button{
+  width:auto;
+  padding:9px 12px;
+  min-height:auto;
+  font-size:12px;
+  border-radius:999px;
+}
+@media (max-width:640px){
+  .watchShell.cinemaFullscreenFallback .cinemaFloatingActions{
+    top:8px;
+    right:8px;
+    gap:6px;
+  }
+  .watchShell.cinemaFullscreenFallback .cinemaFloatingActions button{
+    padding:8px 10px;
+    font-size:11px;
+  }
+}
