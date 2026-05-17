@@ -1,0 +1,43 @@
+{
+  "currentVersion": "v2026.05.17-001",
+  "releaseDate": "2026-05-17",
+  "project": "İzleKazan",
+  "summary": "Sürüm takip sistemi başlangıcı ve mevcut kararlı sürümün kayıt altına alınması",
+  "rules": [
+    "Her değişiklikte VERSION.json içindeki currentVersion artırılacak.",
+    "Her değişiklik SURUM-GECMISI.md dosyasına madde madde yazılacak.",
+    "Paket hazırlanırken index.html içindeki CSS/JS cache sürüm parametreleri aynı sürümle güncellenecek.",
+    "Güncelleme yapılırken önce mevcut sürüm okunacak, sonra sadece ilgili dosyalara kontrollü değişiklik yapılacak.",
+    "Büyük değişikliklerde ZIP adı sürüm numarasını içerecek."
+  ],
+  "changes": [
+    "Her güncelleme için zorunlu sürüm numarası sistemi eklendi.",
+    "Site içine VERSION.json ve SURUM-GECMISI.md dosyaları eklendi.",
+    "Sunucuya /api/version kontrol endpoint’i eklendi.",
+    "Kaybolan değişiklikleri takip etmek için dosya manifesti ve değişiklik notları eklendi.",
+    "Mevcut son durum baz alındı: Supabase kalıcı veritabanı, premium film erişim kontrolü, gizli film gateway, mükerrer ödeme engeli, gizlilik formatı ve profesyonel arayüz korunur."
+  ],
+  "importantActiveFeatures": [
+    "Supabase kalıcı veritabanı aktif: /api/health içinde storage=supabase görünmeli.",
+    "Film sitesi gerçek adresi istemci kaynak kodunda görünmez; sunucu tarafındaki MOVIE_SITE_URL veya Render MOVIE_SITE_URL değişkeninden yönetilir.",
+    "Premium olmayan kullanıcı gerçek film sitesine erişemez; yalnızca ön izleme/afiş alanı gösterilir.",
+    "Bekleyen ödeme varken ikinci ödeme bildirimi engellenir; mükerrer onay referans kazancını tekrar yazmaz.",
+    "Açık veri tabanında isim görünür, soyad sadece ilk harf + yıldız, telefon ilk 5 hane + yıldız formatındadır."
+  ],
+  "files": {
+    "index.html": "e73d2610a036b2df",
+    "style.css": "576ba8a25868fe4a",
+    "app.js": "86ad893f8a7032be",
+    "server.js": "8f1f72917e7e3592",
+    "site-update.js": "9f8d8bcd1c0a5944",
+    "package.json": "784613a58589ee84",
+    "README.md": "2b354fe0cc83cc58",
+    "supabase-setup.sql": "440628a41865ef15",
+    ".gitignore": "7c7298baae9efd8d",
+    "SURUM-GECMISI.md": "d105e7a29d6b0063",
+    "assets/film-afisleri-vitrin.png": "c49d835eb1295ea6",
+    "assets/hero-bg.svg": "0e61c7e3c6176cea",
+    "assets/movie-poster.svg": "7244f8f164cca133",
+    "assets/vizyon-filmleri.png": "ed332a01a998776a"
+  }
+}

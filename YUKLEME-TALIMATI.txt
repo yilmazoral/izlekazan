@@ -1,19 +1,10 @@
-Bu paket dün geceki profesyonel tasarım sürümü baz alınarak hazırlandı.
-İçinde şu son değişiklikler korunur:
-- Profesyonel ana sayfa ve üye paneli
-- Mobil menü ve üye ol formu düzeltmeleri
-- Şifre göster/gizle
-- E-posta veya telefonla giriş
-- 0 ile başlayan telefon zorunluluğu
-- Supabase kalıcı veritabanı desteği
-- Mükerrer ödeme bildirimi/onayı engeli
-- Film linkinin kaynak kodda görünmemesi için /api/film-gateway
-- Film sitesi kilit/uyarı/tam ekran düzeltmeleri
-- Premium içerik bölümünde film afiş vitrini
-- İsim açık, soyisim ilk harf + ****, telefon ilk 5 hane görünür gizlilik formatı
+İzleKazan v2026.05.17-001 yükleme talimatı
 
-Yükleme:
-1) GitHub ana dizindeki dosyaları bu pakettekilerle değiştir.
+1) ZIP içindeki klasörün İÇİNDEKİ tüm dosyaları GitHub ana dizinine yükle.
 2) assets klasörünü olduğu gibi yükle.
-3) Render otomatik deploy etmezse Manual Deploy > Deploy latest commit yap.
-4) /api/health içinde storage: supabase göründüğünü kontrol et.
+3) Render yeniden deploy olduktan sonra kontrol et:
+   https://izlekazan.onrender.com/api/health
+   https://izlekazan.onrender.com/api/version
+4) /api/health içinde storage=supabase ve version=v2026.05.17-001 görünmeli.
+
+Bundan sonraki değişikliklerde SURUM-GECMISI.md ve VERSION.json dosyaları mutlaka güncellenecek.
