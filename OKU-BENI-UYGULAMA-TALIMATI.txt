@@ -1,14 +1,13 @@
-İzleKazan v2026.05.18-018 Güncelleme Paketi
+İzleKazan v2026.05.18-019 Güncelleme Paketi
 
 Bu paket şunları uygular:
-- Mobil görünümde liderlik tablolarındaki Tutar sütununun görünmemesi sorununu düzeltir.
-- Liderlik tablolarını mobilde Sıra / Üye / Tutar şeklinde sabit sütun yapısına alır.
-- Tutar sütununu sağa hizalar ve dar ekranlarda görünür kalmasını sağlar.
-- Üye adı uzun olursa tabloyu taşırmaz, üç nokta ile kısaltır.
-- Liderlik kartlarının mobil genişlik, padding ve taşma davranışlarını düzeltir.
-- Alt mobil menünün içerikle çakışmasını engellemek için sayfa altına güvenli boşluk ekler.
-- Sağdaki mobil menü öğelerinin kesilmesini azaltmak için alt menüye güvenli alan/yatay kaydırma düzeltmesi ekler.
-- VERSION.json, SURUM-GECMISI.md, footer ve cache sürümünü v2026.05.18-018 / v20260518018 yapar.
+- Referans liderlik tablolarında sıralamayı tutardan alt üye sayısına çevirir.
+- Referans liderliği tablolarında Tutar yerine Alt Üye Sayısı gösterir.
+- Kazanç liderliği tablolarını değiştirmez; tutara göre sıralamaya devam eder.
+- Üyelik paketlerinin akordeon olarak açılmasını ve içerikte satın alma butonu görünmesini korur/düzeltir.
+- VIP Üye paketinde 3. seviye bilgisi veya olumsuz uyarı cümlesi göstermez.
+- Paket fiyatını akordeon içinde tekrar yazmaz.
+- VERSION.json, SURUM-GECMISI.md, footer ve cache sürümünü v2026.05.18-019 / v20260518019 yapar.
 
 EN KOLAY UYGULAMA:
 1. Bu zip dosyasını aç.
@@ -16,7 +15,7 @@ EN KOLAY UYGULAMA:
    Aynı klasörde server.js, index.html, app.js, style.css dosyaları bulunmalı.
 3. Bilgisayarda proje klasöründe komut satırı açıp şu komutu çalıştır:
 
-   node apply-v2026.05.18-018.js
+   node apply-v2026.05.18-019.js
 
    Windows kullanıyorsan `UYGULA-WINDOWS.bat` dosyasını da proje klasörüne koyup çift tıklayabilirsin.
 
@@ -28,16 +27,17 @@ EN KOLAY UYGULAMA:
    - SURUM-GECMISI.md
 
 5. Güncellenen dosyaları GitHub'a yükle / commit et.
-6. Render otomatik deploy ettikten sonra canlı sitede footer sürümü `v2026.05.18-018` görünmeli.
+6. Render otomatik deploy ettikten sonra canlı sitede footer sürümü `v2026.05.18-019` görünmeli.
 
 KONTROL LİSTESİ:
-- Ana sayfada Liderlik Tabloları bölümü görünmeli.
-- Mobilde her liderlik kartında Sıra / Üye / Tutar başlıkları görünmeli.
-- Tutar değeri sağ tarafta görünmeli, ekran dışına taşmamalı.
-- Alt mobil menü içeriğin üzerine binmemeli.
-- Sağdaki menü öğesi kesiliyorsa yatay kaydırma ile erişilebilir olmalı.
+- Referans liderliği kartlarında Sıra / Üye / Alt Üye Sayısı görünmeli.
+- Referans liderleri en çok alt üye getiren kullanıcıdan aşağı doğru sıralanmalı.
+- Kazanç liderliği kartlarında Sıra / Üye / Tutar görünmeye devam etmeli.
+- Paket kartına tıklanınca akordeon açılmalı.
+- Akordeon içinde paket genel bilgisi ve Paket Satın Al / Yenile / Yükselt butonu görünmeli.
 - VIP Üye detayında 3. seviye ile ilgili hiçbir bilgi olmamalı.
-- Footer sürümü v2026.05.18-018 görünmeli.
+- Paket akordeon içeriğinde fiyat tekrar yazmamalı.
+- Footer sürümü v2026.05.18-019 görünmeli.
 
 NOT:
-Script mevcut dosyaların yedeğini `.bak-v2026.05.18-018` uzantısıyla oluşturur.
+Script mevcut dosyaların yedeğini `.bak-v2026.05.18-019` uzantısıyla oluşturur.

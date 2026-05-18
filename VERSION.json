@@ -1,17 +1,17 @@
 {
-  "currentVersion": "v2026.05.18-018",
+  "currentVersion": "v2026.05.18-019",
   "releaseDate": "2026-05-18",
   "project": "İzleKazan",
-  "summary": "Mobil liderlik tablolarında Tutar sütunu görünürlüğü, alt mobil menü taşması ve sayfa alt boşluğu düzeltildi.",
+  "summary": "Referans liderlik tabloları alt üye sayısına göre sıralandı ve paket akordeon satın alma butonu netleştirildi.",
   "changes": [
-    "Mobilde liderlik tabloları Sıra / Üye / Tutar şeklinde sabit sütun düzenine alındı.",
-    "Tutar sütunu sağa hizalı, dar ekranlarda görünür kalacak şekilde optimize edildi.",
-    "Üye adı sütununda taşma engellendi; uzun adlar üç nokta ile kısaltılır.",
-    "Liderlik kartlarının mobil genişlik, padding ve taşma davranışı düzeltildi.",
-    "Alt mobil menünün sağdan kesilmesini azaltmak için güvenli alan ve yatay kaydırma düzeltmesi eklendi.",
-    "Sayfa altına mobil menüye çarpmayacak güvenli boşluk eklendi.",
-    "Cache sürümü v20260518018 olarak güncellendi.",
-    "Footer ve meta sürüm etiketi v2026.05.18-018 olarak güncellendi."
+    "Referans liderliği tablolarında sıralama tutara göre değil, alt üye sayısına göre yapılır.",
+    "Haftalık/Aylık/Geçen hafta/Geçen ay referans liderliği tablolarında Tutar yerine Alt Üye Sayısı gösterilir.",
+    "Kazanç liderliği tabloları tutara göre sıralanmaya ve Tutar göstermeye devam eder.",
+    "Üyelik paketleri akordeon şeklinde açılır; akordeon içinde paket genel bilgisi ve satın alma butonu görünür.",
+    "VIP Üye açıklamasında 3. seviye veya olumsuz uyarı cümlesi gösterilmez; yalnızca 1. ve 2. seviye %20 referans kazancı bilgisi yer alır.",
+    "Paket fiyatı başlıkta kaldı; akordeon içerik bölümünde fiyat tekrarı yapılmaz.",
+    "Cache sürümü v20260518019 olarak güncellendi.",
+    "Footer ve meta sürüm etiketi v2026.05.18-019 olarak güncellendi."
   ],
   "protectedFeatures": [
     "Supabase kalıcı veritabanı aktif kalmalı.",
