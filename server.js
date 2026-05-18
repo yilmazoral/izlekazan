@@ -20,6 +20,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "izlekazan_development_secret_chang
 const ADMIN_EMAIL = String(process.env.ADMIN_EMAIL || "yilmazoral@hotmail.com").toLowerCase();
 const ADMIN_PASS = process.env.ADMIN_PASS || "059221";
 const PUBLIC_URL = process.env.PUBLIC_URL || `http://localhost:${PORT}`;
+const APP_VERSION = "v2026.05.18-017";
 const MOVIE_SITE_URL = process.env.MOVIE_SITE_URL || "https://sinemaizle.org/";
 function readVersionInfo() {
   try {
@@ -30,7 +31,6 @@ function readVersionInfo() {
   } catch (e) {}
   return { currentVersion: process.env.APP_VERSION || "v2026.05.17-016", project: "İzleKazan" };
 }
-const APP_VERSION = process.env.APP_VERSION || readVersionInfo().currentVersion || "v2026.05.17-016";
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_KEY || "";
@@ -47,58 +47,9 @@ app.use(express.json({ limit: "4mb" }));
 app.use(express.static(__dirname));
 
 const PACKAGES = [
-  {
-    id: 1,
-    name: "Standart Üye",
-    price: 100,
-    depth: 1,
-    rate: 0.10,
-    durationDays: 365,
-    badge: "1. Seviye • %10",
-    features: [
-      "1 yıl / 365 gün premium film erişimi",
-      "Reklamsız film deneyimi",
-      "Sadece 1. seviye referanslardan %10 prim",
-      "Referans kodu paket aktif olunca görünür",
-      "Cüzdan, destek ve çekim talebi",
-      "Platformu tanımak ve reklamsız film izlemek isteyen kullanıcılar için başlangıç seviyesi"
-    ]
-  },
-  {
-    id: 2,
-    name: "VIP Üye",
-    price: 500,
-    depth: 2,
-    rate: 0.20,
-    durationDays: 365,
-    badge: "2 Seviye • %20",
-    features: [
-      "Standart Üye özelliklerinin tamamı",
-      "1. ve 2. seviye referanslardan %20 prim",
-      "3. seviye referanslardan prim kazanımı yoktur",
-      "Geniş referans ağı takibi",
-      "Referans kazanç geçmişi",
-      "1 yıl aktif premium üyelik",
-      "Haftalık ve aylık liderlik tablolarına dahil olma"
-    ]
-  },
-  {
-    id: 3,
-    name: "CEO Üye",
-    price: 1000,
-    depth: 3,
-    rate: 0.30,
-    durationDays: 365,
-    badge: "3 Seviye • %30",
-    features: [
-      "Tüm özelliklere tam erişim",
-      "1, 2 ve 3. seviye referanslardan %30 prim",
-      "En yüksek referans primi oranı",
-      "CEO film ön onay paneli",
-      "Onaylanan film katkılarıyla ek kazanç fırsatı",
-      "1 yıl premium erişim"
-    ]
-  }
+  { id: 1, name: "Standart Üye", price: 100, depth: 1, rate: 0.10, durationDays: 365, badge: "Başlangıç", features: ["1 yıl premium film erişimi", "Reklamsız Film Platformu filmlerine erişim", "1. seviye referanslardan %10 kazanç", "Referans kodu paket aktif olunca görünür", "Siteye Film Ekleme Kazancı", "Cüzdan, destek ve çekim talebi"] },
+  { id: 2, name: "VIP Üye", price: 500, depth: 2, rate: 0.20, durationDays: 365, badge: "VIP", features: ["1 yıl premium film erişimi", "Reklamsız Film Platformu filmlerine erişim", "1. seviye referanslardan %20 kazanç", "2. seviye referanslardan %20 kazanç", "Gelişmiş referans kazanç takibi", "Siteye Film Ekleme Kazancı", "Cüzdan, destek ve çekim talebi"] },
+  { id: 3, name: "CEO Üye", price: 1000, depth: 3, rate: 0.30, durationDays: 365, badge: "CEO", features: ["1 yıl premium film erişimi", "Reklamsız Film Platformu filmlerine erişim", "1. seviye referanslardan %30 kazanç", "2. seviye referanslardan %30 kazanç", "3. seviye referanslardan %30 kazanç", "CEO film ön onay paneli", "Siteye Film Ekleme Kazancı", "Cüzdan, destek ve çekim talebi"] }
 ];
 
 function id() { return crypto.randomUUID(); }
@@ -107,6 +58,7 @@ function addDays(days) { const d = new Date(); d.setDate(d.getDate() + Number(da
 function addDaysTo(dateValue, days) { const d = dateValue ? new Date(dateValue) : new Date(); d.setDate(d.getDate() + Number(days || 0)); return d.toISOString(); }
 function daysLeft(dateStr) { if (!dateStr) return 0; return Math.max(0, Math.ceil((new Date(dateStr) - new Date()) / 86400000)); }
 function isPremium(u) { return !!(u && Number(u.packageId || 0) > 0 && u.premiumUntil && new Date(u.premiumUntil) > new Date()); }
+function isCeoPackage(packageId) { return Number(packageId || 0) === 3 || Number(packageId || 0) === 5; }
 function normalizePackageId(packageId) {
   const n = Number(packageId || 0);
   if (!n) return 0;
@@ -739,7 +691,7 @@ function authOptional(req, res, next) {
 app.post("/api/movies", auth, userRequired, async (req, res) => {
   const { title, year, category, poster, link, embedLink, description } = req.body || {};
   if (!title || !link) return res.status(400).json({ error: "Film adı ve link zorunludur" });
-  const isCeo = req.user.role === "admin" || (isPremium(req.user) && Number(req.user.packageId) === 5);
+  const isCeo = req.user.role === "admin" || (isPremium(req.user) && isCeoPackage(req.user.packageId));
   const movie = { id: id(), title, year, category, poster: poster || "/assets/movie-poster.svg", link, embedLink: embedLink || link, description, status: isCeo ? "admin_pending" : "ceo_pending", addedBy: req.user.id, ceoApprovedBy: isCeo ? req.user.id : null, adminApprovedBy: null, createdAt: now() };
   req.db.movies.push(movie);
   await saveDb(req.db);
@@ -762,6 +714,91 @@ app.post("/api/ceo/reject/:id", auth, ceoOnly, async (req, res) => {
 
 app.get("/api/public/withdrawals", (req, res) => { const d = readDb(); processDb(d); res.json({ withdrawals: d.withdrawals.slice().reverse().map(w => publicWithdrawal(d, w)) }); });
 app.get("/api/public/members", (req, res) => { const d = readDb(); processDb(d); res.json({ members: d.users.filter(u => u.role !== "admin").slice().reverse().map(u => publicMember(d, u)) }); });
+
+function dateRange(kind) {
+  const nowDate = new Date();
+  const startOfDay = (d) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
+  const startOfWeek = (d) => {
+    const x = startOfDay(d);
+    const day = (x.getDay() + 6) % 7;
+    x.setDate(x.getDate() - day);
+    return x;
+  };
+  const startOfMonth = (d) => new Date(d.getFullYear(), d.getMonth(), 1);
+
+  if (kind === "week") {
+    const start = startOfWeek(nowDate);
+    const end = new Date(start); end.setDate(end.getDate() + 7);
+    return { start, end };
+  }
+  if (kind === "month") {
+    const start = startOfMonth(nowDate);
+    const end = new Date(nowDate.getFullYear(), nowDate.getMonth() + 1, 1);
+    return { start, end };
+  }
+  if (kind === "prevWeek") {
+    const end = startOfWeek(nowDate);
+    const start = new Date(end); start.setDate(start.getDate() - 7);
+    return { start, end };
+  }
+  if (kind === "prevMonth") {
+    const start = new Date(nowDate.getFullYear(), nowDate.getMonth() - 1, 1);
+    const end = new Date(nowDate.getFullYear(), nowDate.getMonth(), 1);
+    return { start, end };
+  }
+  return { start: new Date(0), end: new Date(8640000000000000) };
+}
+function inRange(value, start, end) {
+  const d = new Date(value || 0);
+  return d >= start && d < end;
+}
+function addBoardAmount(map, userId, amount) {
+  if (!userId || !Number(amount)) return;
+  map.set(userId, Number((Number(map.get(userId) || 0) + Number(amount || 0)).toFixed(2)));
+}
+function topBoardRows(d, mode, rangeKind) {
+  const { start, end } = dateRange(rangeKind);
+  const totals = new Map();
+
+  for (const e of d.pendingEarnings || []) {
+    if (!inRange(e.createdAt, start, end)) continue;
+    if (mode === "referans" && e.type !== "referans") continue;
+    addBoardAmount(totals, e.userId, Number(e.amount || 0));
+  }
+
+  for (const t of d.transactions || []) {
+    const amount = Number(t.amount || 0);
+    if (amount <= 0) continue;
+    if (t.type === "bekleyen_devri") continue;
+    if (!inRange(t.createdAt, start, end)) continue;
+    if (mode === "referans" && t.type !== "referans") continue;
+    addBoardAmount(totals, t.userId, amount);
+  }
+
+  return Array.from(totals.entries())
+    .map(([userId, amount]) => {
+      const u = d.users.find(x => x.id === userId);
+      return { userId, maskedName: u ? maskName(u.firstName, u.lastName) : "Üye", amount: Number(amount.toFixed(2)) };
+    })
+    .filter(x => x.amount > 0)
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, 5);
+}
+app.get("/api/public/leaderboards", (req, res) => {
+  const d = readDb(); processDb(d);
+  res.json({
+    boards: [
+      { key: "weekly_ref", title: "Haftalık Referans Liderleri", rows: topBoardRows(d, "referans", "week") },
+      { key: "monthly_ref", title: "Aylık Referans Liderleri", rows: topBoardRows(d, "referans", "month") },
+      { key: "weekly_earn", title: "Haftalık En Çok Kazananı", rows: topBoardRows(d, "earnings", "week") },
+      { key: "monthly_earn", title: "Ayın En Çok Kazananı", rows: topBoardRows(d, "earnings", "month") },
+      { key: "prev_week_ref", title: "Geçen Haftanın Referans Lideri", rows: topBoardRows(d, "referans", "prevWeek") },
+      { key: "prev_month_ref", title: "Geçen Ayın Referans Lideri", rows: topBoardRows(d, "referans", "prevMonth") },
+      { key: "prev_week_earn", title: "Geçen Haftanın En Çok Kazananı", rows: topBoardRows(d, "earnings", "prevWeek") },
+      { key: "prev_month_earn", title: "Geçen Ayın En Çok Kazananı", rows: topBoardRows(d, "earnings", "prevMonth") }
+    ]
+  });
+});
 
 app.get("/api/admin/all", auth, adminOnly, (req, res) => {
   const d = req.db;

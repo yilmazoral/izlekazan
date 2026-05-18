@@ -1,0 +1,5 @@
+const PACKAGES = [
+  { id: 1, name: "Standart Üye", price: 100, depth: 1, rate: 0.10, durationDays: 365, badge: "Başlangıç", features: ["1 yıl premium film erişimi", "Reklamsız Film Platformu filmlerine erişim", "1. seviye referanslardan %10 kazanç", "Referans kodu paket aktif olunca görünür", "Siteye Film Ekleme Kazancı", "Cüzdan, destek ve çekim talebi"] },
+  { id: 2, name: "VIP Üye", price: 500, depth: 2, rate: 0.20, durationDays: 365, badge: "VIP", features: ["1 yıl premium film erişimi", "Reklamsız Film Platformu filmlerine erişim", "1. seviye referanslardan %20 kazanç", "2. seviye referanslardan %20 kazanç", "Gelişmiş referans kazanç takibi", "Siteye Film Ekleme Kazancı", "Cüzdan, destek ve çekim talebi"] },
+  { id: 3, name: "CEO Üye", price: 1000, depth: 3, rate: 0.30, durationDays: 365, badge: "CEO", features: ["1 yıl premium film erişimi", "Reklamsız Film Platformu filmlerine erişim", "1. seviye referanslardan %30 kazanç", "2. seviye referanslardan %30 kazanç", "3. seviye referanslardan %30 kazanç", "CEO film ön onay paneli", "Siteye Film Ekleme Kazancı", "Cüzdan, destek ve çekim talebi"] }
+];
