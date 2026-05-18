@@ -1,0 +1,8 @@
+İzleKazan v2026.05.18-021 canlı site paketi
+
+Bu ZIP GitHub/Render'a yüklenecek temiz canlı site dosyalarını içerir.
+Kurulum notları ve gereksiz dokümanlar ayrı ZIP'e taşınmıştır.
+
+Canlı çalışma için ana dosyalar: server.js, app.js, index.html, style.css, site-update.js, sw.js, manifest.json, package.json, VERSION.json, SURUM-GECMISI.md ve assets/ klasörüdür.
+
+Render Environment Variables içinde SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_ANON_KEY ve MOVIE_SITE_URL değerlerini kontrol edin.

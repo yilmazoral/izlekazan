@@ -1,0 +1,27 @@
+{
+  "currentVersion": "v2026.05.18-021",
+  "releaseDate": "2026-05-18",
+  "project": "İzleKazan",
+  "summary": "v2026.05.18-020 düzeltmeleri ana proje dosyalarına işlendi; sürüm/cache etiketleri senkronlandı ve gereksiz güncelleme dosyaları temizlendi.",
+  "changes": [
+    "server.js, index.html, app.js, site-update.js, sw.js ve VERSION.json aynı sürüme alındı.",
+    "Referans liderliği backend mantığı ana server.js içine işlendi.",
+    "Referans liderliği tabloları gerçek alt üye sayısına göre sıralanır ve 0 alt üyeli satır göstermez.",
+    "Kazanç liderliği tabloları tutara göre çalışmaya devam eder.",
+    "Ana sayfada eski/yeni liderlik alanı karışmasını önlemek için tek homeLeaderboards alanı bırakıldı.",
+    "Paket akordeonları ve Paket Satın Al / Paketi Yenile / Paketi Yükselt butonları korundu.",
+    "VIP Üye içinde 3. seviye bilgisi ve olumsuz uyarı cümlesi bulunmaz.",
+    "Kullanılmayan apply dosyaları, yardımcı parça dosyaları ve tekrar görsel temizlendi.",
+    "Cache sürümü v20260518021 olarak güncellendi.",
+    ".gitignore, .env.example, analiz raporu ve SHA256 kontrol dosyası eklendi."
+  ],
+  "protectedFeatures": [
+    "Supabase kalıcı veritabanı aktif kalmalı.",
+    "Film adresi Render Environment değişkeni MOVIE_SITE_URL üzerinden yönetilmeli.",
+    "Premium olmayan kullanıcı gerçek film sitesine tam erişememeli.",
+    "Mükerrer ödeme bildirimi ve mükerrer ödeme onayı engelli kalmalı.",
+    "Açık veri tabanında ad açık, soyad ilk harf + yıldız, telefon ilk 5 hane + yıldız görünmeli.",
+    "Admin panelinde tam bilgiler görünmeye devam etmeli.",
+    "Sitenin alt kısmında görünür sürüm etiketi bulunmalı."
+  ]
+}
