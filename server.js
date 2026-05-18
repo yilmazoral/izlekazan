@@ -13,6 +13,9 @@ try { ({ createClient } = require("@supabase/supabase-js")); } catch (e) {}
 let nodemailer = null;
 try { nodemailer = require("nodemailer"); } catch (e) {}
 
+let webpush = null;
+try { webpush = require("web-push"); } catch (e) {}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DB_FILE = path.join(__dirname, "db.json");
@@ -20,8 +23,11 @@ const JWT_SECRET = process.env.JWT_SECRET || "izlekazan_development_secret_chang
 const ADMIN_EMAIL = String(process.env.ADMIN_EMAIL || "yilmazoral@hotmail.com").toLowerCase();
 const ADMIN_PASS = process.env.ADMIN_PASS || "059221";
 const PUBLIC_URL = process.env.PUBLIC_URL || `http://localhost:${PORT}`;
-const APP_VERSION = "v2026.05.18-021";
+const APP_VERSION = "v2026.05.18-022";
 const MOVIE_SITE_URL = process.env.MOVIE_SITE_URL || "";
+const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || "";
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || "";
+const VAPID_SUBJECT = process.env.VAPID_SUBJECT || `mailto:${ADMIN_EMAIL}`;
 function readVersionInfo() {
   try {
     const versionFile = path.join(__dirname, "VERSION.json");
@@ -29,7 +35,7 @@ function readVersionInfo() {
       return JSON.parse(fs.readFileSync(versionFile, "utf8"));
     }
   } catch (e) {}
-  return { currentVersion: process.env.APP_VERSION || "v2026.05.18-021", project: "İzleKazan" };
+  return { currentVersion: process.env.APP_VERSION || "v2026.05.18-022", project: "İzleKazan" };
 }
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
@@ -39,6 +45,14 @@ const SUPABASE_STATE_ID = process.env.SUPABASE_STATE_ID || "main";
 const supabase = createClient && SUPABASE_URL && SUPABASE_KEY
   ? createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } })
   : null;
+
+function isWebPushReady() {
+  return !!(webpush && VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY);
+}
+if (isWebPushReady()) {
+  try { webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY); }
+  catch (e) { console.error("Web Push VAPID ayarı yapılamadı:", e.message); }
+}
 
 let dbCache = null;
 let dbSaveQueue = Promise.resolve();
@@ -94,6 +108,7 @@ function freshDb() {
     movies: [defaultMovie()],
     supportTickets: [],
     notifications: [],
+    pushSubscriptions: [],
     passwordResets: [],
     leaderboards: {
       currentWeekKey: null,
@@ -119,6 +134,7 @@ function normalizeDb(data) {
   out.movies = Array.isArray(out.movies) && out.movies.length ? out.movies : [defaultMovie()];
   out.supportTickets = Array.isArray(out.supportTickets) ? out.supportTickets : [];
   out.notifications = Array.isArray(out.notifications) ? out.notifications : [];
+  out.pushSubscriptions = Array.isArray(out.pushSubscriptions) ? out.pushSubscriptions : [];
   out.passwordResets = Array.isArray(out.passwordResets) ? out.passwordResets : [];
   out.logs = Array.isArray(out.logs) ? out.logs : [];
   out.leaderboards = out.leaderboards && typeof out.leaderboards === "object" ? out.leaderboards : {};
@@ -129,6 +145,7 @@ function normalizeDb(data) {
   out.leaderboards.lastMonthlyEarners = Array.isArray(out.leaderboards.lastMonthlyEarners) ? out.leaderboards.lastMonthlyEarners : [];
   out.leaderboards.awardedPeriods = Array.isArray(out.leaderboards.awardedPeriods) ? out.leaderboards.awardedPeriods : [];
   for (const u of out.users) {
+    if (u) u.notificationSettings = normalizeNotificationSettings(u.notificationSettings);
     if (u && Number(u.packageId || 0) > 3) u.packageId = 3;
     if (u && u.role === "ceo" && Number(u.packageId || 0) !== 3 && u.role !== "admin") u.role = "user";
   }
@@ -209,9 +226,94 @@ function normalizePhone(phone) {
   return raw;
 }
 
+
+const DEFAULT_NOTIFICATION_SETTINGS = {
+  pushEnabled: true,
+  referral: true,
+  earning: true,
+  withdrawal: true,
+  package: true,
+  announcement: true,
+  admin: true
+};
+const FORCE_PUSH_CATEGORIES = new Set(["payment_status", "withdrawal_status", "package_status", "security", "system_error"]);
+function normalizeNotificationSettings(settings) {
+  return { ...DEFAULT_NOTIFICATION_SETTINGS, ...(settings && typeof settings === "object" ? settings : {}) };
+}
+function adminUsers(d) { return (d.users || []).filter(u => u && u.role === "admin"); }
+function shouldSendPush(d, userId, category, forcePush = false) {
+  const u = (d.users || []).find(x => String(x.id) === String(userId));
+  if (!u) return false;
+  const settings = normalizeNotificationSettings(u.notificationSettings);
+  if (forcePush || FORCE_PUSH_CATEGORIES.has(String(category || ""))) return true;
+  if (settings.pushEnabled === false) return false;
+  const key = String(category || "general");
+  if (Object.prototype.hasOwnProperty.call(settings, key) && settings[key] === false) return false;
+  return true;
+}
+function normalizeSubscriptionPayload(raw) {
+  const sub = raw && raw.subscription ? raw.subscription : raw;
+  if (!sub || !sub.endpoint) return null;
+  return {
+    endpoint: String(sub.endpoint),
+    expirationTime: sub.expirationTime || null,
+    keys: sub.keys || {},
+    raw: sub
+  };
+}
+function pushPayload(notification) {
+  return JSON.stringify({
+    id: notification.id,
+    title: notification.title || "İzleKazan",
+    body: notification.message || "Yeni bildiriminiz var.",
+    message: notification.message || "Yeni bildiriminiz var.",
+    type: notification.type || "info",
+    category: notification.category || "general",
+    url: notification.actionUrl || "/?page=panel",
+    icon: "/assets/icon-192.png",
+    badge: "/assets/icon-192.png",
+    tag: notification.id || `izlekazan-${Date.now()}`
+  });
+}
+function sendWebPushToUser(d, userId, notification) {
+  if (!isWebPushReady()) return;
+  const list = (d.pushSubscriptions || []).filter(s => String(s.userId) === String(userId) && s.endpoint && !s.disabled);
+  for (const sub of list) {
+    const payload = sub.raw && sub.raw.endpoint ? sub.raw : { endpoint: sub.endpoint, expirationTime: sub.expirationTime || null, keys: sub.keys || {} };
+    webpush.sendNotification(payload, pushPayload(notification)).catch(err => {
+      if (err && (err.statusCode === 404 || err.statusCode === 410)) sub.disabled = true;
+      console.error("Push bildirimi gönderilemedi:", err && err.message ? err.message : err);
+    });
+  }
+}
+function scheduleWebPush(d, userId, notification, forcePush = false) {
+  if (!shouldSendPush(d, userId, notification.category, forcePush)) return;
+  setTimeout(() => sendWebPushToUser(d, userId, notification), 0);
+}
+
 function makeRef() { return "IK" + Math.random().toString(36).slice(2, 8).toUpperCase() + Math.floor(10 + Math.random() * 89); }
-function notify(d, userId, title, message, type = "info") {
-  d.notifications.push({ id: id(), userId, title, message, type, read: false, createdAt: now() });
+function notify(d, userId, title, message, type = "info", options = {}) {
+  const notification = {
+    id: id(),
+    userId,
+    title,
+    message,
+    type,
+    category: options.category || "general",
+    audience: options.audience || "user",
+    read: false,
+    push: options.push !== false,
+    actionUrl: options.actionUrl || "/?page=panel",
+    createdAt: now()
+  };
+  d.notifications.push(notification);
+  if (options.push !== false) scheduleWebPush(d, userId, notification, !!options.forcePush);
+  return notification;
+}
+function notifyAdmins(d, title, message, type = "info", options = {}) {
+  for (const admin of adminUsers(d)) {
+    notify(d, admin.id, title, message, type, { category: options.category || "admin", audience: "admin", push: options.push !== false, forcePush: options.forcePush !== false, actionUrl: options.actionUrl || "/?page=admin" });
+  }
 }
 function tx(d, userId, amount, type, desc) {
   d.transactions.push({ id: id(), userId, amount: Number(amount), type, desc, createdAt: now() });
@@ -227,7 +329,7 @@ function releasePending(d) {
       u.balance = Number((Number(u.balance || 0) + Number(e.amount || 0)).toFixed(2));
       e.status = "released";
       tx(d, u.id, e.amount, "bekleyen_devri", `${e.desc} çekilebilir bakiyeye devredildi`);
-      notify(d, u.id, "Bekleyen Kazanç Aktarıldı", `${e.amount} TL çekilebilir bakiyenize aktarıldı.`, "success");
+      notify(d, u.id, "Bekleyen Kazanç Aktarıldı", `${e.amount} TL çekilebilir bakiyenize aktarıldı.`, "success", { category: "earning", push: true });
       changed = true;
     }
   }
@@ -328,10 +430,11 @@ function awardLeaderboardPrizes(d, periodType, periodKey, rows, prizes) {
     if (!u) return;
     u.balance = Number((Number(u.balance || 0) + prize).toFixed(2));
     tx(d, u.id, prize, "liderlik_odulu", `${periodKey} ${periodType === "week" ? "haftalık" : "aylık"} üye davet liderliği ${idx + 1}. ödülü`);
-    notify(d, u.id, "Liderlik Ödülü", `${periodKey} döneminde ${idx + 1}. olduğunuz için ${prize} TL ödül bakiyenize eklendi.`, "success");
+    notify(d, u.id, "Liderlik Ödülü", `${periodKey} döneminde ${idx + 1}. olduğunuz için ${prize} TL ödül bakiyenize eklendi.`, "success", { category: "earning", push: true });
     row.prize = prize;
     changed = true;
   });
+  if (changed) notifyAdmins(d, "Liderlik Sonuçları Oluştu", `${periodKey} ${periodType === "week" ? "haftalık" : "aylık"} liderlik ödülleri hesaplandı.`, "success", { category: "admin", push: false });
   d.leaderboards.awardedPeriods.push(awardKey);
   return changed;
 }
@@ -388,17 +491,57 @@ function expireExpiredPackages(d) {
       u.premiumStartedAt = null;
       u.premiumUntil = null;
       if (u.role === "ceo") u.role = "user";
-      notify(d, u.id, "Premium Süresi Bitti", "Paket süreniz bitti. Film erişimi ve kazanç üretimi yeni paket alana kadar durduruldu.", "error");
+      notify(d, u.id, "Premium Süresi Bitti", "Paket süreniz bitti. Film erişimi ve kazanç üretimi yeni paket alana kadar durduruldu.", "error", { category: "package_status", push: true, forcePush: true });
       changed = true;
     }
   }
   return changed;
 }
+
+function warnPackageExpiry(d) {
+  let changed = false;
+  for (const u of d.users || []) {
+    if (!u || !isPremium(u)) continue;
+    const left = daysLeft(u.premiumUntil);
+    const warnKey = `${u.premiumUntil}:7day`;
+    if (left > 0 && left <= 7 && u.packageExpiryWarningKey !== warnKey) {
+      notify(d, u.id, "Paket Süreniz Yaklaşıyor", `Premium paketinizin bitmesine ${left} gün kaldı. Kesintisiz devam etmek için paketinizi yenileyebilirsiniz.`, "warning", { category: "package_status", push: true, forcePush: true });
+      u.packageExpiryWarningKey = warnKey;
+      changed = true;
+    }
+  }
+  return changed;
+}
+function notifyLeaderboardTopChanges(d) {
+  d.leaderboards = d.leaderboards && typeof d.leaderboards === "object" ? d.leaderboards : {};
+  d.leaderboards.topNotificationKeys = Array.isArray(d.leaderboards.topNotificationKeys) ? d.leaderboards.topNotificationKeys : [];
+  const boards = [
+    { key: `week-ref:${weekKeyFor()}`, title: "Haftalık referans liderliğinde ilk 5'e girdiniz.", rows: recruiterRows(d, periodRangeFromWeekKey(weekKeyFor()), 5) },
+    { key: `month-ref:${monthKeyFor()}`, title: "Aylık referans liderliğinde ilk 5'e girdiniz.", rows: recruiterRows(d, periodRangeFromMonthKey(monthKeyFor()), 5) },
+    { key: `week-earn:${weekKeyFor()}`, title: "Haftalık kazanç liderliğinde ilk 5'e girdiniz.", rows: referralEarnerRows(d, periodRangeFromWeekKey(weekKeyFor()), 5) },
+    { key: `month-earn:${monthKeyFor()}`, title: "Aylık kazanç liderliğinde ilk 5'e girdiniz.", rows: referralEarnerRows(d, periodRangeFromMonthKey(monthKeyFor()), 5) }
+  ];
+  let changed = false;
+  for (const board of boards) {
+    board.rows.forEach((row, idx) => {
+      const notifyKey = `${board.key}:${row.userId}:${idx + 1}`;
+      if (d.leaderboards.topNotificationKeys.includes(notifyKey)) return;
+      notify(d, row.userId, "Liderlik Tablosu", `${board.title} Sıranız: ${idx + 1}.`, "success", { category: "earning", push: true });
+      d.leaderboards.topNotificationKeys.push(notifyKey);
+      changed = true;
+    });
+  }
+  if (d.leaderboards.topNotificationKeys.length > 500) d.leaderboards.topNotificationKeys = d.leaderboards.topNotificationKeys.slice(-500);
+  return changed;
+}
+
 function processDb(d) {
   const a = expireExpiredPackages(d);
   const b = releasePending(d);
   const c = ensureLeaderboards(d);
-  if (a || b || c) saveDb(d);
+  const e = warnPackageExpiry(d);
+  const f = notifyLeaderboardTopChanges(d);
+  if (a || b || c || e || f) saveDb(d);
 }
 function getUserFromReq(req, d) { return d.users.find(u => u.id === req.auth.id); }
 function auth(req, res, next) {
@@ -436,7 +579,7 @@ function distributeReferral(d, buyer, amount) {
     if (pack && isPremium(sponsor) && level <= pack.depth) {
       const earn = Number((Number(amount) * pack.rate).toFixed(2));
       pending(d, sponsor.id, earn, "referans", `${maskName(buyer.firstName, buyer.lastName)} ödemesinden ${level}. seviye referans kazancı`, 15);
-      notify(d, sponsor.id, "Referans Kazancı Beklemede", `${earn} TL referans kazancı bekleyen bakiyenize eklendi.`, "success");
+      notify(d, sponsor.id, "Referans Kazancı Oluştu", `${earn} TL referans kazancı bekleyen bakiyenize eklendi.`, "success", { category: "earning", push: true });
     }
     sponsorId = sponsor.sponsorId;
   }
@@ -470,6 +613,22 @@ function publicWithdrawal(d, w) {
   };
 }
 function childrenOf(d, userId) { return d.users.filter(u => u.sponsorId === userId); }
+
+function buildReferralTree(d, userId, depth = 4, seen = new Set()) {
+  if (!userId || depth <= 0 || seen.has(String(userId))) return [];
+  seen.add(String(userId));
+  return childrenOf(d, userId).map(c => ({
+    id: c.id,
+    maskedName: maskName(c.firstName, c.lastName),
+    maskedPhone: maskPhone(c.phone),
+    packageName: (findPackage(c.packageId) || {}).name || "Paket Yok",
+    premiumActive: isPremium(c),
+    premiumStartedAt: c.premiumStartedAt || null,
+    premiumUntil: c.premiumUntil || null,
+    children: buildReferralTree(d, c.id, depth - 1, new Set(seen))
+  }));
+}
+
 async function seedAdmin() {
   const d = readDb();
   let admin = d.users.find(u => String(u.email || "").toLowerCase() === ADMIN_EMAIL);
@@ -561,7 +720,9 @@ app.post("/api/register", async (req, res) => {
     packageId: 0, premiumStartedAt: null, premiumUntil: null, balance: 0, role: "user", banned: false, createdAt: now()
   };
   d.users.push(user);
-  notify(d, sponsor.id, "Yeni Referans Kaydı", `${maskName(user.firstName, user.lastName)} referans kodunuzla kayıt oldu.`, "success");
+  notify(d, sponsor.id, "Yeni Referans Üye", `${maskName(user.firstName, user.lastName)} referans linkinizle aramıza katıldı.`, "success", { category: "referral", push: true });
+  notify(d, user.id, "Üyelik Başvurusu Alındı", "Üyelik kaydınız oluşturuldu. Paket seçip ödeme bildirimi gönderebilirsiniz.", "success", { category: "package", push: false });
+  notifyAdmins(d, "Yeni Üye Kaydı", `${maskName(user.firstName, user.lastName)} sisteme kayıt oldu.`, "success", { category: "admin", push: true });
   await saveDb(d);
   res.json({ ok: true, user: publicUser(user) });
 });
@@ -593,6 +754,9 @@ app.get("/api/dashboard", auth, userRequired, (req, res) => {
     user: publicUser(u),
     package: pack || null,
     children,
+    referralTree: buildReferralTree(d, u.id, 5),
+    notificationSettings: normalizeNotificationSettings(u.notificationSettings),
+    pushEnabled: isWebPushReady(),
     tx: d.transactions.filter(t => t.userId === u.id).slice().reverse(),
     pendingEarnings: d.pendingEarnings.filter(e => e.userId === u.id).slice().reverse(),
     notifications: d.notifications.filter(n => n.userId === u.id).slice().reverse(),
@@ -637,7 +801,8 @@ app.post("/api/payment", auth, userRequired, async (req, res) => {
     status: "pending", createdAt: now()
   };
   req.db.payments.push(payment);
-  notify(req.db, req.user.id, "Ödeme Bildirimi Alındı", "Ödeme bildiriminiz admin onayına gönderildi. Aynı anda yalnızca 1 ödeme bildirimi oluşturabilirsiniz.", "success");
+  notify(req.db, req.user.id, "Ödeme Bildirimi Alındı", "Ödeme bildiriminiz admin onayına gönderildi. Aynı anda yalnızca 1 ödeme bildirimi oluşturabilirsiniz.", "success", { category: "package", push: false });
+  notifyAdmins(req.db, "Yeni Ödeme Bildirimi", `${maskName(req.user.firstName, req.user.lastName)} ${pack.name} için ${value} TL ödeme bildirimi gönderdi.`, "success", { category: "admin", push: true });
   await saveDb(req.db);
   res.json({ ok: true, payment });
 });
@@ -651,7 +816,8 @@ app.post("/api/withdraw", auth, userRequired, async (req, res) => {
   const w = { id: id(), userId: req.user.id, packageId: req.user.packageId || 0, fullName: fullName || `${req.user.firstName} ${req.user.lastName}`, iban: iban || "", amount: value, status: "pending", createdAt: now() };
   req.db.withdrawals.push(w);
   tx(req.db, req.user.id, -value, "çekim_talebi", "Çekim talebi oluşturuldu");
-  notify(req.db, req.user.id, "Çekim Talebi Gönderildi", `${value} TL çekim talebiniz admin onayına gönderildi.`, "success");
+  notify(req.db, req.user.id, "Çekim Talebi Oluşturuldu", `${value} TL çekim talebiniz admin onayına gönderildi.`, "success", { category: "withdrawal", push: false });
+  notifyAdmins(req.db, "Yeni Çekim Talebi", `${maskName(req.user.firstName, req.user.lastName)} ${value} TL çekim talebi oluşturdu.`, "warning", { category: "admin", push: true });
   await saveDb(req.db);
   res.json({ ok: true, withdrawal: w });
 });
@@ -661,6 +827,7 @@ app.post("/api/support", auth, userRequired, async (req, res) => {
   if (!subject || !message) return res.status(400).json({ error: "Konu ve mesaj yazın" });
   const t = { id: id(), userId: req.user.id, subject: String(subject), message: String(message), replies: [], status: "open", createdAt: now(), updatedAt: now() };
   req.db.supportTickets.push(t);
+  notifyAdmins(req.db, "Yeni Destek Mesajı", `${maskName(req.user.firstName, req.user.lastName)} destek mesajı gönderdi: ${String(subject).slice(0, 80)}`, "warning", { category: "admin", push: true });
   await saveDb(req.db);
   res.json({ ok: true, ticket: t });
 });
@@ -699,6 +866,7 @@ app.post("/api/movies", auth, userRequired, async (req, res) => {
   const isCeo = req.user.role === "admin" || (isPremium(req.user) && isCeoPackage(req.user.packageId));
   const movie = { id: id(), title, year, category, poster: poster || "/assets/movie-poster.svg", link, embedLink: embedLink || link, description, status: isCeo ? "admin_pending" : "ceo_pending", addedBy: req.user.id, ceoApprovedBy: isCeo ? req.user.id : null, adminApprovedBy: null, createdAt: now() };
   req.db.movies.push(movie);
+  notifyAdmins(req.db, "Yeni Film Onay Bekliyor", `${maskName(req.user.firstName, req.user.lastName)} film ekledi: ${title}`, "warning", { category: "admin", push: true });
   await saveDb(req.db);
   res.json({ ok: true, movie });
 });
@@ -708,12 +876,15 @@ app.post("/api/ceo/approve/:id", auth, ceoOnly, async (req, res) => {
   const m = req.db.movies.find(x => x.id === req.params.id);
   if (!m) return res.status(404).json({ error: "Film bulunamadı" });
   m.status = "admin_pending"; m.ceoApprovedBy = req.user.id; m.ceoApprovedAt = now();
+  notifyAdmins(req.db, "CEO Film Ön Onayı", `${m.title} admin yayın onayına gönderildi.`, "warning", { category: "admin", push: true });
   await saveDb(req.db); res.json({ ok: true });
 });
 app.post("/api/ceo/reject/:id", auth, ceoOnly, async (req, res) => {
   const m = req.db.movies.find(x => x.id === req.params.id);
   if (!m) return res.status(404).json({ error: "Film bulunamadı" });
   m.status = "rejected"; m.rejectReason = (req.body || {}).reason || "Uygun değil"; m.rejectedAt = now();
+  const owner = req.db.users.find(u => u.id === m.addedBy);
+  if (owner) notify(req.db, owner.id, "Film Reddedildi", `${m.title}: ${m.rejectReason}`, "error", { category: "package", push: true });
   await saveDb(req.db); res.json({ ok: true });
 });
 
@@ -841,7 +1012,7 @@ function topEarningRows(d, rangeKind) {
 app.get("/api/public/leaderboards", (req, res) => {
   const d = readDb(); processDb(d);
   res.json({
-    version: APP_VERSION || "v2026.05.18-021",
+    version: APP_VERSION || "v2026.05.18-022",
     boards: [
       { key: "weekly_ref", type: "referral_count", metricLabel: "Alt Üye Sayısı", title: "Haftalık Referans Liderleri", rows: topReferralRows(d, "week") },
       { key: "monthly_ref", type: "referral_count", metricLabel: "Alt Üye Sayısı", title: "Aylık Referans Liderleri", rows: topReferralRows(d, "month") },
@@ -890,7 +1061,7 @@ app.post("/api/admin/payments/:id/approve", auth, adminOnly, async (req, res) =>
     p.rejectReason = "Mükerrer ödeme bildirimi: Aynı kullanıcı için aynı paket ödemesi daha önce onaylandı.";
     p.rejectedAt = now();
     p.rejectedBy = req.user.id;
-    notify(req.db, u.id, "Mükerrer Ödeme Bildirimi", "Aynı paket için daha önce onaylanan ödeme bulunduğu için bu bildirim işleme alınmadı.", "error");
+    notify(req.db, u.id, "Mükerrer Ödeme Bildirimi", "Aynı paket için daha önce onaylanan ödeme bulunduğu için bu bildirim işleme alınmadı.", "error", { category: "payment_status", push: true, forcePush: true });
     await saveDb(req.db);
     return res.status(400).json({ error: "Bu ödeme bildirimi mükerrer görünüyor. Aynı kullanıcı için aynı paket ödemesi daha önce onaylanmış." });
   }
@@ -903,7 +1074,8 @@ app.post("/api/admin/payments/:id/approve", auth, adminOnly, async (req, res) =>
   if (pack.id === 3 && u.role !== "admin") u.role = "ceo";
   if (!u.referralCode) u.referralCode = makeRef();
   tx(req.db, u.id, 0, "paket_onay", `${pack.name} paketi onaylandı`);
-  notify(req.db, u.id, "Premium Paket Onaylandı", `${pack.name} paketiniz aktif edildi.`, "success");
+  notify(req.db, u.id, "Ödemeniz Onaylandı", `${pack.name} paketiniz aktif edildi.`, "success", { category: "payment_status", push: true, forcePush: true });
+  notify(req.db, u.id, "Paket Aktif Edildi", `${pack.name} paketiniz 365 gün boyunca aktif.`, "success", { category: "package_status", push: true, forcePush: true });
   distributeReferral(req.db, u, Number(p.amount || pack.price));
   await saveDb(req.db);
   res.json({ ok: true });
@@ -913,7 +1085,7 @@ app.post("/api/admin/payments/:id/reject", auth, adminOnly, async (req, res) => 
   if (!p) return res.status(404).json({ error: "Ödeme bulunamadı" });
   p.status = "rejected"; p.rejectReason = (req.body || {}).reason || "Ödeme doğrulanamadı"; p.rejectedAt = now();
   const u = req.db.users.find(x => x.id === p.userId);
-  if (u) notify(req.db, u.id, "Ödeme Reddedildi", p.rejectReason, "error");
+  if (u) notify(req.db, u.id, "Ödeme Reddedildi", p.rejectReason, "error", { category: "payment_status", push: true, forcePush: true });
   await saveDb(req.db); res.json({ ok: true });
 });
 
@@ -924,7 +1096,7 @@ app.post("/api/admin/movies/:id/publish", auth, adminOnly, async (req, res) => {
   const owner = req.db.users.find(u => u.id === m.addedBy);
   if (owner && owner.id !== "system" && isPremium(owner)) {
     pending(req.db, owner.id, 10, "film_ekleme", `${m.title} filmi onaylandı`, 15);
-    notify(req.db, owner.id, "Film Onaylandı", `${m.title} filmi yayınlandı ve kazanç bekleyen bakiyenize eklendi.`, "success");
+    notify(req.db, owner.id, "Film Onaylandı", `${m.title} filmi yayınlandı ve kazanç bekleyen bakiyenize eklendi.`, "success", { category: "earning", push: true });
   }
   await saveDb(req.db); res.json({ ok: true });
 });
@@ -933,7 +1105,7 @@ app.post("/api/admin/movies/:id/reject", auth, adminOnly, async (req, res) => {
   if (!m) return res.status(404).json({ error: "Film bulunamadı" });
   m.status = "rejected"; m.rejectReason = (req.body || {}).reason || "Film uygun değil"; m.rejectedAt = now();
   const owner = req.db.users.find(u => u.id === m.addedBy);
-  if (owner) notify(req.db, owner.id, "Film Reddedildi", `${m.title}: ${m.rejectReason}`, "error");
+  if (owner) notify(req.db, owner.id, "Film Reddedildi", `${m.title}: ${m.rejectReason}`, "error", { category: "package", push: true });
   await saveDb(req.db); res.json({ ok: true });
 });
 
@@ -944,7 +1116,7 @@ app.post("/api/admin/support/:id/reply", auth, adminOnly, async (req, res) => {
   if (!message) return res.status(400).json({ error: "Cevap yazın" });
   t.replies.push({ id: id(), adminId: req.user.id, message, createdAt: now() });
   t.status = "answered"; t.updatedAt = now();
-  notify(req.db, t.userId, "Destek Talebiniz Cevaplandı", message, "success");
+  notify(req.db, t.userId, "Destek Talebiniz Cevaplandı", message, "success", { category: "announcement", push: true });
   await saveDb(req.db); res.json({ ok: true });
 });
 
@@ -952,7 +1124,7 @@ app.post("/api/admin/withdrawals/:id/approve", auth, adminOnly, async (req, res)
   const w = req.db.withdrawals.find(x => x.id === req.params.id);
   if (!w) return res.status(404).json({ error: "Çekim bulunamadı" });
   w.status = "approved"; w.approvedAt = now(); w.approvedBy = req.user.id;
-  notify(req.db, w.userId, "Çekim Talebi Onaylandı", `${w.amount} TL çekim talebiniz ödeme yapıldı olarak işaretlendi.`, "success");
+  notify(req.db, w.userId, "Çekim Talebi Onaylandı", `${w.amount} TL çekim talebiniz ödeme yapıldı olarak işaretlendi.`, "success", { category: "withdrawal_status", push: true, forcePush: true });
   await saveDb(req.db); res.json({ ok: true });
 });
 app.post("/api/admin/withdrawals/:id/reject", auth, adminOnly, async (req, res) => {
@@ -963,8 +1135,63 @@ app.post("/api/admin/withdrawals/:id/reject", auth, adminOnly, async (req, res) 
     if (u) u.balance = Number((Number(u.balance || 0) + Number(w.amount || 0)).toFixed(2));
   }
   w.status = "rejected"; w.rejectReason = (req.body || {}).reason || "Çekim reddedildi"; w.rejectedAt = now();
-  notify(req.db, w.userId, "Çekim Talebi Reddedildi", w.rejectReason, "error");
+  notify(req.db, w.userId, "Çekim Talebi Reddedildi", w.rejectReason, "error", { category: "withdrawal_status", push: true, forcePush: true });
   await saveDb(req.db); res.json({ ok: true });
+});
+
+
+app.get("/api/push/config", (req, res) => {
+  res.json({ enabled: isWebPushReady(), publicKey: VAPID_PUBLIC_KEY || "", subject: VAPID_SUBJECT });
+});
+
+app.post("/api/push/subscribe", auth, userRequired, async (req, res) => {
+  const normalized = normalizeSubscriptionPayload((req.body || {}).subscription || req.body || {});
+  if (!normalized) return res.status(400).json({ error: "Geçerli push aboneliği alınamadı" });
+  req.db.pushSubscriptions = Array.isArray(req.db.pushSubscriptions) ? req.db.pushSubscriptions : [];
+  const existing = req.db.pushSubscriptions.find(s => s.endpoint === normalized.endpoint);
+  if (existing) {
+    existing.userId = req.user.id;
+    existing.keys = normalized.keys;
+    existing.raw = normalized.raw;
+    existing.disabled = false;
+    existing.updatedAt = now();
+  } else {
+    req.db.pushSubscriptions.push({ id: id(), userId: req.user.id, ...normalized, userAgent: String(req.headers["user-agent"] || ""), disabled: false, createdAt: now(), updatedAt: now() });
+  }
+  req.user.notificationSettings = normalizeNotificationSettings({ ...req.user.notificationSettings, pushEnabled: true });
+  await saveDb(req.db);
+  res.json({ ok: true });
+});
+
+app.post("/api/push/unsubscribe", auth, userRequired, async (req, res) => {
+  const endpoint = String((req.body || {}).endpoint || "");
+  req.db.pushSubscriptions = (req.db.pushSubscriptions || []).filter(s => !(String(s.userId) === String(req.user.id) && (!endpoint || s.endpoint === endpoint)));
+  await saveDb(req.db);
+  res.json({ ok: true });
+});
+
+app.get("/api/notification-settings", auth, userRequired, (req, res) => {
+  res.json({ settings: normalizeNotificationSettings(req.user.notificationSettings), pushEnabled: isWebPushReady() });
+});
+
+app.post("/api/notification-settings", auth, userRequired, async (req, res) => {
+  req.user.notificationSettings = normalizeNotificationSettings((req.body || {}).settings || {});
+  await saveDb(req.db);
+  res.json({ ok: true, settings: req.user.notificationSettings });
+});
+
+app.post("/api/admin/notifications/broadcast", auth, adminOnly, async (req, res) => {
+  const { title, message, push = true } = req.body || {};
+  if (!title || !message) return res.status(400).json({ error: "Başlık ve mesaj zorunludur" });
+  let count = 0;
+  for (const u of req.db.users || []) {
+    if (!u || u.role === "admin") continue;
+    notify(req.db, u.id, String(title), String(message), "info", { category: "announcement", push: !!push, actionUrl: "/?page=panel" });
+    count += 1;
+  }
+  notifyAdmins(req.db, "Duyuru Gönderildi", `${count} üyeye duyuru gönderildi.`, "success", { category: "admin", push: false });
+  await saveDb(req.db);
+  res.json({ ok: true, count });
 });
 
 app.post("/api/forgot-password", async (req, res) => {

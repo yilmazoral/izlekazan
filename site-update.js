@@ -1,8 +1,8 @@
-// İzleKazan v2026.05.18-021 güncelleme yamaları
+// İzleKazan v2026.05.18-022 güncelleme yamaları
 // Bu dosya app.js yüklendikten sonra çalışır; paket görünümü, liderlik tabloları ve mobil görünüm düzeltmelerini uygular.
 
 (function () {
-  const VERSION = "v2026.05.18-021";
+  const VERSION = "v2026.05.18-022";
 
   function safeCell(value, fallback = "-") {
     return value === undefined || value === null || value === "" ? fallback : value;
@@ -85,12 +85,12 @@
   }
 
   function ensurePatchStyles() {
-    if (document.getElementById("ik-v20260518021-style")) return;
+    if (document.getElementById("ik-v20260518022-style")) return;
     const style = document.createElement("style");
-    style.id = "ik-v20260518021-style";
+    style.id = "ik-v20260518022-style";
     style.textContent = `
-      .packageGrid.v20260518021{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:start}
-      .package.v20260518021{padding:0;overflow:hidden;border:1px solid rgba(255,255,255,.12);background:rgba(15,23,42,.72)}
+      .packageGrid.v20260518022{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:start}
+      .package.v20260518022{padding:0;overflow:hidden;border:1px solid rgba(255,255,255,.12);background:rgba(15,23,42,.72)}
       .packageHeaderBtn{width:100%;border-radius:0;background:transparent;color:var(--text,#fff);box-shadow:none;border:0;padding:22px;text-align:left;display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
       .packageHeaderBtn:hover{transform:none;box-shadow:none;background:rgba(255,255,255,.04)}
       .packageHeaderMain{display:flex;flex-direction:column;gap:8px}
@@ -112,7 +112,7 @@
       .leaderboardTable td{padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06)}
       .leaderboardRank{width:32px;color:var(--gold2,#ffd36a);font-weight:900}
       .leaderboardEmpty{color:var(--muted,#a8b3c7);font-size:13px;margin:0}
-      @media(max-width:1020px){.leaderboardGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.packageGrid.v20260518021{grid-template-columns:1fr}}
+      @media(max-width:1020px){.leaderboardGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.packageGrid.v20260518022{grid-template-columns:1fr}}
       @media(max-width:640px){.leaderboardGrid{grid-template-columns:1fr}.packageHeaderBtn{flex-direction:column}.packageHeaderPrice{font-size:18px}}
 
       .leaderboardSection,.leaderboardCard,.leaderboardTable,.leaderboardTable *{box-sizing:border-box}
@@ -143,6 +143,13 @@
         .bottomNav,.mobileBottomNav,.mobileNav,.tabBar,.mobileTabBar,.bottomMenu,.mobile-menu,.bottom-nav,#mobileNav,#bottomNav{left:0!important;right:0!important;width:100vw!important;max-width:100vw!important;box-sizing:border-box!important;overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))!important}
         .bottomNav a,.mobileBottomNav a,.mobileNav a,.tabBar a,.mobileTabBar a,.bottomMenu a,.mobile-menu a,.bottom-nav a,#mobileNav a,#bottomNav a,.bottomNav button,.mobileBottomNav button,.mobileNav button,.tabBar button,.mobileTabBar button,.bottomMenu button,.mobile-menu button,.bottom-nav button,#mobileNav button,#bottomNav button{flex:0 0 auto!important;min-width:68px!important;font-size:11px!important;line-height:1.15!important;white-space:nowrap!important}
       }
+
+      .package.v20260518022.open .packageAccordionBody{display:block!important}
+      .package.v20260518022:not(.open) .packageAccordionBody{display:none!important}
+      .notificationSettingsGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:8px 0 14px}
+      .notificationSettingsGrid label{display:flex!important;gap:10px;align-items:center;margin:0!important;padding:12px;border:1px solid rgba(255,255,255,.09);border-radius:16px;background:rgba(255,255,255,.045)}
+      .notificationSettingsGrid input{width:auto!important;margin:0!important}.wrapActions{flex-wrap:wrap}.smallInfo{font-size:13px}.referralTreeBox{border:1px solid rgba(255,255,255,.09);border-radius:20px;background:rgba(2,6,23,.34);padding:14px;margin-bottom:14px;overflow:auto}.referralTree{list-style:none;margin:0;padding-left:0;display:grid;gap:8px}.referralTree .referralTree{margin:8px 0 0 24px;padding-left:14px;border-left:1px dashed rgba(246,181,30,.30)}.treeNode{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.045);padding:11px 12px}.treeNode b,.treeNode small{display:block}.treeNode small{color:#aeb9ca;margin-top:3px}.treeNode em{font-style:normal;color:#f8d46a;font-weight:900;font-size:12px;white-space:nowrap}.treeLineIcon{color:#f6b51e;font-weight:1000}.compactTable{margin-top:12px}@media(max-width:640px){.notificationSettingsGrid{grid-template-columns:1fr}.treeNode{grid-template-columns:22px minmax(0,1fr)}.treeNode em{grid-column:2/3}.referralTree .referralTree{margin-left:10px;padding-left:10px}}
+
       @media(max-width:380px){
         .leaderboardCard{padding:15px 10px!important}
         .leaderboardTable{font-size:11.5px!important}
@@ -155,11 +162,15 @@
   }
 
   window.togglePackageAccordion = function togglePackageAccordion(id) {
-    document.querySelectorAll(".packageAccordionBody").forEach((body) => {
-      if (body.id !== `packageDetail-${id}`) body.classList.add("hidden");
+    document.querySelectorAll(".package.v20260518022, .packageAccordion").forEach((card) => {
+      const body = card.querySelector(".packageAccordionBody");
+      const target = body && (body.id === `packageDetail-${id}` || body.id === `packageBody${id}`);
+      const open = !!target && (body.classList.contains("hidden") || !card.classList.contains("open"));
+      card.classList.toggle("open", open);
+      if (body) body.classList.toggle("hidden", !open);
+      const head = card.querySelector("button");
+      if (head) head.setAttribute("aria-expanded", open ? "true" : "false");
     });
-    const body = document.getElementById(`packageDetail-${id}`);
-    if (body) body.classList.toggle("hidden");
   };
 
   function packageActionText(pack, state) {
@@ -184,13 +195,13 @@
     const el = $("packageList");
     if (!el) return;
     ensurePatchStyles();
-    el.classList.add("v20260518021");
+    el.classList.add("v20260518022");
     el.innerHTML = packs.map((x) => {
       const state = packageButtonState(x);
       const currentNote = state.className === "currentPackage" ? `<div class="packageNote">Mevcut paketiniz. Yenileme yaparsanız yeni süre mevcut bitiş tarihinden sonra başlar.</div>` : "";
       const disabledNote = state.disabled ? `<div class="packageNote muted">Bu paket mevcut paketinizden düşük olduğu için seçilemez.</div>` : "";
       return `
-        <div class="package v20260518021 ${state.className}">
+        <div class="package v20260518022 packageAccordion ${state.className}">
           <button class="packageHeaderBtn" type="button" onclick="togglePackageAccordion(${x.id})" aria-controls="packageDetail-${x.id}">
             <span class="packageHeaderMain">
               <span class="badge">${x.badge}</span>

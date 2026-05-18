@@ -354,3 +354,17 @@ Her sürümde şu bilgiler yazılacak:
 - Paket kartı rozetleri ve açıklama metinleri yeni sisteme göre güncellendi.
 - Sürüm etiketi, VERSION.json, server fallback ve cache parametreleri v2026.05.17-016 olarak senkronlandı.
 - Korunan özellikler: Supabase kalıcı veritabanı, PWA zorunlu kullanım modu, referans davet linki, liderlik tabloları, paket/üye paneli akordeonları, mükerrer ödeme koruması ve gizlilik maskelemesi.
+
+
+## v2026.05.18-022 - Bildirim ve Panel Güncellemesi
+
+- Web Push + VAPID altyapısı eklendi: kullanıcı izin verdiğinde uygulama/PWA kapalı olsa bile telefona bildirim gönderilebilir.
+- Üyelere gidecek bildirim senaryoları işlendi: üyelik kaydı, ödeme onayı/reddi, paket aktif/süre bitiş uyarısı, yeni referans, referans/kazanç, çekim onayı/reddi, duyuru, liderlik ve destek cevapları.
+- Admin bildirimleri işlendi: yeni üye, yeni ödeme bildirimi, yeni çekim talebi, destek mesajı, film onay bekleme, sistem/liderlik özetleri ve duyuru gönderimi.
+- Üye paneline Bildirim Ayarları bölümü eklendi.
+- Üye paneli daha sade akordeon mantığında tutuldu; detaylar tıklanınca ilgili başlığın altında açılır.
+- Alt Üyeler bölümü Bildirimler bölümünün üstüne alındı.
+- Alt Üye kartına tıklanınca alt üyeler soy ağacı / hiyerarşik görünümde açılır.
+- Paket akordeon hatası düzeltildi; paket kartına tıklanınca içerik açılır ve Paket Satın Al / Yenile / Yükselt butonu görünür.
+- VIP pakette 3. seviye bilgisi gösterilmez; akordeon içinde fiyat tekrarı yapılmaz.
+- Cache sürümü: v20260518022

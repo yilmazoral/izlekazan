@@ -1,8 +1,30 @@
-İzleKazan v2026.05.18-021 canlı site paketi
+# İzleKazan v2026.05.18-022 Canlı Site Paketi
 
-Bu ZIP GitHub/Render'a yüklenecek temiz canlı site dosyalarını içerir.
-Kurulum notları ve gereksiz dokümanlar ayrı ZIP'e taşınmıştır.
+Bu paket GitHub/Render canlı site dosyalarıdır.
 
-Canlı çalışma için ana dosyalar: server.js, app.js, index.html, style.css, site-update.js, sw.js, manifest.json, package.json, VERSION.json, SURUM-GECMISI.md ve assets/ klasörüdür.
+## Bu sürümde öne çıkanlar
 
-Render Environment Variables içinde SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_ANON_KEY ve MOVIE_SITE_URL değerlerini kontrol edin.
+- Bildirim senaryoları uygulandı.
+- Web Push altyapısı eklendi.
+- Paket akordeon açılmama / buton görünmeme sorunu düzeltildi.
+- Üye paneli sade akordeon mantığında düzenlendi.
+- Alt üyeler soy ağacı şeklinde gösterilir.
+- Bildirimler ve Alt Üyeler bölüm sırası değiştirildi.
+
+## Push bildirim için Render ortam değişkenleri
+
+Aşağıdaki değişkenler tanımlı değilse site çalışır; fakat telefona push bildirimi gönderilmez:
+
+```txt
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
+VAPID_SUBJECT=mailto:yilmazoral@hotmail.com
+```
+
+VAPID anahtarları üretmek için bilgisayarda proje klasöründe şu komut kullanılabilir:
+
+```bash
+npx web-push generate-vapid-keys
+```
+
+Üretilen public/private key değerlerini Render > Environment bölümüne ekleyin.

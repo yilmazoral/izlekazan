@@ -292,28 +292,29 @@ async function loadPackages() {
   const el = $("packageList");
   if (!el) return;
 
+  const packageSummary = (x) => {
+    if (Number(x.id) === 1) return "1. seviyeden %10 referans kazancı sağlar. Film erişimi ve temel panel özellikleriyle başlangıç paketidir.";
+    if (Number(x.id) === 2) return "1. ve 2. seviyeden %20 referans kazancı sağlar. Daha güçlü referans takibi ve premium film erişimi sunar.";
+    return "1, 2 ve 3. seviyeden %30 referans kazancı sağlar. CEO avantajları ve film ön onay paneliyle en kapsamlı pakettir.";
+  };
+
   el.innerHTML = packs
     .map((x) => {
       const state = packageButtonState(x);
       const currentNote = state.className === "currentPackage" ? `<div class="packageNote">Mevcut paketiniz. Yenileme yaparsanız yeni süre mevcut bitiş tarihinden sonra başlar.</div>` : "";
       const disabledNote = state.disabled ? `<div class="packageNote muted">Bu paket mevcut paketinizden düşük olduğu için seçilemez.</div>` : "";
-      const standardDescription = Number(x.id) === 1
-        ? `<p class="packageProDescription">Platformu deneyimlemek ve sistemi yakından tanımak isteyen kullanıcılar için başlangıç seviyesidir. Premium üyeliğe geçiş yaparak tüm içerik ve avantajlara erişebilirsiniz. Daha düşük referans kazanç yapısı nedeniyle bu paket genellikle reklamsız ve kesintisiz film deneyimine odaklanan kullanıcılar tarafından tercih edilmektedir.</p>`
-        : "";
       return `
       <div class="package packageAccordion ${state.className}" data-package-id="${x.id}">
-        <button type="button" class="packageAccordionHead" onclick="togglePackageAccordion(${x.id})" aria-expanded="false">
+        <button type="button" class="packageAccordionHead" onclick="togglePackageAccordion(${x.id})" aria-expanded="false" aria-controls="packageBody${x.id}">
           <span class="badge">${x.badge}</span>
           <span class="packageHeadText"><b>${x.name}</b><small>${x.price} TL / Yıl</small></span>
           <span class="packageChevron">⌄</span>
         </button>
         <div class="packageAccordionBody" id="packageBody${x.id}">
-          <div class="price">${x.price} TL / Yıl</div>
-          <p>1 yıl geçerli | ${x.depth === 1 ? "1. seviye" : "1, 2 ve 3. seviye"} | %${Math.round(x.rate * 100)} prim</p>
-          ${standardDescription}
-          <ul>${x.features.map((f) => `<li>${f}</li>`).join("")}</ul>
+          <p class="packageProDescription">${packageSummary(x)}</p>
+          <ul>${(x.features || []).map((f) => `<li>${f}</li>`).join("")}</ul>
           ${currentNote}${disabledNote}
-          <button ${state.disabled ? "disabled" : ""} onclick="choosePack(${x.id}, ${x.price})">${state.text}</button>
+          <button ${state.disabled ? "disabled" : ""} onclick="choosePack(${x.id}, ${x.price})">${state.text === "Paketi Seç" ? "Paket Satın Al" : state.text}</button>
         </div>
       </div>`;
     })
@@ -325,9 +326,12 @@ function togglePackageAccordion(packageId) {
     const open = String(item.dataset.packageId) === String(packageId) && !item.classList.contains("open");
     item.classList.toggle("open", open);
     const head = item.querySelector(".packageAccordionHead");
+    const body = item.querySelector(".packageAccordionBody");
     if (head) head.setAttribute("aria-expanded", open ? "true" : "false");
+    if (body) body.classList.toggle("hidden", !open);
   });
 }
+
 
 async function choosePack(id, price) {
   if(!isLoggedIn()){
@@ -420,10 +424,62 @@ async function login() {
     localStorage.setItem("token", token);
     refreshMenu();
     toast("Giriş başarılı");
+    registerPushIfAllowed().catch(() => {});
     page("panel");
   } catch (e) {
     toast(e.message);
   }
+}
+
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function renderReferralTree(nodes, level = 0) {
+  const list = Array.isArray(nodes) ? nodes : [];
+  if (!list.length) return `<div class="emptyState compact">Alt üye yok.</div>`;
+  return `<ul class="referralTree level${level}">${list.map((node) => {
+    const hasChildren = Array.isArray(node.children) && node.children.length;
+    return `<li>
+      <div class="treeNode level${level}">
+        <span class="treeLineIcon">${hasChildren ? "┬" : "•"}</span>
+        <div><b>${escapeHtml(node.maskedName || "Üye")}</b><small>${escapeHtml(node.packageName || "Paket Yok")} • ${node.premiumActive ? "Premium" : "Pasif"}</small></div>
+        <em>${(node.children || []).length} alt üye</em>
+      </div>
+      ${hasChildren ? renderReferralTree(node.children, level + 1) : ""}
+    </li>`;
+  }).join("")}</ul>`;
+}
+
+function renderNotificationSettings(settings = {}) {
+  const checked = (key) => settings[key] !== false ? "checked" : "";
+  return `
+    <div class="notificationSettingsGrid">
+      <label><input type="checkbox" id="ns_push" ${checked("pushEnabled")}> Telefon push bildirimi</label>
+      <label><input type="checkbox" id="ns_referral" ${checked("referral")}> Referans bildirimleri</label>
+      <label><input type="checkbox" id="ns_earning" ${checked("earning")}> Kazanç bildirimleri</label>
+      <label><input type="checkbox" id="ns_withdrawal" ${checked("withdrawal")}> Çekim bildirimleri</label>
+      <label><input type="checkbox" id="ns_package" ${checked("package")}> Paket bildirimleri</label>
+      <label><input type="checkbox" id="ns_announcement" ${checked("announcement")}> Duyurular</label>
+    </div>
+    <div class="actionRow wrapActions">
+      <button onclick="enablePushNotifications()">Telefon Bildirimini Aç</button>
+      <button class="ghost" onclick="saveNotificationSettings()">Ayarları Kaydet</button>
+    </div>
+    <p class="muted smallInfo">Ödeme onayı/reddi, çekim onayı/reddi, paket aktif/pasif ve güvenlik bildirimleri kapatılamaz.</p>`;
+}
+
+function openDashboardSection(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  toggleMemberAccordion(id);
+  setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
 }
 
 async function dash() {
@@ -483,11 +539,11 @@ async function dash() {
             <strong>${pEnd}</strong>
             <small>${d.user.premiumDaysLeft || 0} gün kaldı.</small>
           </div>
-          <div class="metricCard blue">
+          <div class="metricCard clickable blue" onclick="openDashboardSection('memberChildren')">
             <i>👥</i>
             <span>Alt Üye</span>
             <strong>${children.length}</strong>
-            <small>Referans ağındaki doğrudan üyeler.</small>
+            <small>Soy ağacını görmek için tıkla.</small>
           </div>
         </div>
 
@@ -502,26 +558,17 @@ async function dash() {
         </div>
 
         <div class="memberAccordionWrap">
-          <div class="card dashboardWide notificationPanel memberAccordionCard">
-            <button class="memberAccordionHead" onclick="toggleMemberAccordion('memberNotifications')" type="button">
-              <span><i>🔔</i><b>Bildirimlerim</b><small>Ödeme, çekim ve destek durumları</small></span>
-              <em>${notifications.length} Bildirim</em>
-            </button>
-            <div id="memberNotifications" class="memberAccordionBody hidden">
-              <div class="notificationList">
-                ${notifications.map((n) => `<div class="notificationItem ${n.type}"><i>${n.type === "error" ? "!" : "✓"}</i><div><b>${n.title}</b><p>${n.message}</p><small>${new Date(n.createdAt).toLocaleString("tr-TR")}</small></div></div>`).join("") || `<div class="emptyState"><b>Bildirim yok</b><span>Yeni ödeme, çekim ve destek cevapları burada görünür.</span></div>`}
-              </div>
-            </div>
-          </div>
-
           <div class="card dashboardWide memberAccordionCard">
             <button class="memberAccordionHead" onclick="toggleMemberAccordion('memberChildren')" type="button">
-              <span><i>👥</i><b>Alt Üyelerim</b><small>Referans ağındaki doğrudan üyeler</small></span>
+              <span><i>👥</i><b>Alt Üyelerim</b><small>Referans ağını soy ağacı şeklinde gör</small></span>
               <em>${children.length} Üye</em>
             </button>
             <div id="memberChildren" class="memberAccordionBody hidden">
-              <p class="privacyNote">Üyelerimizin kişisel veri güvenliğini korumak için herkese açık alanlarda yalnızca gerekli bilgiler paylaşılır; soyad ve telefon numarası kısmi olarak maskelenir.</p>
-              <div class="tableWrap professionalTable">
+              <p class="privacyNote">Alt üyeler hiyerarşik soy ağacı mantığıyla gösterilir. Kişisel bilgiler gizlilik formatına göre maskelenir.</p>
+              <div class="referralTreeBox">
+                ${renderReferralTree(d.referralTree || [])}
+              </div>
+              <div class="tableWrap professionalTable compactTable">
                 <table>
                   <thead><tr><th>Ad Soyad</th><th>Telefon</th><th>Paket</th><th>Premium Başlangıç</th><th>Premium Bitiş</th><th>Durum</th></tr></thead>
                   <tbody>
@@ -529,6 +576,29 @@ async function dash() {
                   </tbody>
                 </table>
               </div>
+            </div>
+          </div>
+
+          <div class="card dashboardWide notificationPanel memberAccordionCard">
+            <button class="memberAccordionHead" onclick="toggleMemberAccordion('memberNotifications')" type="button">
+              <span><i>🔔</i><b>Bildirimlerim</b><small>Ödeme, çekim, referans, kazanç ve sistem duyuruları</small></span>
+              <em>${notifications.length} Bildirim</em>
+            </button>
+            <div id="memberNotifications" class="memberAccordionBody hidden">
+              <div class="notificationList">
+                ${notifications.map((n) => `<div class="notificationItem ${n.type}"><i>${n.type === "error" ? "!" : "✓"}</i><div><b>${n.title}</b><p>${n.message}</p><small>${new Date(n.createdAt).toLocaleString("tr-TR")}</small></div></div>`).join("") || `<div class="emptyState"><b>Bildirim yok</b><span>Yeni ödeme, çekim, referans, kazanç ve destek cevapları burada görünür.</span></div>`}
+              </div>
+            </div>
+          </div>
+
+
+          <div class="card panelFormCard memberAccordionCard dashboardWide">
+            <button class="memberAccordionHead" onclick="toggleMemberAccordion('memberNotificationSettings')" type="button">
+              <span><i>⚙️</i><b>Bildirim Ayarları</b><small>Telefon bildirimi ve kategori tercihleri</small></span>
+              <em>Ayarlar</em>
+            </button>
+            <div id="memberNotificationSettings" class="memberAccordionBody hidden">
+              ${renderNotificationSettings(d.notificationSettings || {})}
             </div>
           </div>
 
@@ -613,6 +683,8 @@ async function dash() {
           </div>
         </div>
       </div>`;
+
+    registerPushIfAllowed().catch(() => {});
 
     const firstEnabledOption = Array.from($("packSel").options).find((opt) => !opt.disabled);
     if (firstEnabledOption) $("packSel").value = firstEnabledOption.value;
@@ -992,6 +1064,17 @@ async function admin() {
       </div>
 
       <div class="adminGrid">
+
+        <section class="adminSection wide">
+          <h3>Toplu Duyuru Gönder</h3>
+          <div class="adminBroadcastBox">
+            <label>Duyuru Başlığı<input id="adminAnnouncementTitle" placeholder="Örn: Sistem Duyurusu"></label>
+            <label>Duyuru Mesajı<textarea id="adminAnnouncementMessage" placeholder="Üyelere gönderilecek duyuru metni"></textarea></label>
+            <label class="inlineCheck"><input id="adminAnnouncementPush" type="checkbox" checked> Telefon push bildirimi de gönder</label>
+            <button onclick="sendAdminAnnouncement()">Tüm Üyelere Duyuru Gönder</button>
+          </div>
+        </section>
+
         <section class="adminSection wide">
           <h3>Ödeme Bildirimleri</h3>
           ${pendingPayments.map((p) => `
@@ -1073,6 +1156,23 @@ async function admin() {
   }
 }
 
+async function sendAdminAnnouncement() {
+  try {
+    const title = $("adminAnnouncementTitle").value.trim();
+    const message = $("adminAnnouncementMessage").value.trim();
+    const push = !!$("adminAnnouncementPush").checked;
+    if (!title || !message) { toast("Duyuru başlığı ve mesajı zorunludur."); return; }
+    const result = await api("/api/admin/notifications/broadcast", {
+      method: "POST",
+      body: JSON.stringify({ title, message, push })
+    });
+    toast(`${result.count || 0} üyeye duyuru gönderildi.`);
+    admin();
+  } catch (e) {
+    toast(e.message || "Duyuru gönderilemedi");
+  }
+}
+
 async function payOk(id) {
   await api("/api/admin/payments/" + id + "/approve", { method: "POST" });
   toast("Ödeme onaylandı");
@@ -1145,7 +1245,7 @@ function openFilmModal(url, locked = false) {
     return;
   }
 
-  // v2026.05.18-021:
+  // v2026.05.18-022:
   // Premium üyede iframe kullanılmaz; gizli sunucu geçidi üzerinden film sitesi doğrudan açılır.
   // Mobil kullanıcılar uygulama moduna zorlandığı için adres çubuğu görünmeden kullanım hedeflenir.
   if (!locked && isSafeRelativeFilmGateway) {
@@ -1159,7 +1259,7 @@ function openFilmModal(url, locked = false) {
   const shell = document.querySelector(".watchShell");
   if (shell) {
     shell.classList.toggle("lockedWatch", filmIsLocked);
-    // v2026.05.18-021: Premium üyelerde film sitesi kırpılmadan tam görünür.
+    // v2026.05.18-022: Premium üyelerde film sitesi kırpılmadan tam görünür.
     // Üst bölüm gizleme/crop kaldırıldı; sadece adres çubuğunda gerçek adres gizli kalır.
   }
 
@@ -1322,7 +1422,7 @@ function fullscreenMovie() {
   const overlay = $("filmLockOverlay");
   if (!shell) return;
 
-  // v2026.05.18-021:
+  // v2026.05.18-022:
   // İframe içindeki yabancı player tam ekran API'si her tarayıcıda çalışmadığı için
   // İzleKazan tarafında zorunlu ekranı kapla modu kullanılır. Bu mod tarayıcı
   // fullscreen iznine bağlı kalmadan iframe alanını viewport'un tamamına yayar.
@@ -1413,10 +1513,75 @@ function checkResetLink() {
   if (params.get("reset")) page("reset");
 }
 
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = window.atob(base64);
+  return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+}
+
+async function getPushConfig() {
+  try { return await api("/api/push/config"); } catch (e) { return { enabled: false, publicKey: "" }; }
+}
+
+async function registerPushIfAllowed() {
+  if (!isLoggedIn() || !("serviceWorker" in navigator) || !("PushManager" in window) || Notification.permission !== "granted") return false;
+  const cfg = await getPushConfig();
+  if (!cfg.enabled || !cfg.publicKey) return false;
+  const reg = await navigator.serviceWorker.ready;
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub) {
+    sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(cfg.publicKey) });
+  }
+  await api("/api/push/subscribe", { method: "POST", body: JSON.stringify({ subscription: sub }) });
+  return true;
+}
+
+async function enablePushNotifications() {
+  try {
+    if (!isLoggedIn()) { toast("Telefon bildirimi için önce giriş yapmalısınız."); page("auth"); return; }
+    if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
+      toast("Bu cihaz/tarayıcı telefon bildirimi desteklemiyor.");
+      return;
+    }
+    const cfg = await getPushConfig();
+    if (!cfg.enabled) {
+      toast("Push bildirimi için Render ortam değişkenlerinde VAPID anahtarları tanımlanmalı.");
+      return;
+    }
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") { toast("Bildirim izni verilmedi."); return; }
+    await registerPushIfAllowed();
+    toast("Telefon bildirimi aktif edildi.");
+  } catch (e) {
+    toast(e.message || "Telefon bildirimi açılamadı.");
+  }
+}
+
+async function saveNotificationSettings() {
+  try {
+    const settings = {
+      pushEnabled: !!$("ns_push")?.checked,
+      referral: !!$("ns_referral")?.checked,
+      earning: !!$("ns_earning")?.checked,
+      withdrawal: !!$("ns_withdrawal")?.checked,
+      package: !!$("ns_package")?.checked,
+      announcement: !!$("ns_announcement")?.checked
+    };
+    await api("/api/notification-settings", { method: "POST", body: JSON.stringify({ settings }) });
+    if (settings.pushEnabled) await registerPushIfAllowed();
+    toast("Bildirim ayarları kaydedildi.");
+  } catch (e) {
+    toast(e.message || "Bildirim ayarları kaydedilemedi.");
+  }
+}
+
+
 init();
 
 
-// v2026.05.18-021: Görünür sürüm etiketi artık VERSION.json / /api/version üzerinden otomatik senkronize edilir.
+// v2026.05.18-022: Görünür sürüm etiketi artık VERSION.json / /api/version üzerinden otomatik senkronize edilir.
 async function syncSiteVersionLabel() {
   const el = document.getElementById("siteVersionLabel");
   if (!el) return;
@@ -1434,7 +1599,7 @@ if (document.readyState === "loading") {
 }
 
 
-// v2026.05.18-021: PWA / Ana ekrana ekleme ve adres çubuğu olmadan kullanım desteği.
+// v2026.05.18-022: PWA / Ana ekrana ekleme ve adres çubuğu olmadan kullanım desteği.
 let izleKazanDeferredInstallPrompt = null;
 function isStandalonePwaMode() {
   return window.matchMedia && window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
@@ -1474,7 +1639,7 @@ function dismissPwaInstallBanner() {
 }
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js?v=v20260518021").catch(() => {});
+    navigator.serviceWorker.register("/sw.js?v=v20260518022").catch(() => {});
     showPwaInstallUi();
   });
 } else {
@@ -1482,7 +1647,7 @@ if ("serviceWorker" in navigator) {
 }
 
 
-// v2026.05.18-021: Mobilde uygulama yüklü değilse site içeriğini kilitle.
+// v2026.05.18-022: Mobilde uygulama yüklü değilse site içeriğini kilitle.
 function isMobileLikeDevice() {
   return window.matchMedia && (window.matchMedia("(max-width: 820px)").matches || window.matchMedia("(hover: none) and (pointer: coarse)").matches);
 }

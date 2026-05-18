@@ -1,19 +1,19 @@
 {
-  "currentVersion": "v2026.05.18-021",
+  "currentVersion": "v2026.05.18-022",
   "releaseDate": "2026-05-18",
   "project": "İzleKazan",
-  "summary": "v2026.05.18-020 düzeltmeleri ana proje dosyalarına işlendi; sürüm/cache etiketleri senkronlandı ve gereksiz güncelleme dosyaları temizlendi.",
+  "summary": "Bildirim senaryoları, Web Push altyapısı, sade akordeon üye paneli, alt üye soy ağacı ve paket akordeon düzeltmeleri uygulandı.",
   "changes": [
-    "server.js, index.html, app.js, site-update.js, sw.js ve VERSION.json aynı sürüme alındı.",
-    "Referans liderliği backend mantığı ana server.js içine işlendi.",
-    "Referans liderliği tabloları gerçek alt üye sayısına göre sıralanır ve 0 alt üyeli satır göstermez.",
-    "Kazanç liderliği tabloları tutara göre çalışmaya devam eder.",
-    "Ana sayfada eski/yeni liderlik alanı karışmasını önlemek için tek homeLeaderboards alanı bırakıldı.",
-    "Paket akordeonları ve Paket Satın Al / Paketi Yenile / Paketi Yükselt butonları korundu.",
-    "VIP Üye içinde 3. seviye bilgisi ve olumsuz uyarı cümlesi bulunmaz.",
-    "Kullanılmayan apply dosyaları, yardımcı parça dosyaları ve tekrar görsel temizlendi.",
-    "Cache sürümü v20260518021 olarak güncellendi.",
-    ".gitignore, .env.example, analiz raporu ve SHA256 kontrol dosyası eklendi."
+    "Web Push + VAPID altyapısı eklendi; izin veren cihazlara uygulama kapalıyken telefon bildirimi gönderilebilir.",
+    "Üye bildirim senaryoları işlendi: üyelik kaydı, ödeme onayı/reddi, paket aktif/süre bitiş uyarısı, referans, kazanç, çekim, duyuru, liderlik ve destek cevapları.",
+    "Admin bildirim senaryoları işlendi: yeni üye, yeni ödeme bildirimi, yeni çekim talebi, destek mesajı, film onayı ve liderlik özetleri.",
+    "Kullanıcı paneline Bildirim Ayarları eklendi.",
+    "Üye paneli sade akordeon mantığında tutuldu; detaylar tıklanınca ilgili başlığın altında açılır.",
+    "Alt Üyeler bölümü Bildirimler bölümünün üstüne alındı.",
+    "Alt üye kartına tıklanınca soy ağacı / hiyerarşik alt üye görünümü açılır.",
+    "Paket akordeon açılmama ve Paket Satın Al butonu görünmeme sorunu düzeltildi.",
+    "VIP paketinde 3. seviye bilgisi gösterilmez ve akordeon içinde fiyat tekrarı yapılmaz.",
+    "Cache sürümü v20260518022 olarak güncellendi."
   ],
   "protectedFeatures": [
     "Supabase kalıcı veritabanı aktif kalmalı.",
@@ -23,5 +23,8 @@
     "Açık veri tabanında ad açık, soyad ilk harf + yıldız, telefon ilk 5 hane + yıldız görünmeli.",
     "Admin panelinde tam bilgiler görünmeye devam etmeli.",
     "Sitenin alt kısmında görünür sürüm etiketi bulunmalı."
-  ]
+  ],
+  "cacheVersion": "v20260518022",
+  "updatedAt": "2026-05-18T22:45:00+03:00",
+  "notes": "Bildirim senaryoları, Web Push altyapısı, sade akordeon üye paneli, alt üye soy ağacı ve paket akordeon düzeltmeleri."
 }
