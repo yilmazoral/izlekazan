@@ -33,7 +33,7 @@ function dateRange(kind) {
 }
 function inRange(value, start, end) {
   const d = new Date(value || 0);
-  return d >= start && d < end;
+  return !Number.isNaN(d.getTime()) && d >= start && d < end;
 }
 function addBoardAmount(map, userId, amount) {
   if (!userId || !Number(amount)) return;
@@ -41,32 +41,52 @@ function addBoardAmount(map, userId, amount) {
 }
 function addBoardCount(map, userId, count = 1) {
   if (!userId) return;
-  map.set(userId, Number(map.get(userId) || 0) + Number(count || 1));
+  const value = Number(count || 1);
+  if (!Number.isFinite(value) || value <= 0) return;
+  map.set(userId, Number(map.get(userId) || 0) + value);
 }
 function publicBoardName(d, userId) {
-  const u = (d.users || []).find(x => x.id === userId);
+  const u = (d.users || []).find(x => String(x.id) === String(userId));
   return u ? maskName(u.firstName, u.lastName) : "Üye";
+}
+function resolveSponsorUserId(d, sponsorValue) {
+  const key = String(sponsorValue || "").trim();
+  if (!key) return null;
+  const users = Array.isArray(d.users) ? d.users : [];
+  const sponsor = users.find(u =>
+    String(u.id || "") === key ||
+    String(u.referralCode || "") === key ||
+    String(u.refCode || "") === key ||
+    String(u.inviteCode || "") === key
+  );
+  return sponsor ? sponsor.id : key;
 }
 function topReferralRows(d, rangeKind) {
   const { start, end } = dateRange(rangeKind);
   const totals = new Map();
 
   for (const child of d.users || []) {
-    if (child.role === "admin") continue;
-    if (!child.sponsorId) continue;
-    if (!inRange(child.createdAt, start, end)) continue;
-    addBoardCount(totals, child.sponsorId, 1);
+    if (!child || child.role === "admin") continue;
+    const sponsorRaw = child.sponsorId || child.sponsorUserId || child.referrerId || child.parentId || child.invitedBy || child.referredBy;
+    const sponsorId = resolveSponsorUserId(d, sponsorRaw);
+    if (!sponsorId) continue;
+    if (!inRange(child.createdAt || child.joinedAt || child.registeredAt, start, end)) continue;
+    addBoardCount(totals, sponsorId, 1);
   }
 
   return Array.from(totals.entries())
-    .map(([userId, count]) => ({
-      userId,
-      maskedName: publicBoardName(d, userId),
-      count: Number(count || 0),
-      altMemberCount: Number(count || 0)
-    }))
-    .filter(x => x.count > 0)
-    .sort((a, b) => b.count - a.count || String(a.maskedName).localeCompare(String(b.maskedName), "tr-TR"))
+    .map(([userId, count]) => {
+      const safeCount = Number(count || 0);
+      return {
+        userId,
+        maskedName: publicBoardName(d, userId),
+        count: safeCount,
+        altMemberCount: safeCount,
+        referralCount: safeCount
+      };
+    })
+    .filter(x => Number(x.altMemberCount || 0) > 0)
+    .sort((a, b) => Number(b.altMemberCount || 0) - Number(a.altMemberCount || 0) || String(a.maskedName).localeCompare(String(b.maskedName), "tr-TR"))
     .slice(0, 5);
 }
 function topEarningRows(d, rangeKind) {
@@ -92,13 +112,14 @@ function topEarningRows(d, rangeKind) {
       maskedName: publicBoardName(d, userId),
       amount: Number(amount.toFixed(2))
     }))
-    .filter(x => x.amount > 0)
-    .sort((a, b) => b.amount - a.amount || String(a.maskedName).localeCompare(String(b.maskedName), "tr-TR"))
+    .filter(x => Number(x.amount || 0) > 0)
+    .sort((a, b) => Number(b.amount || 0) - Number(a.amount || 0) || String(a.maskedName).localeCompare(String(b.maskedName), "tr-TR"))
     .slice(0, 5);
 }
 app.get("/api/public/leaderboards", (req, res) => {
   const d = readDb(); processDb(d);
   res.json({
+    version: APP_VERSION || "v2026.05.18-020",
     boards: [
       { key: "weekly_ref", type: "referral_count", metricLabel: "Alt Üye Sayısı", title: "Haftalık Referans Liderleri", rows: topReferralRows(d, "week") },
       { key: "monthly_ref", type: "referral_count", metricLabel: "Alt Üye Sayısı", title: "Aylık Referans Liderleri", rows: topReferralRows(d, "month") },

@@ -1,17 +1,18 @@
 {
-  "currentVersion": "v2026.05.18-019",
+  "currentVersion": "v2026.05.18-020",
   "releaseDate": "2026-05-18",
   "project": "İzleKazan",
-  "summary": "Referans liderlik tabloları alt üye sayısına göre sıralandı ve paket akordeon satın alma butonu netleştirildi.",
+  "summary": "Referans liderlik tablolarında 0 alt üyeli satırların görünmesi engellendi ve referans sıralaması gerçek alt üye sayısına kilitlendi.",
   "changes": [
-    "Referans liderliği tablolarında sıralama tutara göre değil, alt üye sayısına göre yapılır.",
-    "Haftalık/Aylık/Geçen hafta/Geçen ay referans liderliği tablolarında Tutar yerine Alt Üye Sayısı gösterilir.",
+    "Referans liderlik tablolarında 0 alt üyeli kullanıcılar kesin olarak gizlenir.",
+    "Referans liderliği sıralaması yalnızca gerçek alt üye sayısına göre yapılır.",
+    "Eski backend/cache verisi amount alanı gönderse bile referans tablosunda 0 üye satırı gösterilmez.",
+    "Referans tablolarında Alt Üye Sayısı 1 ve üzeri olan kullanıcılar listelenir.",
     "Kazanç liderliği tabloları tutara göre sıralanmaya ve Tutar göstermeye devam eder.",
-    "Üyelik paketleri akordeon şeklinde açılır; akordeon içinde paket genel bilgisi ve satın alma butonu görünür.",
-    "VIP Üye açıklamasında 3. seviye veya olumsuz uyarı cümlesi gösterilmez; yalnızca 1. ve 2. seviye %20 referans kazancı bilgisi yer alır.",
-    "Paket fiyatı başlıkta kaldı; akordeon içerik bölümünde fiyat tekrarı yapılmaz.",
-    "Cache sürümü v20260518019 olarak güncellendi.",
-    "Footer ve meta sürüm etiketi v2026.05.18-019 olarak güncellendi."
+    "Backend liderlik endpointi sponsorId/referrerId gibi bağlılık alanlarından gerçek alt üye sayısını hesaplayacak şekilde güçlendirildi.",
+    "Frontend liderlik render işlemi referans ve kazanç tablolarını ayrı ayrı filtreleyip güvenli şekilde sıralar.",
+    "Cache sürümü v20260518020 olarak güncellendi.",
+    "Footer ve meta sürüm etiketi v2026.05.18-020 olarak güncellendi."
   ],
   "protectedFeatures": [
     "Supabase kalıcı veritabanı aktif kalmalı.",

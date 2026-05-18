@@ -1,8 +1,8 @@
-// İzleKazan v2026.05.18-019 güncelleme yamaları
+// İzleKazan v2026.05.18-020 güncelleme yamaları
 // Bu dosya app.js yüklendikten sonra çalışır; paket görünümü, liderlik tabloları ve mobil görünüm düzeltmelerini uygular.
 
 (function () {
-  const VERSION = "v2026.05.18-019";
+  const VERSION = "v2026.05.18-020";
 
   function safeCell(value, fallback = "-") {
     return value === undefined || value === null || value === "" ? fallback : value;
@@ -85,12 +85,12 @@
   }
 
   function ensurePatchStyles() {
-    if (document.getElementById("ik-v20260518019-style")) return;
+    if (document.getElementById("ik-v20260518020-style")) return;
     const style = document.createElement("style");
-    style.id = "ik-v20260518019-style";
+    style.id = "ik-v20260518020-style";
     style.textContent = `
-      .packageGrid.v20260518019{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:start}
-      .package.v20260518019{padding:0;overflow:hidden;border:1px solid rgba(255,255,255,.12);background:rgba(15,23,42,.72)}
+      .packageGrid.v20260518020{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:start}
+      .package.v20260518020{padding:0;overflow:hidden;border:1px solid rgba(255,255,255,.12);background:rgba(15,23,42,.72)}
       .packageHeaderBtn{width:100%;border-radius:0;background:transparent;color:var(--text,#fff);box-shadow:none;border:0;padding:22px;text-align:left;display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
       .packageHeaderBtn:hover{transform:none;box-shadow:none;background:rgba(255,255,255,.04)}
       .packageHeaderMain{display:flex;flex-direction:column;gap:8px}
@@ -112,7 +112,7 @@
       .leaderboardTable td{padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06)}
       .leaderboardRank{width:32px;color:var(--gold2,#ffd36a);font-weight:900}
       .leaderboardEmpty{color:var(--muted,#a8b3c7);font-size:13px;margin:0}
-      @media(max-width:1020px){.leaderboardGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.packageGrid.v20260518019{grid-template-columns:1fr}}
+      @media(max-width:1020px){.leaderboardGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.packageGrid.v20260518020{grid-template-columns:1fr}}
       @media(max-width:640px){.leaderboardGrid{grid-template-columns:1fr}.packageHeaderBtn{flex-direction:column}.packageHeaderPrice{font-size:18px}}
 
       .leaderboardSection,.leaderboardCard,.leaderboardTable,.leaderboardTable *{box-sizing:border-box}
@@ -184,13 +184,13 @@
     const el = $("packageList");
     if (!el) return;
     ensurePatchStyles();
-    el.classList.add("v20260518019");
+    el.classList.add("v20260518020");
     el.innerHTML = packs.map((x) => {
       const state = packageButtonState(x);
       const currentNote = state.className === "currentPackage" ? `<div class="packageNote">Mevcut paketiniz. Yenileme yaparsanız yeni süre mevcut bitiş tarihinden sonra başlar.</div>` : "";
       const disabledNote = state.disabled ? `<div class="packageNote muted">Bu paket mevcut paketinizden düşük olduğu için seçilemez.</div>` : "";
       return `
-        <div class="package v20260518019 ${state.className}">
+        <div class="package v20260518020 ${state.className}">
           <button class="packageHeaderBtn" type="button" onclick="togglePackageAccordion(${x.id})" aria-controls="packageDetail-${x.id}">
             <span class="packageHeaderMain">
               <span class="badge">${x.badge}</span>
@@ -351,12 +351,39 @@
     return isReferralBoard(board) ? "Alt Üye Sayısı" : "Tutar";
   }
 
+  function referralCountFromRow(row) {
+    if (!row) return 0;
+    const raw = row.altMemberCount ?? row.count ?? row.referralCount ?? row.memberCount ?? row.totalMembers ?? 0;
+    const count = Number(raw || 0);
+    return Number.isFinite(count) && count > 0 ? count : 0;
+  }
+
+  function earningAmountFromRow(row) {
+    const amount = Number((row && row.amount) || 0);
+    return Number.isFinite(amount) && amount > 0 ? amount : 0;
+  }
+
+  function cleanBoardRows(board) {
+    const incomingRows = Array.isArray(board && board.rows) ? board.rows : [];
+    if (isReferralBoard(board)) {
+      return incomingRows
+        .map((row) => ({ ...row, _referralCount: referralCountFromRow(row) }))
+        .filter((row) => row._referralCount > 0)
+        .sort((a, b) => b._referralCount - a._referralCount || String(a.maskedName || a.name || "").localeCompare(String(b.maskedName || b.name || ""), "tr-TR"))
+        .slice(0, 5);
+    }
+    return incomingRows
+      .map((row) => ({ ...row, _earningAmount: earningAmountFromRow(row) }))
+      .filter((row) => row._earningAmount > 0)
+      .sort((a, b) => b._earningAmount - a._earningAmount || String(a.maskedName || a.name || "").localeCompare(String(b.maskedName || b.name || ""), "tr-TR"))
+      .slice(0, 5);
+  }
+
   function boardMetricValue(board, row) {
     if (isReferralBoard(board)) {
-      const count = Number(row.altMemberCount ?? row.count ?? row.referralCount ?? 0);
-      return `${count} üye`;
+      return `${referralCountFromRow(row)} üye`;
     }
-    return money(row.amount);
+    return money(earningAmountFromRow(row));
   }
 
   function renderLeaderboards(boards) {
@@ -367,11 +394,11 @@
       <div class="sectionIntro compactIntro">
         <span>Canlı Liderlik</span>
         <h2>Liderlik Tabloları</h2>
-        <p>Referans liderlerinde alt üye sayısı, kazanç liderlerinde tutar listelenir. Kişisel bilgiler gizlilik kurallarına göre maskelenir.</p>
+        <p>Referans liderlerinde yalnızca gerçek alt üye sayısı 1 ve üzeri olan kullanıcılar listelenir; kazanç liderlerinde tutar listelenir. Kişisel bilgiler gizlilik kurallarına göre maskelenir.</p>
       </div>
       <div class="leaderboardGrid">
         ${normalized.map((board) => {
-          const rows = Array.isArray(board.rows) ? board.rows.slice(0, 5) : [];
+          const rows = cleanBoardRows(board);
           const metricLabel = boardMetricLabel(board);
           return `<div class="leaderboardCard ${isReferralBoard(board) ? "referralLeaderboardCard" : "earningLeaderboardCard"}">
             <h3>${board.title}</h3>
@@ -404,14 +431,14 @@
   };
 
   const originalPage = window.page;
-  if (typeof originalPage === "function" && !originalPage.__ikPatchedV20260518019) {
+  if (typeof originalPage === "function" && !originalPage.__ikPatchedV20260518020) {
     const patchedPage = function patchedPage(id) {
       const result = originalPage.apply(this, arguments);
       const targetId = id === "withdrawalsPublic" ? "database" : id;
       if (targetId === "home") { setTimeout(loadHomeLeaderboards, 150); setTimeout(tuneMobileBottomBars, 300); }
       return result;
     };
-    patchedPage.__ikPatchedV20260518019 = true;
+    patchedPage.__ikPatchedV20260518020 = true;
     window.page = patchedPage;
   }
 
