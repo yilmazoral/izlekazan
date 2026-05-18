@@ -28,9 +28,9 @@ function readVersionInfo() {
       return JSON.parse(fs.readFileSync(versionFile, "utf8"));
     }
   } catch (e) {}
-  return { currentVersion: process.env.APP_VERSION || "v2026.05.17-013", project: "İzleKazan" };
+  return { currentVersion: process.env.APP_VERSION || "v2026.05.17-016", project: "İzleKazan" };
 }
-const APP_VERSION = process.env.APP_VERSION || readVersionInfo().currentVersion || "v2026.05.17-013";
+const APP_VERSION = process.env.APP_VERSION || readVersionInfo().currentVersion || "v2026.05.17-016";
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_KEY || "";
@@ -47,11 +47,58 @@ app.use(express.json({ limit: "4mb" }));
 app.use(express.static(__dirname));
 
 const PACKAGES = [
-  { id: 1, name: "Standart Üye", price: 100, depth: 1, rate: 0.10, durationDays: 365, badge: "Başlangıç", features: ["1 yıl premium film erişimi", "Reklamsız Film Platformu filmlerine erişim", "1. seviye referanslardan %10 kazanç", "Referans kodu paket aktif olunca görünür", "Siteye Film Ekleme Kazancı", "Cüzdan, destek ve çekim talebi"] },
-  { id: 2, name: "Kıdemli Üye", price: 200, depth: 2, rate: 0.10, durationDays: 365, badge: "2 Seviye", features: ["Standart Üye özelliklerinin tamamı", "1. ve 2. seviye referanslardan %10 kazanç", "Alt üye ağacını daha geniş takip", "Referans kazanç geçmişi", "1 yıl aktif premium üyelik", "Siteye Film Ekleme Kazancı"] },
-  { id: 3, name: "Ortak", price: 300, depth: 3, rate: 0.10, durationDays: 365, badge: "3 Seviye", features: ["Kıdemli Üye özelliklerinin tamamı", "1, 2 ve 3. seviye referanslardan %10 kazanç", "Platform gelir ortaklığına tam katılım", "Geniş referans ağı takibi", "1 yıl premium erişim", "Siteye Film Ekleme Kazancı"] },
-  { id: 4, name: "Kıdemli Ortak", price: 500, depth: 3, rate: 0.20, durationDays: 365, badge: "Yüksek Prim", features: ["Ortak paket özelliklerinin tamamı", "İlk 3 referans seviyesinden %20 kazanç", "Daha yüksek cüzdan kazanç potansiyeli", "Gelişmiş kazanç takibi", "1 yıl premium erişim", "Siteye Film Ekleme Kazancı"] },
-  { id: 5, name: "CEO Üye", price: 1000, depth: 3, rate: 0.30, durationDays: 365, badge: "En Üst Seviye", features: ["Tüm özelliklere tam erişim", "İlk 3 referans seviyesinden %30 kazanç", "CEO film ön onay paneli", "Onayladığı film başına extra kazanç", "Siteye Film Ekleme Kazancı", "1 yıl premium erişim"] }
+  {
+    id: 1,
+    name: "Standart Üye",
+    price: 100,
+    depth: 1,
+    rate: 0.10,
+    durationDays: 365,
+    badge: "1. Seviye • %10",
+    features: [
+      "1 yıl / 365 gün premium film erişimi",
+      "Reklamsız film deneyimi",
+      "Sadece 1. seviye referanslardan %10 prim",
+      "Referans kodu paket aktif olunca görünür",
+      "Cüzdan, destek ve çekim talebi",
+      "Platformu tanımak ve reklamsız film izlemek isteyen kullanıcılar için başlangıç seviyesi"
+    ]
+  },
+  {
+    id: 2,
+    name: "VIP Üye",
+    price: 500,
+    depth: 2,
+    rate: 0.20,
+    durationDays: 365,
+    badge: "2 Seviye • %20",
+    features: [
+      "Standart Üye özelliklerinin tamamı",
+      "1. ve 2. seviye referanslardan %20 prim",
+      "3. seviye referanslardan prim kazanımı yoktur",
+      "Geniş referans ağı takibi",
+      "Referans kazanç geçmişi",
+      "1 yıl aktif premium üyelik",
+      "Haftalık ve aylık liderlik tablolarına dahil olma"
+    ]
+  },
+  {
+    id: 3,
+    name: "CEO Üye",
+    price: 1000,
+    depth: 3,
+    rate: 0.30,
+    durationDays: 365,
+    badge: "3 Seviye • %30",
+    features: [
+      "Tüm özelliklere tam erişim",
+      "1, 2 ve 3. seviye referanslardan %30 prim",
+      "En yüksek referans primi oranı",
+      "CEO film ön onay paneli",
+      "Onaylanan film katkılarıyla ek kazanç fırsatı",
+      "1 yıl premium erişim"
+    ]
+  }
 ];
 
 function id() { return crypto.randomUUID(); }
@@ -60,7 +107,14 @@ function addDays(days) { const d = new Date(); d.setDate(d.getDate() + Number(da
 function addDaysTo(dateValue, days) { const d = dateValue ? new Date(dateValue) : new Date(); d.setDate(d.getDate() + Number(days || 0)); return d.toISOString(); }
 function daysLeft(dateStr) { if (!dateStr) return 0; return Math.max(0, Math.ceil((new Date(dateStr) - new Date()) / 86400000)); }
 function isPremium(u) { return !!(u && Number(u.packageId || 0) > 0 && u.premiumUntil && new Date(u.premiumUntil) > new Date()); }
-function findPackage(packageId) { return PACKAGES.find(p => p.id === Number(packageId)); }
+function normalizePackageId(packageId) {
+  const n = Number(packageId || 0);
+  if (!n) return 0;
+  if (n > 3) return 3;
+  if (n < 0) return 0;
+  return n;
+}
+function findPackage(packageId) { return PACKAGES.find(p => p.id === normalizePackageId(packageId)); }
 function defaultMovie() {
   return {
     id: id(),
@@ -89,6 +143,14 @@ function freshDb() {
     supportTickets: [],
     notifications: [],
     passwordResets: [],
+    leaderboards: {
+      currentWeekKey: null,
+      currentMonthKey: null,
+      lastWeeklyRecruiters: [],
+      lastMonthlyRecruiters: [],
+      lastMonthlyEarners: [],
+      awardedPeriods: []
+    },
     logs: []
   };
 }
@@ -107,6 +169,17 @@ function normalizeDb(data) {
   out.notifications = Array.isArray(out.notifications) ? out.notifications : [];
   out.passwordResets = Array.isArray(out.passwordResets) ? out.passwordResets : [];
   out.logs = Array.isArray(out.logs) ? out.logs : [];
+  out.leaderboards = out.leaderboards && typeof out.leaderboards === "object" ? out.leaderboards : {};
+  out.leaderboards.currentWeekKey = out.leaderboards.currentWeekKey || null;
+  out.leaderboards.currentMonthKey = out.leaderboards.currentMonthKey || null;
+  out.leaderboards.lastWeeklyRecruiters = Array.isArray(out.leaderboards.lastWeeklyRecruiters) ? out.leaderboards.lastWeeklyRecruiters : [];
+  out.leaderboards.lastMonthlyRecruiters = Array.isArray(out.leaderboards.lastMonthlyRecruiters) ? out.leaderboards.lastMonthlyRecruiters : [];
+  out.leaderboards.lastMonthlyEarners = Array.isArray(out.leaderboards.lastMonthlyEarners) ? out.leaderboards.lastMonthlyEarners : [];
+  out.leaderboards.awardedPeriods = Array.isArray(out.leaderboards.awardedPeriods) ? out.leaderboards.awardedPeriods : [];
+  for (const u of out.users) {
+    if (u && Number(u.packageId || 0) > 3) u.packageId = 3;
+    if (u && u.role === "ceo" && Number(u.packageId || 0) !== 3 && u.role !== "admin") u.role = "user";
+  }
   return out;
 }
 function readLocalDb() {
@@ -152,6 +225,7 @@ function saveDb(d) {
 function publicUser(u) {
   if (!u) return null;
   const { passwordHash, ...safe } = u;
+  safe.packageId = normalizePackageId(safe.packageId);
   return { ...safe, premiumActive: isPremium(u), premiumDaysLeft: daysLeft(u.premiumUntil) };
 }
 function maskFirstName(v) {
@@ -207,6 +281,148 @@ function releasePending(d) {
   }
   return changed;
 }
+
+function trDateParts(dateValue = new Date()) {
+  const d = new Date(dateValue);
+  const tr = new Date(d.getTime() + 3 * 60 * 60 * 1000);
+  return { y: tr.getUTCFullYear(), m: tr.getUTCMonth() + 1, day: tr.getUTCDate(), dow: tr.getUTCDay(), h: tr.getUTCHours(), min: tr.getUTCMinutes(), tr };
+}
+function pad2(n) { return String(n).padStart(2, "0"); }
+function weekKeyFor(dateValue = new Date()) {
+  const p = trDateParts(dateValue);
+  const dayFromMonday = (p.dow + 6) % 7;
+  const start = new Date(Date.UTC(p.y, p.m - 1, p.day - dayFromMonday));
+  if (p.dow === 1 && p.h === 0 && p.min === 0) start.setUTCDate(start.getUTCDate() - 7);
+  const sy = start.getUTCFullYear();
+  const sm = pad2(start.getUTCMonth() + 1);
+  const sd = pad2(start.getUTCDate());
+  return `${sy}-${sm}-${sd}`;
+}
+function monthKeyFor(dateValue = new Date()) {
+  const p = trDateParts(dateValue);
+  return `${p.y}-${pad2(p.m)}`;
+}
+function periodRangeFromWeekKey(key) {
+  const start = new Date(`${key}T00:01:00+03:00`);
+  const end = new Date(start.getTime() + 7 * 86400000);
+  return { start, end };
+}
+function periodRangeFromMonthKey(key) {
+  const [y, m] = String(key).split("-").map(Number);
+  const start = new Date(Date.UTC(y, m - 1, 0, 21, 1, 0)); // İstanbul ayın 1'i 00:01
+  const end = new Date(Date.UTC(m === 12 ? y + 1 : y, m === 12 ? 0 : m, 0, 21, 1, 0));
+  return { start, end };
+}
+function previousWeekKey(key) {
+  const r = periodRangeFromWeekKey(key);
+  return weekKeyFor(new Date(r.start.getTime() - 60000));
+}
+function previousMonthKey(key) {
+  const [y, m] = String(key).split("-").map(Number);
+  const d = new Date(Date.UTC(y, m - 2, 1, 12, 0, 0));
+  return `${d.getUTCFullYear()}-${pad2(d.getUTCMonth() + 1)}`;
+}
+function isInRange(dateValue, range) {
+  const d = new Date(dateValue || 0);
+  return d >= range.start && d < range.end;
+}
+function leaderboardName(d, userId) {
+  const u = d.users.find(x => x.id === userId);
+  return u ? maskName(u.firstName, u.lastName) : "-****";
+}
+function recruiterRows(d, range, limit = 5) {
+  const map = new Map();
+  for (const u of d.users) {
+    if (!u.sponsorId || !isInRange(u.createdAt, range)) continue;
+    const row = map.get(u.sponsorId) || { userId: u.sponsorId, count: 0 };
+    row.count += 1;
+    map.set(u.sponsorId, row);
+  }
+  return [...map.values()]
+    .sort((a, b) => b.count - a.count || String(a.userId).localeCompare(String(b.userId)))
+    .slice(0, limit)
+    .map((r, i) => ({ rank: i + 1, userId: r.userId, maskedName: leaderboardName(d, r.userId), count: r.count }));
+}
+function referralEarnerRows(d, range, limit = 5) {
+  const map = new Map();
+  for (const t of d.transactions) {
+    if (t.type !== "bekleyen_devri" && t.type !== "referans_odul" && t.type !== "liderlik_odulu") continue;
+    const desc = String(t.desc || "").toLowerCase();
+    if (t.type === "bekleyen_devri" && !desc.includes("referans")) continue;
+    if (!isInRange(t.createdAt, range)) continue;
+    const row = map.get(t.userId) || { userId: t.userId, amount: 0 };
+    row.amount += Number(t.amount || 0);
+    map.set(t.userId, row);
+  }
+  return [...map.values()]
+    .sort((a, b) => b.amount - a.amount || String(a.userId).localeCompare(String(b.userId)))
+    .slice(0, limit)
+    .map((r, i) => ({ rank: i + 1, userId: r.userId, maskedName: leaderboardName(d, r.userId), amount: Number(r.amount.toFixed(2)) }));
+}
+function awardLeaderboardPrizes(d, periodType, periodKey, rows, prizes) {
+  d.leaderboards = d.leaderboards || { awardedPeriods: [] };
+  d.leaderboards.awardedPeriods = Array.isArray(d.leaderboards.awardedPeriods) ? d.leaderboards.awardedPeriods : [];
+  const awardKey = `${periodType}:${periodKey}`;
+  if (d.leaderboards.awardedPeriods.includes(awardKey)) return false;
+  let changed = false;
+  rows.slice(0, 3).forEach((row, idx) => {
+    const prize = prizes[idx] || 0;
+    if (!prize) return;
+    const u = d.users.find(x => x.id === row.userId);
+    if (!u) return;
+    u.balance = Number((Number(u.balance || 0) + prize).toFixed(2));
+    tx(d, u.id, prize, "liderlik_odulu", `${periodKey} ${periodType === "week" ? "haftalık" : "aylık"} üye davet liderliği ${idx + 1}. ödülü`);
+    notify(d, u.id, "Liderlik Ödülü", `${periodKey} döneminde ${idx + 1}. olduğunuz için ${prize} TL ödül bakiyenize eklendi.`, "success");
+    row.prize = prize;
+    changed = true;
+  });
+  d.leaderboards.awardedPeriods.push(awardKey);
+  return changed;
+}
+function ensureLeaderboards(d) {
+  d.leaderboards = d.leaderboards && typeof d.leaderboards === "object" ? d.leaderboards : {};
+  d.leaderboards.awardedPeriods = Array.isArray(d.leaderboards.awardedPeriods) ? d.leaderboards.awardedPeriods : [];
+  const currentWeek = weekKeyFor();
+  const currentMonth = monthKeyFor();
+  let changed = false;
+  if (!d.leaderboards.currentWeekKey) d.leaderboards.currentWeekKey = currentWeek;
+  if (!d.leaderboards.currentMonthKey) d.leaderboards.currentMonthKey = currentMonth;
+  if (d.leaderboards.currentWeekKey !== currentWeek) {
+    const prevKey = d.leaderboards.currentWeekKey || previousWeekKey(currentWeek);
+    const rows = recruiterRows(d, periodRangeFromWeekKey(prevKey), 5);
+    awardLeaderboardPrizes(d, "week", prevKey, rows, [500, 250, 100]);
+    d.leaderboards.lastWeeklyRecruiters = rows;
+    d.leaderboards.currentWeekKey = currentWeek;
+    changed = true;
+  }
+  if (d.leaderboards.currentMonthKey !== currentMonth) {
+    const prevKey = d.leaderboards.currentMonthKey || previousMonthKey(currentMonth);
+    const rows = recruiterRows(d, periodRangeFromMonthKey(prevKey), 5);
+    const earners = referralEarnerRows(d, periodRangeFromMonthKey(prevKey), 5);
+    awardLeaderboardPrizes(d, "month", prevKey, rows, [1000, 500, 250]);
+    d.leaderboards.lastMonthlyRecruiters = rows;
+    d.leaderboards.lastMonthlyEarners = earners;
+    d.leaderboards.currentMonthKey = currentMonth;
+    changed = true;
+  }
+  return changed;
+}
+function getPublicLeaderboards(d) {
+  ensureLeaderboards(d);
+  const wk = d.leaderboards.currentWeekKey || weekKeyFor();
+  const mk = d.leaderboards.currentMonthKey || monthKeyFor();
+  return {
+    currentWeekKey: wk,
+    currentMonthKey: mk,
+    weeklyRecruiters: recruiterRows(d, periodRangeFromWeekKey(wk), 5).map((r, i) => ({ ...r, prize: [500, 250, 100][i] || 0 })),
+    lastWeeklyRecruiters: (d.leaderboards.lastWeeklyRecruiters || []).map((r, i) => ({ ...r, prize: r.prize || [500, 250, 100][i] || 0 })),
+    monthlyRecruiters: recruiterRows(d, periodRangeFromMonthKey(mk), 5).map((r, i) => ({ ...r, prize: [1000, 500, 250][i] || 0 })),
+    lastMonthlyRecruiters: (d.leaderboards.lastMonthlyRecruiters || []).map((r, i) => ({ ...r, prize: r.prize || [1000, 500, 250][i] || 0 })),
+    weeklyEarners: referralEarnerRows(d, periodRangeFromWeekKey(wk), 5),
+    monthlyEarners: referralEarnerRows(d, periodRangeFromMonthKey(mk), 5),
+    lastMonthlyEarners: d.leaderboards.lastMonthlyEarners || []
+  };
+}
 function expireExpiredPackages(d) {
   let changed = false;
   for (const u of d.users) {
@@ -225,7 +441,8 @@ function expireExpiredPackages(d) {
 function processDb(d) {
   const a = expireExpiredPackages(d);
   const b = releasePending(d);
-  if (a || b) saveDb(d);
+  const c = ensureLeaderboards(d);
+  if (a || b || c) saveDb(d);
 }
 function getUserFromReq(req, d) { return d.users.find(u => u.id === req.auth.id); }
 function auth(req, res, next) {
@@ -244,7 +461,7 @@ function adminOnly(req, res, next) {
 function ceoOnly(req, res, next) {
   const d = readDb(); processDb(d);
   const u = getUserFromReq(req, d);
-  if (!u || !(u.role === "admin" || (isPremium(u) && Number(u.packageId) === 5))) return res.status(403).json({ error: "CEO yetkisi gerekli" });
+  if (!u || !(u.role === "admin" || (isPremium(u) && Number(normalizePackageId(u.packageId)) === 3))) return res.status(403).json({ error: "CEO yetkisi gerekli" });
   req.db = d; req.user = u; next();
 }
 function userRequired(req, res, next) {
@@ -304,12 +521,12 @@ async function seedAdmin() {
     d.users.push({
       id: id(), firstName: "Yılmaz", lastName: "Oral", email: ADMIN_EMAIL, phone: "05000000000",
       passwordHash: bcrypt.hashSync(ADMIN_PASS, 10), referralCode: "ADMIN", sponsorId: null,
-      packageId: 5, premiumStartedAt: now(), premiumUntil: addDays(3650), balance: 0,
+      packageId: 3, premiumStartedAt: now(), premiumUntil: addDays(3650), balance: 0,
       role: "admin", banned: false, createdAt: now()
     });
   } else {
     admin.role = "admin";
-    admin.packageId = 5;
+    admin.packageId = 3;
     admin.referralCode = admin.referralCode || "ADMIN";
     admin.premiumStartedAt = admin.premiumStartedAt || now();
     admin.premiumUntil = admin.premiumUntil || addDays(3650);
@@ -364,6 +581,11 @@ app.get("/api/film-preview", (req, res) => {
   res.send(`<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;background:#080b14;color:#fff;font-family:Arial,sans-serif;min-height:100vh;overflow:hidden}.stage{min-height:100vh;display:grid;place-items:center;padding:18px;background:radial-gradient(circle at 20% 20%,rgba(246,181,30,.18),transparent 36%),linear-gradient(135deg,#070a13,#111827)}img{width:min(980px,96vw);max-height:82vh;object-fit:cover;border-radius:22px;box-shadow:0 28px 80px rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.12)}.badge{position:fixed;left:18px;top:18px;background:rgba(0,0,0,.64);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:10px 14px;font-size:13px;color:#f6b51e}</style></head><body><div class="badge">Premium içerik ön izlemesi</div><div class="stage"><img src="/assets/film-afisleri-vitrin.png" alt="Film afişleri"></div></body></html>`);
 });
 app.get("/api/packages", (req, res) => res.json(PACKAGES));
+app.get("/api/leaderboards", async (req, res) => {
+  const d = readDb();
+  processDb(d);
+  res.json(getPublicLeaderboards(d));
+});
 
 app.post("/api/register", async (req, res) => {
   const d = readDb(); processDb(d);
@@ -448,7 +670,7 @@ app.post("/api/payment", auth, userRequired, async (req, res) => {
     });
   }
 
-  const currentId = isPremium(req.user) ? Number(req.user.packageId || 0) : 0;
+  const currentId = isPremium(req.user) ? normalizePackageId(req.user.packageId) : 0;
   if (currentId && Number(pack.id) < currentId) return res.status(400).json({ error: "Mevcut paketinizden düşük paket seçemezsiniz" });
 
   const value = Number(amount || pack.price);
@@ -586,7 +808,7 @@ app.post("/api/admin/payments/:id/approve", auth, adminOnly, async (req, res) =>
   u.packageId = pack.id;
   u.premiumStartedAt = u.premiumStartedAt || now();
   u.premiumUntil = addDaysTo(startFrom, pack.durationDays);
-  if (pack.id === 5 && u.role !== "admin") u.role = "ceo";
+  if (pack.id === 3 && u.role !== "admin") u.role = "ceo";
   if (!u.referralCode) u.referralCode = makeRef();
   tx(req.db, u.id, 0, "paket_onay", `${pack.name} paketi onaylandı`);
   notify(req.db, u.id, "Premium Paket Onaylandı", `${pack.name} paketiniz aktif edildi.`, "success");

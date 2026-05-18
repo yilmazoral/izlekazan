@@ -168,6 +168,7 @@ function page(id) {
 
   window.scrollTo(0, 0);
 
+  if (id === "home") loadLeaderboards();
   if (id === "packages") loadPackages();
   if (id === "panel") dash();
   if (id === "movies") {
@@ -308,7 +309,7 @@ async function loadPackages() {
         </button>
         <div class="packageAccordionBody" id="packageBody${x.id}">
           <div class="price">${x.price} TL / Yıl</div>
-          <p>1 yıl geçerli | ${x.depth} seviye | %${x.rate * 100} prim</p>
+          <p>1 yıl geçerli | ${x.depth === 1 ? "1. seviye" : "1, 2 ve 3. seviye"} | %${Math.round(x.rate * 100)} prim</p>
           ${standardDescription}
           <ul>${x.features.map((f) => `<li>${f}</li>`).join("")}</ul>
           ${currentNote}${disabledNote}
@@ -459,7 +460,7 @@ async function dash() {
           </div>
           <div class="memberHeroActions">
             <span class="accountStatus ${premiumActive ? "active" : "passive"}">${premiumActive ? "Premium Aktif" : "Premium Pasif"}</span>
-            <button onclick="page('packages')">${premiumActive && d.user.packageId === 5 ? "Paketi Yenile" : "Paketi Yükselt / Yenile"}</button>
+            <button onclick="page('packages')">${premiumActive && d.user.packageId === 3 ? "Paketi Yenile" : "Paketi Yükselt / Yenile"}</button>
           </div>
         </div>
 
@@ -871,6 +872,43 @@ async function noMovie(id) {
   ceo();
 }
 
+
+function renderLeaderboardRows(rows, type) {
+  const unit = type === "amount" ? "TL" : "üye";
+  return (rows || []).slice(0, 5).map((r, idx) => {
+    const value = type === "amount" ? `${Number(r.amount || 0).toLocaleString("tr-TR")} ${unit}` : `${Number(r.count || 0).toLocaleString("tr-TR")} ${unit}`;
+    const prize = r.prize ? `<small>Ödül: ${Number(r.prize).toLocaleString("tr-TR")} TL</small>` : "";
+    return `<li><b>${idx + 1}</b><span>${r.maskedName || "-"}</span><strong>${value}</strong>${prize}</li>`;
+  }).join("") || `<li class="emptyLeader"><span>Henüz veri yok</span></li>`;
+}
+
+async function loadLeaderboards() {
+  const box = $("leaderboardHome");
+  if (!box) return;
+  box.innerHTML = `<div class="leaderboardLoading">Liderlik tabloları yükleniyor...</div>`;
+  try {
+    const d = await api("/api/leaderboards");
+    box.innerHTML = `
+      <div class="sectionIntro compactIntro leaderboardIntro">
+        <span>Canlı Liderlik Alanı</span>
+        <h2>Haftalık ve Aylık Liderlik Tabloları</h2>
+        <p>Listeler referans sistemi üzerinden oluşur. Üye güvenliği için soyadlar maskeli gösterilir.</p>
+      </div>
+      <div class="leaderboardGrid">
+        <div class="leaderCard prizeLeader"><span>Bu Haftanın Üye Liderleri</span><h3>En Çok Üye Getirenler</h3><ol>${renderLeaderboardRows(d.weeklyRecruiters, "count")}</ol></div>
+        <div class="leaderCard"><span>Geçen Haftanın Kazananları</span><h3>Ödül Alanlar</h3><ol>${renderLeaderboardRows(d.lastWeeklyRecruiters, "count")}</ol></div>
+        <div class="leaderCard prizeLeader"><span>Bu Ayın Üye Liderleri</span><h3>Aylık Davet Sıralaması</h3><ol>${renderLeaderboardRows(d.monthlyRecruiters, "count")}</ol></div>
+        <div class="leaderCard"><span>Geçen Ayın Kazananları</span><h3>Aylık Ödül Alanlar</h3><ol>${renderLeaderboardRows(d.lastMonthlyRecruiters, "count")}</ol></div>
+        <div class="leaderCard"><span>Bu Haftanın En Çok Kazananları</span><h3>Referans Geliri</h3><ol>${renderLeaderboardRows(d.weeklyEarners, "amount")}</ol></div>
+        <div class="leaderCard"><span>Bu Ayın En Çok Kazananları</span><h3>Referans Geliri</h3><ol>${renderLeaderboardRows(d.monthlyEarners, "amount")}</ol></div>
+        <div class="leaderCard wideLeader"><span>Geçen Ayın En Çok Para Kazananları</span><h3>Referans Geliri Arşivi</h3><ol>${renderLeaderboardRows(d.lastMonthlyEarners, "amount")}</ol></div>
+      </div>
+      <p class="leaderboardNote">Haftalık üye liderliği her pazartesi 00:01'de, aylık liderlikler ayın ilk günü 00:01'de yeni dönem için sıfırlanır. İzleKazan sabit veya garanti gelir taahhüdü vermez.</p>`;
+  } catch (e) {
+    box.innerHTML = `<div class="card">Liderlik tabloları şu anda yüklenemedi.</div>`;
+  }
+}
+
 async function publicWithdrawals() {
   const box = $("publicWithdrawalsBox");
   if (!box) return;
@@ -1107,7 +1145,7 @@ function openFilmModal(url, locked = false) {
     return;
   }
 
-  // v2026.05.17-013:
+  // v2026.05.17-016:
   // Premium üyede iframe kullanılmaz; gizli sunucu geçidi üzerinden film sitesi doğrudan açılır.
   // Mobil kullanıcılar uygulama moduna zorlandığı için adres çubuğu görünmeden kullanım hedeflenir.
   if (!locked && isSafeRelativeFilmGateway) {
@@ -1121,7 +1159,7 @@ function openFilmModal(url, locked = false) {
   const shell = document.querySelector(".watchShell");
   if (shell) {
     shell.classList.toggle("lockedWatch", filmIsLocked);
-    // v2026.05.17-007: Premium üyelerde film sitesi kırpılmadan tam görünür.
+    // v2026.05.17-016: Premium üyelerde film sitesi kırpılmadan tam görünür.
     // Üst bölüm gizleme/crop kaldırıldı; sadece adres çubuğunda gerçek adres gizli kalır.
   }
 
@@ -1284,7 +1322,7 @@ function fullscreenMovie() {
   const overlay = $("filmLockOverlay");
   if (!shell) return;
 
-  // v2026.05.17-009:
+  // v2026.05.17-016:
   // İframe içindeki yabancı player tam ekran API'si her tarayıcıda çalışmadığı için
   // İzleKazan tarafında zorunlu ekranı kapla modu kullanılır. Bu mod tarayıcı
   // fullscreen iznine bağlı kalmadan iframe alanını viewport'un tamamına yayar.
@@ -1378,7 +1416,7 @@ function checkResetLink() {
 init();
 
 
-// v2026.05.17-010: Görünür sürüm etiketi artık VERSION.json / /api/version üzerinden otomatik senkronize edilir.
+// v2026.05.17-016: Görünür sürüm etiketi artık VERSION.json / /api/version üzerinden otomatik senkronize edilir.
 async function syncSiteVersionLabel() {
   const el = document.getElementById("siteVersionLabel");
   if (!el) return;
@@ -1396,7 +1434,7 @@ if (document.readyState === "loading") {
 }
 
 
-// v2026.05.17-013: PWA / Ana ekrana ekleme ve adres çubuğu olmadan kullanım desteği.
+// v2026.05.17-016: PWA / Ana ekrana ekleme ve adres çubuğu olmadan kullanım desteği.
 let izleKazanDeferredInstallPrompt = null;
 function isStandalonePwaMode() {
   return window.matchMedia && window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
@@ -1436,7 +1474,7 @@ function dismissPwaInstallBanner() {
 }
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js?v=v20260517012").catch(() => {});
+    navigator.serviceWorker.register("/sw.js?v=v20260517016").catch(() => {});
     showPwaInstallUi();
   });
 } else {
@@ -1444,7 +1482,7 @@ if ("serviceWorker" in navigator) {
 }
 
 
-// v2026.05.17-013: Mobilde uygulama yüklü değilse site içeriğini kilitle.
+// v2026.05.17-016: Mobilde uygulama yüklü değilse site içeriğini kilitle.
 function isMobileLikeDevice() {
   return window.matchMedia && (window.matchMedia("(max-width: 820px)").matches || window.matchMedia("(hover: none) and (pointer: coarse)").matches);
 }

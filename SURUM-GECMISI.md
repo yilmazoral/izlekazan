@@ -1,3 +1,48 @@
+# Sürüm Geçmişi
+
+## v2026.05.17-015 — 2026-05-18
+
+**Özet:** Paket sistemi 3 pakete indirildi ve ana sayfaya haftalık/aylık liderlik tabloları eklendi.
+
+### Yapılanlar
+- Üyelik paketleri **Standart Üye**, **VIP Üye** ve **CEO Üye** olarak 3 pakete düşürüldü.
+- Standart Üye: sadece 1. seviyeden %10 referans primi.
+- VIP Üye: 1, 2 ve 3. seviyeden %20 referans primi.
+- CEO Üye: 1, 2 ve 3. seviyeden %30 referans primi.
+- Eski 4. ve 5. paketlerden gelen kullanıcılar veri kaybı olmadan CEO Üye paketine eşlenecek şekilde güvenli geçiş eklendi.
+- Ana sayfaya herkese açık liderlik tabloları eklendi.
+- Haftalık en çok üye getiren ilk 5 kişi listelenir; 1. 500 TL, 2. 250 TL, 3. 100 TL ödül alır.
+- Aylık en çok üye getiren ilk 5 kişi listelenir; 1. 1000 TL, 2. 500 TL, 3. 250 TL ödül alır.
+- Haftanın ve ayın en çok referans geliri kazananları listelenir; bu tablolara ödül verilmez.
+- Geçen haftanın kazananları, geçen ayın kazananları ve geçen ayın en çok kazananları ayrı tabloda saklanır.
+- Haftalık dönem pazartesi 00:01, aylık dönem ayın 1'i 00:01 esas alınarak yenilenir.
+
+### Korunan kritik özellikler
+- Supabase kalıcı veritabanı.
+- Profesyonel panel tasarımları.
+- Üye paneli ve paket akordeon sistemi.
+- Referans davet linki.
+- Mükerrer ödeme koruması.
+- PWA mobil kullanım modu.
+- Gizli film gateway.
+
+# v2026.05.17-014 - Mobil Alt Boşluk Kesin Düzeltme
+
+## Yapılanlar
+- Mobilde eski `!important` padding kuralları daha güçlü yeni kurallarla ezildi.
+- `body`, `main`, aktif sayfa ve footer boşlukları yeniden dengelendi.
+- Veri tabanı, paketler, filmler ve kısa içerikli sayfalarda içerik bittikten sonra oluşan büyük boşluk azaltıldı.
+- Alt sabit menünün içeriğin üstüne binmemesi için footer alt boşluğu kontrollü bırakıldı.
+- Boş public tablo alanları mobilde görünmez hale getirildi.
+- Sürüm etiketi, `VERSION.json`, `/api/version` ve cache sürümleri v2026.05.17-014 ile senkronlandı.
+
+## Korunan Özellikler
+- PWA zorunlu mobil kullanım modu korundu.
+- Referans davet linki sistemi korundu.
+- Paket akordeonları korundu.
+- Film vitrini ve profesyonel metin değişiklikleri korundu.
+- Supabase kalıcı veritabanı ve mükerrer ödeme engeli korundu.
+
 # v2026.05.17-013 - Toplu Notlar / Paket Akordeon / Film Vitrini / Mobil Boşluk
 
 - Referans paylaşımında linkin iki kez görünmesi düzeltildi.
@@ -211,3 +256,13 @@ Her sürümde şu bilgiler yazılacak:
 - iPhone/Safari için `apple-mobile-web-app-*` meta etiketleri eklendi.
 - Uygulama ikonları `assets/icon-192.png` ve `assets/icon-512.png` olarak eklendi.
 - Önceki korumalı özellikler korunmuştur: Supabase, referans linki, üye paneli akordeon, premium kontrolü, gizli film linki, mükerrer ödeme engeli.
+
+## v2026.05.17-016 — Paket fiyatları ve VIP komisyon düzeltmesi
+
+- Paket fiyatları Standart Üye 100 TL, VIP Üye 500 TL, CEO Üye 1000 TL olarak güncellendi.
+- VIP Üye artık yalnızca 1. ve 2. seviyeden %20 referans primi kazanır.
+- VIP Üye için 3. seviye referans primi kaldırıldı.
+- Standart Üye 1. seviyeden %10, CEO Üye 1, 2 ve 3. seviyeden %30 prim sistemi korunmuştur.
+- Paket kartı rozetleri ve açıklama metinleri yeni sisteme göre güncellendi.
+- Sürüm etiketi, VERSION.json, server fallback ve cache parametreleri v2026.05.17-016 olarak senkronlandı.
+- Korunan özellikler: Supabase kalıcı veritabanı, PWA zorunlu kullanım modu, referans davet linki, liderlik tabloları, paket/üye paneli akordeonları, mükerrer ödeme koruması ve gizlilik maskelemesi.

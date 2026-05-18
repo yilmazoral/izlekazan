@@ -1,17 +1,18 @@
-İzleKazan v2026.05.17-013 Yükleme Talimatı
+İzleKazan v2026.05.17-015 Yükleme Talimatı
 
-1) ZIP içindeki tüm dosyaları GitHub ana dizinine yükleyin.
-2) Özellikle şu dosyalar eksik kalmasın:
-   - index.html
-   - style.css
-   - app.js
-   - server.js
-   - VERSION.json
-   - SURUM-GECMISI.md
-   - manifest.json
-   - sw.js
-   - assets klasörü
-3) Render üzerinde Manual Deploy > Deploy latest commit yapın.
-4) Deploy bittikten sonra https://izlekazan.onrender.com/api/version adresinden sürümü kontrol edin.
-5) Mobilde normal tarayıcıdan açıldığında yalnızca Uygulamayı Yükle ekranı görünmelidir.
-6) Ana ekrana eklenen uygulama ikonundan açıldığında site normal çalışmalıdır.
+Bu sürüm mobil sayfalarda içerik bittikten sonra oluşan gereksiz alt boşluğu düzeltir.
+
+Yükleme:
+1. ZIP içindeki tüm dosyaları GitHub depo ana dizinine yükleyin.
+2. assets klasörünü eksiksiz yükleyin.
+3. Render otomatik deploy etmezse Manual Deploy > Deploy latest commit yapın.
+4. Deploy sonrası /api/version ve footer sürümünün v2026.05.17-015 olduğunu kontrol edin.
+
+Özellikle güncellenen dosyalar:
+- index.html
+- style.css
+- app.js
+- server.js
+- VERSION.json
+- SURUM-GECMISI.md
+- sw.js
