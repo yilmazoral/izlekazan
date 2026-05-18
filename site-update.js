@@ -1,8 +1,8 @@
-// İzleKazan v2026.05.18-017 güncelleme yamaları
-// Bu dosya app.js yüklendikten sonra çalışır; paket görünümü, liderlik tabloları ve küçük davranış düzeltmelerini uygular.
+// İzleKazan v2026.05.18-018 güncelleme yamaları
+// Bu dosya app.js yüklendikten sonra çalışır; paket görünümü, liderlik tabloları ve mobil görünüm düzeltmelerini uygular.
 
 (function () {
-  const VERSION = "v2026.05.18-017";
+  const VERSION = "v2026.05.18-018";
 
   function safeCell(value, fallback = "-") {
     return value === undefined || value === null || value === "" ? fallback : value;
@@ -85,12 +85,12 @@
   }
 
   function ensurePatchStyles() {
-    if (document.getElementById("ik-v20260518017-style")) return;
+    if (document.getElementById("ik-v20260518018-style")) return;
     const style = document.createElement("style");
-    style.id = "ik-v20260518017-style";
+    style.id = "ik-v20260518018-style";
     style.textContent = `
-      .packageGrid.v20260518017{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:start}
-      .package.v20260518017{padding:0;overflow:hidden;border:1px solid rgba(255,255,255,.12);background:rgba(15,23,42,.72)}
+      .packageGrid.v20260518018{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:start}
+      .package.v20260518018{padding:0;overflow:hidden;border:1px solid rgba(255,255,255,.12);background:rgba(15,23,42,.72)}
       .packageHeaderBtn{width:100%;border-radius:0;background:transparent;color:var(--text,#fff);box-shadow:none;border:0;padding:22px;text-align:left;display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
       .packageHeaderBtn:hover{transform:none;box-shadow:none;background:rgba(255,255,255,.04)}
       .packageHeaderMain{display:flex;flex-direction:column;gap:8px}
@@ -112,8 +112,44 @@
       .leaderboardTable td{padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06)}
       .leaderboardRank{width:32px;color:var(--gold2,#ffd36a);font-weight:900}
       .leaderboardEmpty{color:var(--muted,#a8b3c7);font-size:13px;margin:0}
-      @media(max-width:1020px){.leaderboardGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.packageGrid.v20260518017{grid-template-columns:1fr}}
+      @media(max-width:1020px){.leaderboardGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.packageGrid.v20260518018{grid-template-columns:1fr}}
       @media(max-width:640px){.leaderboardGrid{grid-template-columns:1fr}.packageHeaderBtn{flex-direction:column}.packageHeaderPrice{font-size:18px}}
+
+      .leaderboardSection,.leaderboardCard,.leaderboardTable,.leaderboardTable *{box-sizing:border-box}
+      .leaderboardTable{table-layout:fixed;min-width:0}
+      .leaderboardTable th:nth-child(1),.leaderboardTable td:nth-child(1){width:44px}
+      .leaderboardTable th:nth-child(3),.leaderboardTable td:nth-child(3){width:92px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+      .leaderboardTable th:nth-child(2),.leaderboardTable td:nth-child(2){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .leaderboardAmount{font-weight:800;color:var(--gold2,#ffd36a)}
+      .ikMobileBottomBarFix{left:0!important;right:0!important;width:100vw!important;max-width:100vw!important;box-sizing:border-box!important;overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))!important}
+      .ikMobileBottomBarFix a,.ikMobileBottomBarFix button{flex:0 0 auto!important;min-width:68px!important;white-space:nowrap!important;font-size:11px!important;line-height:1.15!important}
+      @media(max-width:760px){
+        html,body{overflow-x:hidden!important}
+        body{padding-bottom:calc(108px + env(safe-area-inset-bottom,0px))!important}
+        main,.container,.page,.section{max-width:100%;box-sizing:border-box}
+        .page.active,#home{padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))!important}
+        .leaderboardSection.card{margin-left:0!important;margin-right:0!important;padding:18px 12px 22px!important;overflow:visible!important}
+        .leaderboardGrid{grid-template-columns:1fr!important;gap:18px!important;width:100%!important;max-width:100%!important}
+        .leaderboardCard{width:100%!important;max-width:100%!important;min-width:0!important;padding:17px 12px!important;border-radius:20px!important;overflow:hidden!important}
+        .leaderboardCard h3{font-size:18px!important;line-height:1.25!important;margin-bottom:16px!important;word-break:normal!important}
+        .leaderboardTable{width:100%!important;max-width:100%!important;table-layout:fixed!important;font-size:12.5px!important;border-collapse:collapse!important}
+        .leaderboardTable th{display:table-cell!important;padding:0 0 8px!important;font-size:10.5px!important;letter-spacing:.04em!important}
+        .leaderboardTable td{display:table-cell!important;padding:10px 0!important;vertical-align:middle!important}
+        .leaderboardTable th:nth-child(1),.leaderboardTable td:nth-child(1){width:42px!important;min-width:42px!important}
+        .leaderboardTable th:nth-child(3),.leaderboardTable td:nth-child(3){width:82px!important;min-width:82px!important;text-align:right!important;white-space:nowrap!important;display:table-cell!important}
+        .leaderboardTable th:nth-child(2),.leaderboardTable td:nth-child(2){width:auto!important;min-width:0!important;max-width:1px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;padding-right:8px!important}
+        .leaderboardRank{font-size:14px!important}
+        .leaderboardAmount{font-size:12px!important}
+        .bottomNav,.mobileBottomNav,.mobileNav,.tabBar,.mobileTabBar,.bottomMenu,.mobile-menu,.bottom-nav,#mobileNav,#bottomNav{left:0!important;right:0!important;width:100vw!important;max-width:100vw!important;box-sizing:border-box!important;overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))!important}
+        .bottomNav a,.mobileBottomNav a,.mobileNav a,.tabBar a,.mobileTabBar a,.bottomMenu a,.mobile-menu a,.bottom-nav a,#mobileNav a,#bottomNav a,.bottomNav button,.mobileBottomNav button,.mobileNav button,.tabBar button,.mobileTabBar button,.bottomMenu button,.mobile-menu button,.bottom-nav button,#mobileNav button,#bottomNav button{flex:0 0 auto!important;min-width:68px!important;font-size:11px!important;line-height:1.15!important;white-space:nowrap!important}
+      }
+      @media(max-width:380px){
+        .leaderboardCard{padding:15px 10px!important}
+        .leaderboardTable{font-size:11.5px!important}
+        .leaderboardTable th:nth-child(1),.leaderboardTable td:nth-child(1){width:36px!important;min-width:36px!important}
+        .leaderboardTable th:nth-child(3),.leaderboardTable td:nth-child(3){width:74px!important;min-width:74px!important}
+        .leaderboardAmount{font-size:11px!important}
+      }
     `;
     document.head.appendChild(style);
   }
@@ -142,13 +178,13 @@
     const el = $("packageList");
     if (!el) return;
     ensurePatchStyles();
-    el.classList.add("v20260518017");
+    el.classList.add("v20260518018");
     el.innerHTML = packs.map((x) => {
       const state = packageButtonState(x);
       const currentNote = state.className === "currentPackage" ? `<div class="packageNote">Mevcut paketiniz. Yenileme yaparsanız yeni süre mevcut bitiş tarihinden sonra başlar.</div>` : "";
       const disabledNote = state.disabled ? `<div class="packageNote muted">Bu paket mevcut paketinizden düşük olduğu için seçilemez.</div>` : "";
       return `
-        <div class="package v20260518017 ${state.className}">
+        <div class="package v20260518018 ${state.className}">
           <button class="packageHeaderBtn" type="button" onclick="togglePackageAccordion(${x.id})" aria-controls="packageDetail-${x.id}">
             <span class="packageHeaderMain">
               <span class="badge">${x.badge}</span>
@@ -322,7 +358,7 @@
                 ${rows.map((r, i) => `<tr>
                   <td class="leaderboardRank">${i + 1}</td>
                   <td>${safeCell(r.maskedName || r.name)}</td>
-                  <td>${money(r.amount)}</td>
+                  <td class="leaderboardAmount">${money(r.amount)}</td>
                 </tr>`).join("")}
               </tbody>
             </table>` : `<p class="leaderboardEmpty">Henüz bu kategori için liderlik verisi oluşmadı.</p>`}
@@ -345,16 +381,37 @@
   };
 
   const originalPage = window.page;
-  if (typeof originalPage === "function" && !originalPage.__ikPatchedV20260518017) {
+  if (typeof originalPage === "function" && !originalPage.__ikPatchedV20260518018) {
     const patchedPage = function patchedPage(id) {
       const result = originalPage.apply(this, arguments);
       const targetId = id === "withdrawalsPublic" ? "database" : id;
-      if (targetId === "home") setTimeout(loadHomeLeaderboards, 150);
+      if (targetId === "home") { setTimeout(loadHomeLeaderboards, 150); setTimeout(tuneMobileBottomBars, 300); }
       return result;
     };
-    patchedPage.__ikPatchedV20260518017 = true;
+    patchedPage.__ikPatchedV20260518018 = true;
     window.page = patchedPage;
   }
+
+
+  function tuneMobileBottomBars() {
+    if (window.innerWidth > 760) return;
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+    document.querySelectorAll("body *").forEach((el) => {
+      if (!el || el.id === "homeLeaderboards") return;
+      const cs = window.getComputedStyle(el);
+      if (!cs) return;
+      const isFixed = cs.position === "fixed" || cs.position === "sticky";
+      if (!isFixed) return;
+      const r = el.getBoundingClientRect();
+      const nearBottom = r.bottom >= vh - 8 && r.top > vh - 180;
+      const wideEnough = r.width >= window.innerWidth * 0.65;
+      const shortEnough = r.height > 32 && r.height < 170;
+      if (nearBottom && wideEnough && shortEnough) el.classList.add("ikMobileBottomBarFix");
+    });
+  }
+
+  window.addEventListener("resize", () => setTimeout(tuneMobileBottomBars, 120));
+  window.addEventListener("orientationchange", () => setTimeout(tuneMobileBottomBars, 250));
 
   function refreshVisibleVersion() {
     const meta = document.querySelector('meta[name="app-version"]');
@@ -366,6 +423,8 @@
   setTimeout(() => {
     refreshVisibleVersion();
     if ($("packageList")) loadPackages().catch(() => {});
+    tuneMobileBottomBars();
     if ($("home") && $("home").classList.contains("active")) loadHomeLeaderboards();
   }, 250);
+  setTimeout(tuneMobileBottomBars, 900);
 })();

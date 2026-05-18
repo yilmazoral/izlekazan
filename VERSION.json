@@ -1,17 +1,17 @@
 {
-  "currentVersion": "v2026.05.18-017",
+  "currentVersion": "v2026.05.18-018",
   "releaseDate": "2026-05-18",
   "project": "İzleKazan",
-  "summary": "Ana sayfa liderlik tabloları 8 kategoriye ayrıldı; VIP paket 1. ve 2. seviye ile sınırlandı; paket akordeon içeriğinde tutar tekrarları kaldırıldı.",
+  "summary": "Mobil liderlik tablolarında Tutar sütunu görünürlüğü, alt mobil menü taşması ve sayfa alt boşluğu düzeltildi.",
   "changes": [
-    "Ana sayfaya 8 başlıklı liderlik tablosu alanı eklendi.",
-    "Her liderlik kategorisinde en fazla 5 kişi ve tutar gösterilecek şekilde API ve frontend hazırlandı.",
-    "Veri yokken tablo kaybolmak yerine 'Henüz bu kategori için liderlik verisi oluşmadı.' mesajı gösterilir.",
-    "VIP Üye paketi 500 TL, sadece 1. ve 2. seviyeden %20 kazanç alacak şekilde sabitlendi.",
-    "3. seviye kazanç bilgisi yalnızca CEO Üye paketinde bırakıldı.",
-    "Paket başlığında görünen tutar, akordeon detay bölümünde tekrar gösterilmez.",
-    "Cache sürümü v20260518017 olarak güncellendi.",
-    "Footer ve meta sürüm etiketi v2026.05.18-017 olarak güncellendi."
+    "Mobilde liderlik tabloları Sıra / Üye / Tutar şeklinde sabit sütun düzenine alındı.",
+    "Tutar sütunu sağa hizalı, dar ekranlarda görünür kalacak şekilde optimize edildi.",
+    "Üye adı sütununda taşma engellendi; uzun adlar üç nokta ile kısaltılır.",
+    "Liderlik kartlarının mobil genişlik, padding ve taşma davranışı düzeltildi.",
+    "Alt mobil menünün sağdan kesilmesini azaltmak için güvenli alan ve yatay kaydırma düzeltmesi eklendi.",
+    "Sayfa altına mobil menüye çarpmayacak güvenli boşluk eklendi.",
+    "Cache sürümü v20260518018 olarak güncellendi.",
+    "Footer ve meta sürüm etiketi v2026.05.18-018 olarak güncellendi."
   ],
   "protectedFeatures": [
     "Supabase kalıcı veritabanı aktif kalmalı.",

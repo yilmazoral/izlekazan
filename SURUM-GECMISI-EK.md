@@ -1,28 +1,21 @@
-## v2026.05.18-017 — 2026-05-18
+## v2026.05.18-018 — Mobil Liderlik Tablosu Düzeltmesi
 
-**Özet:** Ana sayfa liderlik tabloları görünür hale getirildi, VIP paket seviye hatası düzeltildi ve paket akordeon detaylarındaki tutar tekrarı kaldırıldı.
+Tarih: 2026-05-18
 
-### Yapılanlar
-- Ana sayfada 8 liderlik kategorisi oluşturuldu:
-  1. Haftalık Referans Liderleri
-  2. Aylık Referans Liderleri
-  3. Haftalık En Çok Kazananı
-  4. Ayın En Çok Kazananı
-  5. Geçen Haftanın Referans Lideri
-  6. Geçen Ayın Referans Lideri
-  7. Geçen Haftanın En Çok Kazananı
-  8. Geçen Ayın En Çok Kazananı
-- Her kategoride ilk 5 kişi ve tutar gösterilecek yapı kuruldu.
-- Veri yokken liderlik kartları gizlenmez; "Henüz bu kategori için liderlik verisi oluşmadı." mesajı gösterilir.
-- VIP Üye paketi yalnızca 1. ve 2. seviyeden %20 kazanç verecek şekilde düzeltildi.
-- 3. seviye bilgisi sadece CEO Üye paketinde bırakıldı.
-- Paket akordeon başlığında fiyat kalır; açılan detay bölümünde paket tutarı tekrar yazmaz.
-- `VERSION.json`, footer sürüm etiketi ve cache parametreleri `v20260518017` olarak güncellendi.
+### Değişiklikler
+- Mobil görünümde liderlik tablolarındaki `Tutar` sütununun görünmemesi düzeltildi.
+- Liderlik tabloları mobilde `Sıra / Üye / Tutar` şeklinde sabit sütun yapısına alındı.
+- `Tutar` sütunu sağa hizalandı ve dar ekranlarda görünür kalacak şekilde genişlikleri ayarlandı.
+- Uzun üye adlarının tabloyu taşırması engellendi; mobilde üç nokta ile kısaltılır.
+- Liderlik kartlarının mobil padding, genişlik ve taşma davranışları iyileştirildi.
+- Alt mobil menünün ekranı kesmesi ve içerikle çakışması için güvenli alt boşluk eklendi.
+- Sağdaki menü öğelerinin kesilmesini azaltmak için mobil alt menüye yatay kaydırma ve güvenli alan düzeltmesi eklendi.
+- Cache sürümü `v20260518018` olarak güncellendi.
+- Footer ve meta sürüm etiketi `v2026.05.18-018` olarak güncellendi.
 
-### Korunan kritik özellikler
-- Supabase kalıcı veritabanı.
-- Gizli film gateway ve premium erişim kontrolü.
-- Mükerrer ödeme bildirimi/onayı engeli.
-- Açık listelerde gizlilik formatı.
-- Admin panelinde tam bilgi görünümü.
+### Korunanlar
+- v2026.05.18-017 ile gelen 8 liderlik kategorisi korunmuştur.
+- VIP Üye sadece 1. ve 2. seviyeden %20 kazanç alır; 3. seviye bilgisi VIP paketinde gösterilmez.
+- 3. seviye kazanç bilgisi yalnızca CEO Üye paketindedir.
+- Supabase kalıcı veritabanı ve mevcut gizlilik formatı korunmuştur.
 
