@@ -28,9 +28,9 @@ function readVersionInfo() {
       return JSON.parse(fs.readFileSync(versionFile, "utf8"));
     }
   } catch (e) {}
-  return { currentVersion: process.env.APP_VERSION || "v2026.05.17-012", project: "İzleKazan" };
+  return { currentVersion: process.env.APP_VERSION || "v2026.05.17-013", project: "İzleKazan" };
 }
-const APP_VERSION = process.env.APP_VERSION || readVersionInfo().currentVersion || "v2026.05.17-012";
+const APP_VERSION = process.env.APP_VERSION || readVersionInfo().currentVersion || "v2026.05.17-013";
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_KEY || "";

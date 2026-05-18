@@ -296,18 +296,36 @@ async function loadPackages() {
       const state = packageButtonState(x);
       const currentNote = state.className === "currentPackage" ? `<div class="packageNote">Mevcut paketiniz. Yenileme yaparsanız yeni süre mevcut bitiş tarihinden sonra başlar.</div>` : "";
       const disabledNote = state.disabled ? `<div class="packageNote muted">Bu paket mevcut paketinizden düşük olduğu için seçilemez.</div>` : "";
+      const standardDescription = Number(x.id) === 1
+        ? `<p class="packageProDescription">Platformu deneyimlemek ve sistemi yakından tanımak isteyen kullanıcılar için başlangıç seviyesidir. Premium üyeliğe geçiş yaparak tüm içerik ve avantajlara erişebilirsiniz. Daha düşük referans kazanç yapısı nedeniyle bu paket genellikle reklamsız ve kesintisiz film deneyimine odaklanan kullanıcılar tarafından tercih edilmektedir.</p>`
+        : "";
       return `
-      <div class="package ${state.className}">
-        <span class="badge">${x.badge}</span>
-        <h3>${x.name}</h3>
-        <div class="price">${x.price} TL / Yıl</div>
-        <p>1 yıl geçerli | ${x.depth} seviye | %${x.rate * 100} prim</p>
-        <ul>${x.features.map((f) => `<li>${f}</li>`).join("")}</ul>
-        ${currentNote}${disabledNote}
-        <button ${state.disabled ? "disabled" : ""} onclick="choosePack(${x.id}, ${x.price})">${state.text}</button>
+      <div class="package packageAccordion ${state.className}" data-package-id="${x.id}">
+        <button type="button" class="packageAccordionHead" onclick="togglePackageAccordion(${x.id})" aria-expanded="false">
+          <span class="badge">${x.badge}</span>
+          <span class="packageHeadText"><b>${x.name}</b><small>${x.price} TL / Yıl</small></span>
+          <span class="packageChevron">⌄</span>
+        </button>
+        <div class="packageAccordionBody" id="packageBody${x.id}">
+          <div class="price">${x.price} TL / Yıl</div>
+          <p>1 yıl geçerli | ${x.depth} seviye | %${x.rate * 100} prim</p>
+          ${standardDescription}
+          <ul>${x.features.map((f) => `<li>${f}</li>`).join("")}</ul>
+          ${currentNote}${disabledNote}
+          <button ${state.disabled ? "disabled" : ""} onclick="choosePack(${x.id}, ${x.price})">${state.text}</button>
+        </div>
       </div>`;
     })
     .join("");
+}
+
+function togglePackageAccordion(packageId) {
+  document.querySelectorAll(".packageAccordion").forEach((item) => {
+    const open = String(item.dataset.packageId) === String(packageId) && !item.classList.contains("open");
+    item.classList.toggle("open", open);
+    const head = item.querySelector(".packageAccordionHead");
+    if (head) head.setAttribute("aria-expanded", open ? "true" : "false");
+  });
 }
 
 async function choosePack(id, price) {
@@ -501,7 +519,7 @@ async function dash() {
               <em>${children.length} Üye</em>
             </button>
             <div id="memberChildren" class="memberAccordionBody hidden">
-              <p class="privacyNote">Kullanıcı gizliliği için ad görünür; soyadın yalnızca ilk harfi ve telefonun ilk 5 hanesi gösterilir.</p>
+              <p class="privacyNote">Üyelerimizin kişisel veri güvenliğini korumak için herkese açık alanlarda yalnızca gerekli bilgiler paylaşılır; soyad ve telefon numarası kısmi olarak maskelenir.</p>
               <div class="tableWrap professionalTable">
                 <table>
                   <thead><tr><th>Ad Soyad</th><th>Telefon</th><th>Paket</th><th>Premium Başlangıç</th><th>Premium Bitiş</th><th>Durum</th></tr></thead>
@@ -654,10 +672,11 @@ function copyRef() {
 function shareRef() {
   const code = $("refCode").innerText;
   const link = buildReferralLink(code);
-  const text = `İzleKazan davet linkim: ${link}`;
-  if (navigator.share) navigator.share({ title: "İzleKazan Davet Linki", text, url: link });
-  else {
-    navigator.clipboard.writeText(text);
+  const text = "İzleKazan'a davetlisin. Üye olmak ve sistemi incelemek için bağlantıya tıkla:";
+  if (navigator.share) {
+    navigator.share({ title: "İzleKazan Davet Linki", text, url: link });
+  } else {
+    navigator.clipboard.writeText(`${text} ${link}`);
     toast("Davet linki kopyalandı");
   }
 }
@@ -789,7 +808,7 @@ async function movies() {
           <div class="movieMeta">${x.category || "Film"}${x.year ? " • " + x.year : ""}</div>
           <p>${x.description || ""}</p>
           ${x.locked
-            ? `<button onclick='openLockedMovie(${JSON.stringify(x.watchLink || x.previewLink || x.embedLink || x.link || "/api/film-gateway")})'>Film Sitesini Aç</button><small class="movieHint">Film sitesi görüntülenir; izlemek için üye olup premium paket almanız gerekir.</small>`
+            ? `<small class="movieHint">İzlemek için üstteki Film İzle butonunu kullanın. Premium erişim gereklidir.</small>`
             : `<button onclick='openFilmModal(${JSON.stringify(x.watchLink || x.previewLink || x.embedLink || x.link || "")}, false)'>Filmi İzle</button>`}
         </div>`;
       })
@@ -1088,7 +1107,7 @@ function openFilmModal(url, locked = false) {
     return;
   }
 
-  // v2026.05.17-012:
+  // v2026.05.17-013:
   // Premium üyede iframe kullanılmaz; gizli sunucu geçidi üzerinden film sitesi doğrudan açılır.
   // Mobil kullanıcılar uygulama moduna zorlandığı için adres çubuğu görünmeden kullanım hedeflenir.
   if (!locked && isSafeRelativeFilmGateway) {
@@ -1377,7 +1396,7 @@ if (document.readyState === "loading") {
 }
 
 
-// v2026.05.17-012: PWA / Ana ekrana ekleme ve adres çubuğu olmadan kullanım desteği.
+// v2026.05.17-013: PWA / Ana ekrana ekleme ve adres çubuğu olmadan kullanım desteği.
 let izleKazanDeferredInstallPrompt = null;
 function isStandalonePwaMode() {
   return window.matchMedia && window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
@@ -1425,7 +1444,7 @@ if ("serviceWorker" in navigator) {
 }
 
 
-// v2026.05.17-012: Mobilde uygulama yüklü değilse site içeriğini kilitle.
+// v2026.05.17-013: Mobilde uygulama yüklü değilse site içeriğini kilitle.
 function isMobileLikeDevice() {
   return window.matchMedia && (window.matchMedia("(max-width: 820px)").matches || window.matchMedia("(hover: none) and (pointer: coarse)").matches);
 }

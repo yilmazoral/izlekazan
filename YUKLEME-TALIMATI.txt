@@ -1,4 +1,4 @@
-İzleKazan v2026.05.17-012 Yükleme Talimatı
+İzleKazan v2026.05.17-013 Yükleme Talimatı
 
 1) ZIP içindeki tüm dosyaları GitHub ana dizinine yükleyin.
 2) Özellikle şu dosyalar eksik kalmasın:

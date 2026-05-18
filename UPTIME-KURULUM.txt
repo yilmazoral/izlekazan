@@ -1,0 +1,8 @@
+Render ücretsiz planda servis uzun süre kullanılmazsa uykuya geçebilir. Bu durumda ilk kullanıcı Render Loading ekranını görebilir.
+
+Kalıcı çözüm seçenekleri:
+1) Render ücretli plana geçmek.
+2) UptimeRobot gibi servisle https://izlekazan.onrender.com/api/health adresini 5 dakikada bir pingletmek.
+3) Uykuya geçmeyen farklı hosting kullanmak.
+
+Not: Render uyku ekranı, uygulama kodu çalışmadan önce Render tarafından gösterildiği için site içinden tamamen gizlenemez.

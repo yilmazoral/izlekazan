@@ -1,3 +1,16 @@
+# v2026.05.17-013 - Toplu Notlar / Paket Akordeon / Film Vitrini / Mobil Boşluk
+
+- Referans paylaşımında linkin iki kez görünmesi düzeltildi.
+- Mobil görünümde sayfa altındaki gereksiz boşluklar azaltıldı.
+- Film Kataloğu bölümünde gereksiz Film Sitesini Aç butonu kaldırıldı.
+- Film afişleri alanı En Çok İzlenen 10 Film yatay kaydırmalı vitrinine dönüştürüldü.
+- Veri Tabanı gizlilik açıklaması profesyonel metinle değiştirildi.
+- Paket yıllık/süre metinleri alt alta ve ortalı yapıldı.
+- Standart Üye paketi için seçilen profesyonel açıklama eklendi.
+- Paketler bölümü akordeon yapısına çevrildi.
+- Kazanç garantisi metni yeni kurumsal uyarı metniyle değiştirildi.
+- Render uyku ekranı için UPTIME-KURULUM.txt rehberi eklendi; bu ekran ücretsiz Render davranışı olduğu için site koduyla tamamen engellenemez.
+
 # İzleKazan Sürüm Geçmişi
 
 ## v2026.05.17-010 — 2026-05-17

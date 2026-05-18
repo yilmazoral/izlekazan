@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <meta name="description" content="İzleKazan; premium film erişimini referans, katkı ve şeffaf kazanç takibiyle birleştiren yeni nesil üyelik platformudur.">
   <title>İzleKazan | Film İzle, Ek Gelir Fırsatına Katıl</title>
-  <meta name="app-version" content="v2026.05.17-012">
+  <meta name="app-version" content="v2026.05.17-013">
   <meta name="theme-color" content="#050816">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="İzleKazan">
-  <link rel="manifest" href="/manifest.json?v=v20260517011">
-  <link rel="apple-touch-icon" href="/assets/icon-192.png?v=v20260517011">
-  <link rel="stylesheet" href="style.css?v=v20260517011">
+  <link rel="manifest" href="/manifest.json?v=v20260517013">
+  <link rel="apple-touch-icon" href="/assets/icon-192.png?v=v20260517013">
+  <link rel="stylesheet" href="style.css?v=v20260517013">
 </head>
 <body>
   <div id="mobileInstallGate" class="mobileInstallGate hidden" role="dialog" aria-modal="true" aria-label="İzleKazan uygulama kurulumu">
@@ -116,7 +116,7 @@
           <p>Aylarca siteye giremese bile referansları sayesinde ek gelir kazanmaya devam eder.</p>
           <p>Klasik “para ver ve izle” modelinden farklı olarak premium üyeler referanslarıyla sisteme dahil olan her üye için komisyon geliri kazanmanın yanında siteye eklenen ve onaylanan her film için ekstra gelir elde ederler.</p>
           <strong>Ödenen paranın kat ve kat fazlası kazanılabilir.</strong>
-          <small>Kazanç garantisi değildir; sonuçlar aktiflik, paket seviyesi ve sistem kurallarına göre değişir.</small>
+          <small>İzleKazan sabit veya garanti gelir taahhüdü vermez. Kazanç fırsatları üyelik durumu, referans performansı, platform kuralları ve kullanıcı aktivitesine göre değişiklik gösterebilir.</small>
         </div>
       </div>
 
@@ -124,7 +124,7 @@
         <div>
           <span>Herkese Açık Şeffaflık Alanı</span>
           <h3>Veri Tabanı</h3>
-          <p>Kullanıcı gizliliği korunarak ad görünür, soyadın yalnızca ilk harfi ve telefonun ilk 5 hanesi gösterilir.</p>
+          <p>Üyelerimizin kişisel veri güvenliğini korumak için herkese açık alanlarda yalnızca gerekli bilgiler paylaşılır; soyad ve telefon numarası kısmi olarak maskelenir.</p>
         </div>
         <div class="teaserActions">
           <button onclick="page('database'); setTimeout(()=>scrollToDb('publicWithdrawalsBox'),350)">Çekim Taleplerini Gör</button>
@@ -137,7 +137,7 @@
       <div class="sectionIntro">
         <span>Premium Paketler</span>
         <h2>Üyelik Paketleri</h2>
-        <p>Tüm paketler yıllıktır. Paket süresi 1 yıl / 365 gündür.</p>
+        <p><span class="packageDurationLine">Tüm paketler yıllıktır.</span><span class="packageDurationLine">Paket süresi 1 yıl / 365 gündür.</span></p>
       </div>
       <div id="packageList" class="packageGrid"></div>
     </section>
@@ -159,7 +159,7 @@
         <div>
           <h3>Gelir Modeli</h3>
           <p>İzleKazan’da kazanç; paket seviyesi, aktiflik, referans ağı ve onaylanan katkılara göre oluşur. Amaç, aktif premium üyeler için sürdürülebilir ek gelir potansiyeli oluşturmaktır.</p>
-          <p class="muted">Kazanç garantisi verilmez; tüm işlemler sistem kurallarına ve admin onay süreçlerine bağlıdır.</p>
+          <p class="muted">İzleKazan sabit veya garanti gelir taahhüdü vermez. Kazanç fırsatları üyelik durumu, referans performansı, platform kuralları ve kullanıcı aktivitesine göre değişiklik gösterebilir.</p>
         </div>
       </div>
     </section>
@@ -278,6 +278,10 @@
     <section id="movies" class="page">
       <div class="sectionIntro"><span>Film Kataloğu</span><h2>Film Kataloğu</h2><p>Filmlerin adı, afişi ve açıklaması herkese görünür. İzleme erişimi yalnızca aktif premium üyeler için açılır.</p></div>
       <div class="movieActions"><button onclick="openFirstMovie()">Film İzle</button><button onclick="showAddMovie()">☁ Film Ekle Para Kazan</button></div>
+      <div class="topFilmsShowcase card" aria-label="En çok izlenen 10 film vitrini">
+        <div class="topFilmsHeader"><span>Premium İçerik</span><h3>En Çok İzlenen 10 Film</h3><p>Platform vitrininde öne çıkan popüler afişler. Bu alan tanıtım amaçlıdır; afişler tıklanamaz.</p></div>
+        <div class="topFilmsScroller"><article class="topFilmCard"><img src="/assets/top-film-01.png" alt="En çok izlenen film afişi 1"><span>#1</span></article><article class="topFilmCard"><img src="/assets/top-film-02.png" alt="En çok izlenen film afişi 2"><span>#2</span></article><article class="topFilmCard"><img src="/assets/top-film-03.png" alt="En çok izlenen film afişi 3"><span>#3</span></article><article class="topFilmCard"><img src="/assets/top-film-04.png" alt="En çok izlenen film afişi 4"><span>#4</span></article><article class="topFilmCard"><img src="/assets/top-film-05.png" alt="En çok izlenen film afişi 5"><span>#5</span></article><article class="topFilmCard"><img src="/assets/top-film-06.png" alt="En çok izlenen film afişi 6"><span>#6</span></article><article class="topFilmCard"><img src="/assets/top-film-07.png" alt="En çok izlenen film afişi 7"><span>#7</span></article><article class="topFilmCard"><img src="/assets/top-film-08.png" alt="En çok izlenen film afişi 8"><span>#8</span></article><article class="topFilmCard"><img src="/assets/top-film-09.png" alt="En çok izlenen film afişi 9"><span>#9</span></article><article class="topFilmCard"><img src="/assets/top-film-10.png" alt="En çok izlenen film afişi 10"><span>#10</span></article></div>
+      </div>
       <div id="filmGateway" class="filmGateway hidden"><img src="/assets/vizyon-filmleri.png" alt="Vizyon Filmleri" onclick="handleVizyonClick()"><p>Film sitesini görüntülemek için görsele tıklayın.</p></div>
       <div id="movieList" class="movieGrid"></div>
       <div id="addMovieBox" class="card hidden"><h2>Film Ekle Para Kazan</h2><input id="mt" placeholder="Film adı"><input id="my" placeholder="Yıl"><input id="mc" placeholder="Kategori"><input id="mp" placeholder="Afiş linki"><input id="ml" placeholder="Film sayfa linki"><input id="mel" placeholder="Embed / Player linki (varsa - tam ekran için önerilir)"><textarea id="md" placeholder="Açıklama"></textarea><button onclick="addMovie()">CEO Onayına Gönder</button><p class="movieHint">Not: Tam ekranın daha düzgün çalışması için film sayfası yerine varsa embed/player linki kullanın.</p></div>
@@ -285,7 +289,7 @@
     </section>
 
     <section id="database" class="page">
-      <div class="sectionIntro"><span>Şeffaf Kayıtlar</span><h2>Veri Tabanı</h2><p>Kullanıcı gizliliği için ad görünür; soyadın yalnızca ilk harfi ve telefonun ilk 5 hanesi gösterilir.</p></div>
+      <div class="sectionIntro"><span>Şeffaf Kayıtlar</span><h2>Veri Tabanı</h2><p>Üyelerimizin kişisel veri güvenliğini korumak için herkese açık alanlarda yalnızca gerekli bilgiler paylaşılır; soyad ve telefon numarası kısmi olarak maskelenir.</p></div>
       <div class="databaseGrid">
         <div class="card"><h3>Kazanç Çekim Talepleri</h3><p>Platform üzerindeki çekim talepleri gizlilik kurallarıyla listelenir.</p><button onclick="scrollToDb('publicWithdrawalsBox')">Çekim Taleplerini Gör</button></div>
         <div class="card"><h3>Aramıza Katılanlar</h3><p>Platforma katılan yeni üyeler ve davet eden kişiler gizlilik kurallarıyla listelenir.</p><button onclick="scrollToDb('publicMembersBox')">Yeni Üyeleri Gör</button></div>
@@ -305,7 +309,7 @@
 
   <footer class="siteVersionFooter" aria-label="Site sürüm bilgisi">
     <span>İzleKazan</span>
-    <strong id="siteVersionLabel">v2026.05.17-012</strong>
+    <strong id="siteVersionLabel">v2026.05.17-013</strong>
     <small>Canlı sürüm takip sistemi aktif</small>
   </footer>
 
@@ -322,7 +326,7 @@
   </nav>
 
   <div id="toast"></div>
-  <script src="app.js?v=v20260517011"></script>
-  <script src="site-update.js?v=v20260517011"></script>
+  <script src="app.js?v=v20260517013"></script>
+  <script src="site-update.js?v=v20260517013"></script>
 </body>
 </html>
